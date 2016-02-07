@@ -8,8 +8,6 @@
 #include "elem.h"
 #include "corewords.h"
 
-
-
 // This can be reduced but it hits every case
 int isnum(char * foo){
 	int i = 0;
@@ -29,7 +27,41 @@ int isnum(char * foo){
 	return 1;
 }
 
-// Eventually this will be used in the main loop
+// Takes a linked command sequence and attempts to run it as DSSP code
+elem * run(elem * stack, elem * seqHead, dict * vocab){
+	elem * seqPrev; // We use this to free each element after we are done reading it
+	elem * tempStack;
+	elem * tempSeq;
+
+	tempSeq = seqHead;
+	do{
+		assert(tempSeq != NULL);
+		if(isnum(tempSeq->chars)){ // Numerical constant
+			tempStack = stack;
+			stack = malloc(sizeof(elem));
+			stack->next = tempStack;
+			stack->value = atoi(tempSeq->chars);
+		}else if (tempSeq->chars[0] == ':'){ // Function declaration
+			tempSeq = funcDec(seqHead,vocab);
+		}else if (tempSeq->chars[0] == '['){ // Comment
+			// Do nothing
+		}else{ // Not a number or a function declaration
+
+			//  The args will need to change to allow branching
+			//  because we need to provide choices to the
+			//  branching word.
+			stack = wordFind(tempSeq->chars, stack, vocab);
+		}
+		if(tempSeq != NULL){ // This will be NULL if we did a function declaration
+			seqPrev = tempSeq;
+			tempSeq = tempSeq->next;
+			free(seqPrev); // We should be done with this element
+		}
+	}while(tempSeq != NULL);
+	return stack;
+}
+
+// Takes command line and splits it by spaces, returns sequence
 elem * parseInput(char * line){
 	char ch;
 	int i = 0;
@@ -85,9 +117,6 @@ char * prompt(){
 int main(){
 	elem * seqHead;
 	elem * stack;
-	elem * tempStack;
-	elem * tempSeq;
-	elem * seqPrev; // We use this to free each element after we are done reading it
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
@@ -120,32 +149,8 @@ int main(){
 	while(1){
 		// Show prompt, get line of input
 		seqHead = parseInput(prompt());
-		tempSeq = seqHead;
+		stack = run(stack, seqHead, vocab);
 	
-		do{
-			assert(tempSeq != NULL);
-			if(isnum(tempSeq->chars)){ // Numerical constant
-				tempStack = stack;
-				stack = malloc(sizeof(elem));
-				stack->next = tempStack;
-				stack->value = atoi(tempSeq->chars);
-			}else if (tempSeq->chars[0] == ':'){ // Function declaration
-				tempSeq = funcDec(seqHead,vocab);
-			}else if (tempSeq->chars[0] == '['){ // Comment
-				// Do nothing
-			}else{ // Not a number or a function declaration
-
-				//  The args will need to change to allow branching
-				//  because we need to provide choices to the
-				//  branching word.
-				stack = wordFind(tempSeq->chars, stack, vocab);
-			}
-			if(tempSeq != NULL){ // This will be NULL if we did a function declaration
-				seqPrev = tempSeq;
-				tempSeq = tempSeq->next;
-				free(seqPrev); // We should be done with this element
-			}
-		}while(tempSeq != NULL);
 	}
 	return 0;
 }

@@ -59,6 +59,12 @@ elem * funcDec(elem * seq, dict * vocab){
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 	}
+	// Skip over function name
+	if(seq->next != NULL){
+		seq = seq->next;
+	}else{
+		fprintf(stderr,"ERROR: Incomplete definition\n");
+	}
 
 	// TODO This limits the size of a declaration and should be dynamic
 	vocab->sub->wordlist->definition = malloc(80*sizeof(char));
