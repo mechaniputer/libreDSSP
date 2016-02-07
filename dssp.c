@@ -8,16 +8,7 @@
 #include "elem.h"
 #include "corewords.h"
 
-// This is backwards for now
-void showStack(elem * stack){
-	if(stack == NULL) return;
-	elem * temp = stack;
-	do{
-		printf("%d ",temp->value);
-		temp = temp->next;
-	}while(temp != NULL);
-	printf("\n");
-}
+
 
 // This can be reduced but it hits every case
 int isnum(char * foo){
@@ -100,15 +91,25 @@ int main(){
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
-	vocab->core = malloc(sizeof(coreword)); // For built-in words
 
 	// Built-ins
+	vocab->core = malloc(sizeof(coreword)); // For built-in words
+
 	strcpy(vocab->core->name, "+"); // First dict entry
 	vocab->core->func = plus;
+
 	vocab->core->next = malloc(sizeof(coreword));
 	strcpy(vocab->core->next->name, "bye"); // Second dict entry
 	vocab->core->next->func = bye;
-	vocab->core->next->next = NULL;
+
+	vocab->core->next->next = malloc(sizeof(coreword)); // Third dict entry
+	strcpy(vocab->core->next->next->name, "."); // Second dict entry
+	vocab->core->next->next->func = showTop;
+
+	vocab->core->next->next->next = malloc(sizeof(coreword)); // Fourth dict entry
+	strcpy(vocab->core->next->next->next->name, ".."); // Second dict entry
+	vocab->core->next->next->next->func = showStack;
+	vocab->core->next->next->next->next = NULL;
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;
@@ -145,9 +146,6 @@ int main(){
 				free(seqPrev); // We should be done with this element
 			}
 		}while(tempSeq != NULL);
-
-		showStack(stack);
 	}
-
 	return 0;
 }

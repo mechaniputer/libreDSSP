@@ -30,7 +30,7 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 	if (vocab->sub->wordlist != NULL){
 		do{
 			if(!strcmp(tempWord->name, elemName)){
-				printf("found %s\n",elemName);
+				// TODO This should actually run the function
 				printf("%s\n",tempWord->definition);
 				done = 1;
 			}

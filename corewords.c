@@ -26,3 +26,23 @@ elem * bye(elem * stack){
 	printf("Exiting DSSP\n");
 	exit(0);
 }
+
+// TODO This will need to be modified to support multiple output modes
+elem * showTop(elem * stack){
+	if(stack != NULL){
+		printf("%d\n",stack->value);
+	}
+	return stack;
+}
+
+// This is backwards for now
+elem * showStack(elem * stack){
+	if(stack == NULL) return stack;
+	elem * temp = stack;
+	do{
+		printf("%d ",temp->value);
+		temp = temp->next;
+	}while(temp != NULL);
+	printf("\n");
+	return stack;
+}
