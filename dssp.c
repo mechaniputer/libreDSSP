@@ -21,6 +21,25 @@ char * prompt(){
 	return line;
 }
 
+void defCore(char * name, elem * (*func)(elem *), dict * vocab){
+	coreword * temp = vocab->core;
+	if(vocab->core == NULL){
+		temp = malloc(sizeof(coreword));
+		strcpy(temp->name, name);
+		temp->func = (*func);
+		temp->next = NULL;
+	}
+	// Find last defined func
+	while(temp->next != NULL){
+		temp = temp->next;
+	}
+	temp->next = malloc(sizeof(coreword));
+	strcpy(temp->next->name, name);
+	temp->next->func = (*func);
+	temp->next->next = NULL;
+	return;
+}
+
 int main(){
 	elem * seqHead;
 	elem * stack;
@@ -31,21 +50,10 @@ int main(){
 	// Built-ins
 	vocab->core = malloc(sizeof(coreword)); // For built-in words
 
-	strcpy(vocab->core->name, "+"); // First dict entry
-	vocab->core->func = plus;
-
-	vocab->core->next = malloc(sizeof(coreword));
-	strcpy(vocab->core->next->name, "bye"); // Second dict entry
-	vocab->core->next->func = bye;
-
-	vocab->core->next->next = malloc(sizeof(coreword)); // Third dict entry
-	strcpy(vocab->core->next->next->name, "."); // Second dict entry
-	vocab->core->next->next->func = showTop;
-
-	vocab->core->next->next->next = malloc(sizeof(coreword)); // Fourth dict entry
-	strcpy(vocab->core->next->next->next->name, ".."); // Second dict entry
-	vocab->core->next->next->next->func = showStack;
-	vocab->core->next->next->next->next = NULL;
+	defCore("+", plus, vocab);
+	defCore("bye", bye, vocab);
+	defCore(".", showTop, vocab);
+	defCore("..", showStack, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;
