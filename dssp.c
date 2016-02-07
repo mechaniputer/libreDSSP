@@ -41,21 +41,27 @@ int isnum(char * foo){
 elem * getSequence(){
 	char ch;
 	int i=0;
-	elem * seqhead;
+	elem * seqHead;
 	elem * seqcurr;
 	elem * seqtail;
 
-	seqhead = malloc(sizeof(elem));
-	seqtail = seqhead;
+	seqHead = malloc(sizeof(elem));
+	seqtail = seqHead;
 	seqtail->next = NULL;
 
 	printf("* ");
 
+	// TODO Keep comments but don't break on spaces
 	while(((ch = getchar()) != '\n')){
 		if (ch == '['){
-			while(((ch = getchar()) != ']'));
+			seqtail->chars[i++] = '[';
+			while(((ch = getchar()) != ']')){
+				if(i>8) break; // TODO This limits a word or comment to 8 chars due to fixed size in struct
+				seqtail->chars[i++] = ch;
+			}
+			seqtail->chars[i++] = ']';
 		} else if(ch != ' '){
-			if(i>8) break;
+			if(i>8) break; // TODO This limits a word or comment to 8 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
 		} else if (i != 0){ // Handles adjacent spaces
 			seqtail->chars[i] =  '\0';
@@ -68,14 +74,15 @@ elem * getSequence(){
 	}
 	seqtail->chars[i] =  '\0';
 
-	return seqhead;
+	return seqHead;
 }
 
 int main(){
-	elem * seqhead;
+	elem * seqHead;
 	elem * stack;
 	elem * tempStack;
 	elem * tempSeq;
+	elem * seqPrev; // We use this to free each element after we are done reading it
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
@@ -96,21 +103,33 @@ int main(){
 	stack = NULL;
 
 	while(1){
-		seqhead = getSequence();
-		tempSeq = seqhead;
+		// Show prompt, get line of input
+		seqHead = getSequence();
+		tempSeq = seqHead;
 	
 		do{
 			assert(tempSeq != NULL);
-			if(isnum(tempSeq->chars)){
+			if(isnum(tempSeq->chars)){ // Numerical constant
 				tempStack = stack;
 				stack = malloc(sizeof(elem));
 				stack->next = tempStack;
 				stack->value = atoi(tempSeq->chars);
-			}else{
+			}else if (tempSeq->chars[0] == ':'){ // Function declaration
+				tempSeq = funcDec(seqHead,vocab);
+			}else if (tempSeq->chars[0] == '['){ // Comment
+				// Do nothing
+			}else{ // Not a number or a function declaration
+
+				//  The args will need to change to allow branching
+				//  because we need to provide choices to the
+				//  branching word.
 				stack = wordFind(tempSeq->chars, stack, vocab);
 			}
-			assert(tempSeq != NULL);
-			tempSeq = tempSeq->next;
+			if(tempSeq != NULL){ // This will be NULL if we did a function declaration
+				seqPrev = tempSeq;
+				tempSeq = tempSeq->next;
+				free(seqPrev); // We should be done with this element
+			}
 		}while(tempSeq != NULL);
 
 		showStack(stack);

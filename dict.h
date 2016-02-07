@@ -49,6 +49,9 @@ struct dict
 	subdict * sub;
 };
 
+// Searches dictionaries, runs a word if possible
 elem * wordFind(char * elemName, elem * stack, dict * vocab);
+// Attempts to define a new function
+elem * funcDec(elem * seq, dict * vocab);
 
 #endif
