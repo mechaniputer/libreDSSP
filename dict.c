@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "dict.h"
 #include "elem.h"
+#include "util.h"
 #include "corewords.h"
 
 // Searches dictionaries, runs a word if possible
@@ -30,8 +31,7 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 	if (vocab->sub->wordlist != NULL){
 		do{
 			if(!strcmp(tempWord->name, elemName)){
-				// TODO This should actually run the function
-				printf("%s\n",tempWord->definition);
+				run(stack, parseInput(tempWord->definition), vocab);
 				done = 1;
 			}
 			tempWord = tempWord->next;
