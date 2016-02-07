@@ -10,7 +10,7 @@
 
 // This is backwards for now
 void showStack(elem * stack){
-	assert(stack != NULL);
+	if(stack == NULL) return;
 	elem * temp = stack;
 	do{
 		printf("%d ",temp->value);
@@ -60,34 +60,42 @@ int main(){
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
 	vocab->core = malloc(sizeof(coreword)); // For built-in words
+
+	// Built-ins
 	strcpy(vocab->core->name, "+"); // First dict entry
-	vocab->core->func = plus; // fn ptr
-	vocab->core->next = NULL;
+	vocab->core->func = plus;
+	vocab->core->next = malloc(sizeof(coreword));
+	strcpy(vocab->core->next->name, "bye"); // Second dict entry
+	vocab->core->next->func = bye;
+	vocab->core->next->next = NULL;
+
+	// Sub-Dictionaries
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
 
 	stack = NULL;
 
-	seqhead = getSequence();
-	tempSeq = seqhead;
+	while(1){
+		seqhead = getSequence();
+		tempSeq = seqhead;
 	
-	do{
-		assert(tempSeq != NULL);
-		if(isdigit(tempSeq->chars[0])){
-			tempStack = stack;
-			stack = malloc(sizeof(elem));
-			stack->next = tempStack;
+		do{
+			assert(tempSeq != NULL);
+			if(isdigit(tempSeq->chars[0])){
+				tempStack = stack;
+				stack = malloc(sizeof(elem));
+				stack->next = tempStack;
 
-			stack->value = atoi(tempSeq->chars);
-		}else{
-			stack = wordFind(tempSeq->chars, stack, vocab);
-			assert(stack != NULL);
-		}
-		assert(tempSeq != NULL);
-		tempSeq = tempSeq->next;
-	}while(tempSeq != NULL);
+				stack->value = atoi(tempSeq->chars);
+			}else{
+				stack = wordFind(tempSeq->chars, stack, vocab);
+			}
+			assert(tempSeq != NULL);
+			tempSeq = tempSeq->next;
+		}while(tempSeq != NULL);
 
-	showStack(stack);
+		showStack(stack);
+	}
 
 	return 0;
 }

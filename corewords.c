@@ -1,9 +1,14 @@
 #include <malloc.h>
+#include <stdlib.h>
 #include "corewords.h"
 #include "elem.h"
 
 elem * plus(elem * stack){
 	int sum;
+	if((stack == NULL)||(stack->next == NULL)){
+		fprintf(stderr,"ERROR: Insufficient operands for +\n");
+		return stack;
+	}
 
 	elem * temp = stack->next; // For summing and because we free(stack)
 	sum = temp->value + stack->value;
@@ -15,4 +20,9 @@ elem * plus(elem * stack){
 	stack->value = sum;
 	stack->next = temp; // Need to make it be a stack!
 	return stack;
+}
+
+elem * bye(elem * stack){
+	printf("Exiting DSSP\n");
+	exit(0);
 }

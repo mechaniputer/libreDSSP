@@ -7,8 +7,11 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 	coreword * tempCore;
 	// Search core dict first
 	tempCore = vocab->core;
-	if(!strcmp(tempCore->name, elemName)){
-		stack = tempCore->func(stack);
-	}
+	do{
+		if(!strcmp(tempCore->name, elemName)){
+			stack = tempCore->func(stack);
+		}
+		tempCore = tempCore->next;
+	}while(tempCore != NULL);
 	return stack;
 }
