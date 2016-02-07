@@ -41,7 +41,7 @@ elem * run(elem * stack, elem * seqHead, dict * vocab){
 			stack = malloc(sizeof(elem));
 			stack->next = tempStack;
 			stack->value = atoi(tempSeq->chars);
-		}else if (tempSeq->chars[0] == ':'){ // Function declaration
+		}else if (!strcmp(tempSeq->chars, ":")){ // Function declaration
 			tempSeq = funcDec(seqHead,vocab);
 		}else if (tempSeq->chars[0] == '['){ // Comment
 			// Do nothing
