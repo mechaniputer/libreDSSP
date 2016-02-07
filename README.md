@@ -1,5 +1,5 @@
 # libreDSSP
-A GPL Licensed DSSP Interpreter
+A GPLv3 Licensed DSSP Interpreter
 
 This is a work in progress. At time of writing, it's really just a framework.
 
