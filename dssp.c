@@ -21,7 +21,7 @@ void showStack(elem * stack){
 
 // This can be reduced but it hits every case
 int isnum(char * foo){
-	int i=0;
+	int i = 0;
 	char temp = foo[0];
 
 	if(foo == NULL) return 0;
@@ -38,9 +38,11 @@ int isnum(char * foo){
 	return 1;
 }
 
-elem * getSequence(){
+// Eventually this will be used in the main loop
+elem * parseInput(char * line){
 	char ch;
-	int i=0;
+	int i = 0;
+	int j = 0;
 	elem * seqHead;
 	elem * seqcurr;
 	elem * seqtail;
@@ -49,22 +51,23 @@ elem * getSequence(){
 	seqtail = seqHead;
 	seqtail->next = NULL;
 
-	printf("* ");
-
-	// TODO Keep comments but don't break on spaces
-	while(((ch = getchar()) != '\n')){
-		if (ch == '['){
+	// TODO Not safe!
+	while((line[j] != '\0') && (j < 79)){
+		ch = line[j++];
+		if (ch == '[') {
 			seqtail->chars[i++] = '[';
-			while(((ch = getchar()) != ']')){
+			while(((ch = line[j++]) != ']')){
 				if(i>8) break; // TODO This limits a word or comment to 8 chars due to fixed size in struct
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = ']';
-		} else if(ch != ' '){
+
+		} else if(ch != ' ') {
 			if(i>8) break; // TODO This limits a word or comment to 8 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
-		} else if (i != 0){ // Handles adjacent spaces
-			seqtail->chars[i] =  '\0';
+
+		} else if ((ch == ' ') && (i != 0)) { // Handles adjacent spaces
+			seqtail->chars[i] = '\0';
 			seqcurr = seqtail;
 			seqtail = malloc(sizeof(elem));
 			seqcurr->next = seqtail; // old tail used to point to NULL, now to new elem
@@ -73,8 +76,19 @@ elem * getSequence(){
 		}
 	}
 	seqtail->chars[i] =  '\0';
-
 	return seqHead;
+}
+
+char * prompt(){
+	int i = 0;
+	char * line = malloc(80 * sizeof(char)); // TODO: This limits line size to 80!
+	char ch;
+	printf("* ");
+	while(((ch = getchar()) != '\n') && (i < 79)){
+		line[i++] = ch;
+	}
+	line[i] = '\0';
+	return line;
 }
 
 int main(){
@@ -104,7 +118,7 @@ int main(){
 
 	while(1){
 		// Show prompt, get line of input
-		seqHead = getSequence();
+		seqHead = parseInput(prompt());
 		tempSeq = seqHead;
 	
 		do{

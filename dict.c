@@ -43,11 +43,9 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 }
 
 // Attempts to define a new function
-// TODO check for semicolon
 elem * funcDec(elem * seq, dict * vocab){
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
-	printf("Func dec\n");
 
 	// Only allows one word for now
 	if (vocab->sub->wordlist == NULL){
@@ -55,14 +53,14 @@ elem * funcDec(elem * seq, dict * vocab){
 	}
 	strcpy(vocab->sub->wordlist->name, "foo"); // Name the function
 
-	// Loop to append elements until semicolon or display error
+	// Skip over ':'
 	if(seq->next != NULL){
 		seq = seq->next;
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 	}
 
-	// TODO This limits the size of a declaration and should be fixed
+	// TODO This limits the size of a declaration and should be dynamic
 	vocab->sub->wordlist->definition = malloc(80*sizeof(char));
 	while(seq->chars[0] != ';'){
 		strcat(vocab->sub->wordlist->definition, seq->chars);
@@ -77,5 +75,6 @@ elem * funcDec(elem * seq, dict * vocab){
 
 	vocab->sub->wordlist->next = NULL;
 	// TODO We should free the entire sequence
+	printf("%s\n",vocab->sub->wordlist->name);
 	return NULL;
 }
