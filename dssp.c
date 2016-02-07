@@ -30,11 +30,9 @@ int isnum(char * foo){
 	// If first is minus, scan from beginning to see if all are digits
 	if(temp=='-'){
 		for (i=1; i < (strlen(foo)); i++){
-			printf("check %d\n",i);
 			if(!isdigit(foo[i])) return 0;
 		}
 	}else for (i=0; i < (strlen(foo)); i++){
-		printf("check %d\n",i);
 		if(!isdigit(foo[i])) return 0;
 	}
 	return 1;
