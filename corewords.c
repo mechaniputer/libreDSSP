@@ -38,11 +38,22 @@ elem * showTop(elem * stack){
 // This is backwards for now
 elem * showStack(elem * stack){
 	if(stack == NULL) return stack;
+
 	elem * temp = stack;
-	do{
+	elem * bottom = NULL;
+
+	while(bottom != stack->next){ // While we haven't printed the top
+		temp = stack; // Start at the top
+		// Find lowest not printed
+		do{
+			temp = temp->next;
+		}while(temp->next != bottom);
+
 		printf("%d ",temp->value);
-		temp = temp->next;
-	}while(temp != NULL);
+		bottom = temp;
+	}
+	printf("%d ",stack->value); // Now print the top
+
 	printf("\n");
 	return stack;
 }
