@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include <string.h>
 #include <assert.h>
 #include "dict.h"
@@ -65,7 +64,7 @@ word * newWord(subdict * dict){
 
 // Attempts to define a new function
 // TODO Should replace if function exists, or error if core function
-elem * funcDec(elem * seq, dict * vocab){
+elem * defWord(elem * seq, dict * vocab){
 	word * temp;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);

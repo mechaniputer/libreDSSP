@@ -52,7 +52,7 @@ struct dict
 // Searches dictionaries, runs a word if possible
 elem * wordRun(elem * sequence, elem * stack, dict * vocab);
 // Attempts to define a new function
-elem * funcDec(elem * seq, dict * vocab);
+elem * defWord(elem * seq, dict * vocab);
 // Defines built-in functions
 void defCore(char * name, elem * (*func)(elem *, elem*), dict * vocab);
 

@@ -41,7 +41,7 @@ elem * run(elem * stack, elem * seqHead, dict * vocab){
 			stack->next = tempStack;
 			stack->value = atoi(tempSeq->chars);
 		}else if (!strcmp(tempSeq->chars, ":")){ // Function declaration
-			tempSeq = funcDec(seqHead,vocab);
+			tempSeq = defWord(seqHead,vocab);
 		}else if (tempSeq->chars[0] == '['){ // Comment
 			// Do nothing
 		}else{ // Not a number or a function declaration
