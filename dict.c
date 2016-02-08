@@ -90,7 +90,6 @@ elem * funcDec(elem * seq, dict * vocab){
 
 	// TODO This limits the size of a declaration and should be dynamic
 	while(seq->chars[0] != ';'){
-printf("definition chunk %s\n",seq->chars);
 		strcat(temp->definition, seq->chars); // SEGFAULT
 		strcat(temp->definition, " ");
 		if(seq->next == NULL){
