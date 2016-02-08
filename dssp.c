@@ -58,6 +58,8 @@ int main(){
 	defCore("IF+", ifplus, vocab);
 	defCore("IF0", ifzero, vocab);
 	defCore("IF-", ifminus, vocab);
+	defCore("D", drop, vocab);
+	defCore("C", copy, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

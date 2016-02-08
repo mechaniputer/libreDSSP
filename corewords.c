@@ -89,3 +89,26 @@ elem * ifminus(elem * stack, elem * sequence){
 	}
 	return stack;
 }
+
+elem * drop(elem * stack, elem * sequence){
+	if(stack == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for D\n");
+		return stack;
+	}
+	elem * temp = stack->next;
+	free(stack);
+	stack = temp;
+	return stack;
+}
+
+elem * copy(elem * stack, elem * sequence){
+	if(stack == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for C\n");
+		return stack;
+	}
+	elem * temp = stack;
+	stack = malloc(sizeof(elem));
+	stack->value = temp->value;
+	stack->next = temp;
+	return stack;
+}
