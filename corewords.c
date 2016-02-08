@@ -3,7 +3,7 @@
 #include "corewords.h"
 #include "elem.h"
 
-elem * plus(elem * stack){
+elem * plus(elem * stack, elem * sequence){
 	int sum;
 	if((stack == NULL)||(stack->next == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for +\n");
@@ -22,21 +22,20 @@ elem * plus(elem * stack){
 	return stack;
 }
 
-elem * bye(elem * stack){
+elem * bye(elem * stack, elem * sequence){
 	printf("Exiting DSSP\n");
 	exit(0);
 }
 
 // TODO This will need to be modified to support multiple output modes
-elem * showTop(elem * stack){
+elem * showTop(elem * stack, elem * sequence){
 	if(stack != NULL){
 		printf("%d\n",stack->value);
 	}
 	return stack;
 }
 
-// This is backwards for now
-elem * showStack(elem * stack){
+elem * showStack(elem * stack, elem * sequence){
 	if(stack == NULL) return stack;
 
 	elem * temp = stack;

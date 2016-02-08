@@ -21,7 +21,7 @@ char * prompt(){
 	return line;
 }
 
-void defCore(char * name, elem * (*func)(elem *), dict * vocab){
+void defCore(char * name, elem * (*func)(elem *, elem*), dict * vocab){
 	coreword * temp = vocab->core;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));
@@ -42,7 +42,7 @@ void defCore(char * name, elem * (*func)(elem *), dict * vocab){
 
 int main(){
 	elem * seqHead;
-	elem * stack;
+	elem * stack = NULL;
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
@@ -59,13 +59,10 @@ int main(){
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
 
-	stack = NULL;
-
 	while(1){
 		// Show prompt, get line of input
 		seqHead = parseInput(prompt());
 		stack = run(stack, seqHead, vocab);
-	
 	}
 	return 0;
 }

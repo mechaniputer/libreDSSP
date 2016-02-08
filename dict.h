@@ -34,7 +34,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	elem * (*func)(elem *);
+	elem * (*func)(elem *, elem *);
 };
 
 struct subdict
@@ -50,7 +50,7 @@ struct dict
 };
 
 // Searches dictionaries, runs a word if possible
-elem * wordFind(char * elemName, elem * stack, dict * vocab);
+elem * wordFind(elem * sequence, elem * stack, dict * vocab);
 // Attempts to define a new function
 elem * funcDec(elem * seq, dict * vocab);
 

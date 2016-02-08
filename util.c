@@ -44,11 +44,7 @@ elem * run(elem * stack, elem * seqHead, dict * vocab){
 		}else if (tempSeq->chars[0] == '['){ // Comment
 			// Do nothing
 		}else{ // Not a number or a function declaration
-
-			//  The args will need to change to allow branching
-			//  because we need to provide choices to the
-			//  branching word.
-			stack = wordFind(tempSeq->chars, stack, vocab);
+			stack = wordFind(tempSeq, stack, vocab);
 		}
 		if(tempSeq != NULL){ // This will be NULL if we did a function declaration
 			seqPrev = tempSeq;

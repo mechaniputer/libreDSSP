@@ -8,8 +8,9 @@
 
 // Searches dictionaries, runs a word if possible
 // Should add an error when word is not found
-elem * wordFind(char * elemName, elem * stack, dict * vocab){
+elem * wordFind(elem * sequence, elem * stack, dict * vocab){
 	int done = 0;
+	char * elemName = sequence->chars;
 	coreword * tempCore;
 	word * tempWord;
 
@@ -19,7 +20,7 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 	tempCore = vocab->core;
 	do{
 		if(!strcmp(tempCore->name, elemName)){
-			stack = tempCore->func(stack); // Run built-in function
+			stack = tempCore->func(stack, sequence); // Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
 			done = 1;
 		}
 		tempCore = tempCore->next;
@@ -28,7 +29,7 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 	// Search subdicts (for now just one)
 	tempWord = vocab->sub->wordlist;
 
-	if (vocab->sub->wordlist != NULL){
+	if(!done && (vocab->sub->wordlist != NULL)){
 		do{
 			if(!strcmp(tempWord->name, elemName)){
 				run(stack, parseInput(tempWord->definition), vocab);
@@ -43,6 +44,7 @@ elem * wordFind(char * elemName, elem * stack, dict * vocab){
 }
 
 // Attempts to define a new function
+// TODO Should replace if function exists, or error if core function
 elem * funcDec(elem * seq, dict * vocab){
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
@@ -51,7 +53,6 @@ elem * funcDec(elem * seq, dict * vocab){
 	if (vocab->sub->wordlist == NULL){
 		vocab->sub->wordlist = malloc(sizeof(word));
 	}
-	strcpy(vocab->sub->wordlist->name, "foo"); // Name the function
 
 	// Skip over ':'
 	if(seq->next != NULL){
@@ -61,6 +62,7 @@ elem * funcDec(elem * seq, dict * vocab){
 	}
 	// Skip over function name
 	if(seq->next != NULL){
+		strcpy(vocab->sub->wordlist->name, seq->chars); // Name the function
 		seq = seq->next;
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
@@ -73,7 +75,7 @@ elem * funcDec(elem * seq, dict * vocab){
 		strcat(vocab->sub->wordlist->definition, " ");
 		if(seq->next == NULL){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
-			return NULL; // We should free the sequence before returning
+			return NULL; // TODO We should free the sequence before returning
 		}else{
 			seq = seq->next;
 		}
