@@ -51,9 +51,13 @@ int main(){
 	vocab->core = malloc(sizeof(coreword)); // For built-in words
 
 	defCore("+", plus, vocab);
-	defCore("bye", bye, vocab);
+	defCore("-", minus, vocab);
+	defCore("BYE", bye, vocab);
 	defCore(".", showTop, vocab);
 	defCore("..", showStack, vocab);
+	defCore("IF+", ifplus, vocab);
+	defCore("IF0", ifzero, vocab);
+	defCore("IF-", ifminus, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

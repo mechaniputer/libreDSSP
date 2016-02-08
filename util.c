@@ -14,7 +14,7 @@ int isnum(char * foo){
 	if(strlen(foo) == 0) return 0;
 
 	// If first is minus, scan from beginning to see if all are digits
-	if(temp=='-'){
+	if((temp=='-') && (strlen(foo) > 1)){
 		for (i=1; i < (strlen(foo)); i++){
 			if(!isdigit(foo[i])) return 0;
 		}

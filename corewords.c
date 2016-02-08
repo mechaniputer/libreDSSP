@@ -5,20 +5,29 @@
 
 elem * plus(elem * stack, elem * sequence){
 	int sum;
-	if((stack == NULL)||(stack->next == NULL)){
+	if((stack == NULL) || (stack->next == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for +\n");
 		return stack;
 	}
-
 	elem * temp = stack->next; // For summing and because we free(stack)
 	sum = temp->value + stack->value;
 	free(stack); // Get rid of top element
-	stack = temp; // We also need to get rid of this element
-	temp = stack->next; // We will keep this element
-	free(stack);
-	stack = malloc(sizeof(elem)); // New element for top of stack
+	stack = temp; // We also need to revalue this element
 	stack->value = sum;
-	stack->next = temp; // Need to make it be a stack!
+	return stack;
+}
+
+elem * minus(elem * stack, elem * sequence){
+	int diff;
+	if((stack == NULL) || (stack->next == NULL)){
+		fprintf(stderr,"ERROR: Insufficient operands for -\n");
+		return stack;
+	}
+	elem * temp = stack->next; // For diff and because we free(stack)
+	diff = (temp->value) - (stack->value);
+	free(stack); // Get rid of top element
+	stack = temp; // We also need to revalue this element
+	stack->value = diff;
 	return stack;
 }
 
@@ -54,5 +63,29 @@ elem * showStack(elem * stack, elem * sequence){
 	printf("%d ",stack->value); // Now print the top
 
 	printf("\n");
+	return stack;
+}
+
+elem * ifplus(elem * stack, elem * sequence){
+	// This will segfault if conditional is last element in sequence
+	if((stack == NULL) || (stack->value <= 0)) {
+		sequence->next = sequence->next->next;
+	}
+	return stack;
+}
+
+elem * ifzero(elem * stack, elem * sequence){
+	// This will segfault if conditional is last element in sequence
+	if((stack == NULL) || (stack->value != 0)) {
+		sequence->next = sequence->next->next;
+	}
+	return stack;
+}
+
+elem * ifminus(elem * stack, elem * sequence){
+	// This will segfault if conditional is last element in sequence
+	if((stack == NULL) || (stack->value >= 0)) {
+		sequence->next = sequence->next->next;
+	}
 	return stack;
 }
