@@ -26,7 +26,7 @@ typedef struct dict dict;
 struct word
 {
 	char name[8];
-	char * definition;
+	char definition[80];
 	word * next;
 };
 
