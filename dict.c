@@ -20,19 +20,20 @@ elem * wordFind(elem * sequence, elem * stack, dict * vocab){
 	tempCore = vocab->core;
 	do{
 		if(!strcmp(tempCore->name, elemName)){
-			stack = tempCore->func(stack, sequence); // Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
+			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
+			stack = tempCore->func(stack, sequence);
 			done = 1;
 		}
 		tempCore = tempCore->next;
 	}while(tempCore != NULL);
 
-	// Search subdicts (for now just one)
-	tempWord = vocab->sub->wordlist;
-
 	if(!done && (vocab->sub->wordlist != NULL)){
+		// Search subdicts (for now just one)
+		tempWord = vocab->sub->wordlist;
 		do{
 			if(!strcmp(tempWord->name, elemName)){
-				run(stack, parseInput(tempWord->definition), vocab);
+				// run programmed word
+				stack = run(stack, parseInput(tempWord->definition), vocab);
 				done = 1;
 			}
 			tempWord = tempWord->next;
