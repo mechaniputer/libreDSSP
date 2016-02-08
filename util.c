@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
@@ -44,7 +45,7 @@ elem * run(elem * stack, elem * seqHead, dict * vocab){
 		}else if (tempSeq->chars[0] == '['){ // Comment
 			// Do nothing
 		}else{ // Not a number or a function declaration
-			stack = wordFind(tempSeq, stack, vocab);
+			stack = wordRun(tempSeq, stack, vocab);
 		}
 		if(tempSeq != NULL){ // This will be NULL if we did a function declaration
 			seqPrev = tempSeq;
@@ -95,4 +96,17 @@ elem * parseInput(char * line){
 	seqtail->chars[i] =  '\0';
 	return seqHead;
 }
+
+char * prompt(){
+	int i = 0;
+	char * line = malloc(80 * sizeof(char)); // TODO: This limits line size to 80!
+	char ch;
+	printf("* ");
+	while(((ch = getchar()) != '\n') && (i < 79)){
+		line[i++] = ch;
+	}
+	line[i] = '\0';
+	return line;
+}
+
 

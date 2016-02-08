@@ -8,8 +8,7 @@
 #include "corewords.h"
 
 // Searches dictionaries, runs a word if possible
-// Should add an error when word is not found
-elem * wordFind(elem * sequence, elem * stack, dict * vocab){
+elem * wordRun(elem * sequence, elem * stack, dict * vocab){
 	int done = 0;
 	char * elemName = sequence->chars;
 	coreword * tempCore;
@@ -104,3 +103,24 @@ elem * funcDec(elem * seq, dict * vocab){
 	// TODO We should free the entire sequence
 	return NULL;
 }
+
+void defCore(char * name, elem * (*func)(elem *, elem*), dict * vocab){
+	coreword * temp = vocab->core;
+	if(vocab->core == NULL){
+		temp = malloc(sizeof(coreword));
+		strcpy(temp->name, name);
+		temp->func = (*func);
+		temp->next = NULL;
+	}
+	// Find last defined func
+	while(temp->next != NULL){
+		temp = temp->next;
+	}
+	temp->next = malloc(sizeof(coreword));
+	strcpy(temp->next->name, name);
+	temp->next->func = (*func);
+	temp->next->next = NULL;
+	return;
+}
+
+
