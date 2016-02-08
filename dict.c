@@ -21,7 +21,7 @@ elem * wordRun(elem * sequence, elem * stack, dict * vocab){
 		if(!strcmp(tempCore->name, elemName)){
 			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
 			stack = tempCore->func(stack, sequence);
-			done = 1;
+			return stack;
 		}
 		tempCore = tempCore->next;
 	}while(tempCore != NULL);
@@ -33,13 +33,13 @@ elem * wordRun(elem * sequence, elem * stack, dict * vocab){
 			if(!strcmp(tempWord->name, elemName)){
 				// run programmed word
 				stack = run(stack, parseInput(tempWord->definition), vocab);
-				done = 1;
+				return stack;
 			}
 			tempWord = tempWord->next;
 		}while(tempWord != NULL);
 	}
 
-	if(!done) fprintf(stderr,"ERROR: %s unrecognized\n",elemName);
+	fprintf(stderr,"ERROR: %s unrecognized\n",elemName);
 	return stack;
 }
 
