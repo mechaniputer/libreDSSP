@@ -17,6 +17,20 @@ elem * plus(elem * stack, elem * sequence){
 	return stack;
 }
 
+elem * multiply(elem * stack, elem * sequence){
+	int product;
+	if((stack == NULL) || (stack->next == NULL)){
+		fprintf(stderr,"ERROR: Insufficient operands for +\n");
+		return stack;
+	}
+	elem * temp = stack->next; // For multiplying and because we free(stack)
+	product = temp->value * stack->value;
+	free(stack); // Get rid of top element
+	stack = temp; // We also need to revalue this element
+	stack->value = product;
+	return stack;
+}
+
 elem * minus(elem * stack, elem * sequence){
 	int diff;
 	if((stack == NULL) || (stack->next == NULL)){
@@ -29,6 +43,27 @@ elem * minus(elem * stack, elem * sequence){
 	stack = temp; // We also need to revalue this element
 	stack->value = diff;
 	return stack;
+}
+
+elem * divide(elem * stack, elem * sequence){
+	return stack;
+}
+
+elem * negate(elem * stack, elem * sequence){
+	if(stack == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
+		return stack;
+	}
+	stack->value = -1 * (stack->value);
+}
+
+elem * absval(elem * stack, elem * sequence){
+	if(stack == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
+		return stack;
+	} else if(stack->value < 0) {
+		stack->value = -1 * (stack->value);
+	} else return stack;
 }
 
 elem * bye(elem * stack, elem * sequence){
@@ -112,3 +147,4 @@ elem * copy(elem * stack, elem * sequence){
 	stack->next = temp;
 	return stack;
 }
+

@@ -50,14 +50,22 @@ int main(){
 	// Built-ins
 	vocab->core = malloc(sizeof(coreword)); // For built-in words
 
+	// Arithmetic
 	defCore("+", plus, vocab);
+	defCore("*", multiply, vocab);
 	defCore("-", minus, vocab);
+	defCore("/", divide, vocab);
+	defCore("NEG", negate, vocab);
+	defCore("ABS", absval, vocab);
+	// Display and interpreter
 	defCore("BYE", bye, vocab);
 	defCore(".", showTop, vocab);
 	defCore("..", showStack, vocab);
+	// Conditionals
 	defCore("IF+", ifplus, vocab);
 	defCore("IF0", ifzero, vocab);
 	defCore("IF-", ifminus, vocab);
+	// Misc
 	defCore("D", drop, vocab);
 	defCore("C", copy, vocab);
 

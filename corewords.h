@@ -6,7 +6,11 @@
 
 // Arithmetic
 elem * plus(elem * stack, elem * sequence);
+elem * multiply(elem * stack, elem * sequence);
 elem * minus(elem * stack, elem * sequence);
+elem * divide(elem * stack, elem * sequence);
+elem * negate(elem * stack, elem * sequence);
+elem * absval(elem * stack, elem * sequence);
 
 // Display and interpreter
 elem * bye(elem * stack, elem * sequence);
