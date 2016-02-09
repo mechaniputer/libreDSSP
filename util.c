@@ -20,6 +20,9 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #include "util.h"
 #include "dict.h"
 #include "elem.h"
@@ -117,13 +120,13 @@ elem * parseInput(char * line){
 
 char * prompt(){
 	int i = 0;
-	char * line = malloc(80 * sizeof(char)); // TODO: This limits line size to 80!
-	char ch;
-	printf("* ");
-	while(((ch = getchar()) != '\n') && (i < 79)){
-		line[i++] = ch;
+	char * line = readline ("* ");
+	add_history(line);
+	//Check for EOF.
+	if (!line){
+		printf("\n");
+		return "BYE";
 	}
-	line[i] = '\0';
 	return line;
 }
 

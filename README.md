@@ -12,9 +12,9 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* "D"(drop), "C"(copy)
 	* Function declarations
 	* [comments]
+	* GNU readline support
 
 ## What doesn't work yet:
-	* GNU readline support
 	* File IO
 	* Multiple subvocabularies
 	* Variables, arrays, fixed variables,etc

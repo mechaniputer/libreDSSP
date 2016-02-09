@@ -14,7 +14,7 @@
 
 #	You should have received a copy of the GNU General Public License \
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
-
+CFLAGS = -lreadline
 all: dssp
 dssp: stack.o dict.o corewords.o util.o
 clean:

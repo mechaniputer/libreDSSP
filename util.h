@@ -23,6 +23,8 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "util.h"
 #include "dict.h"
