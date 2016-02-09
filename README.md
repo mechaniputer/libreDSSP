@@ -1,7 +1,30 @@
 # libreDSSP
-A GPLv3 Licensed DSSP Interpreter
+## A GPLv3 Licensed DSSP Interpreter
 
-This is a work in progress. At time of writing, it's really just a framework.
+This is a work in progress. It isn't complete enough to be very useful yet.
 
-One barrier that I'm running into is the difficulty of finding a clear and unambiguous specification for this language.
-Therefore I will not assert that this implementation is compliant with any official standard (if any even exist) only that it is close enough to be called DSSP and that it is reasonably practical.
+## What works:
+	* Basic math operations (+,*,-,/)
+	* NEG, ABS
+	* BYE, ".."(show stack), "."(show top of stack)
+	* IF+, IF0, IF-
+	* "D"(drop), "C"(copy)
+	* Function declarations
+	* [comments]
+
+## What doesn't work yet:
+	* GNU readline support
+	* File IO
+	* Multiple subvocabularies
+	* Variables, arrays, fixed variables,etc
+	* BR+, BR0, BR-, BRS, BR
+	* RP, DO
+	* EX, EX-, EX0, EX+, EXT
+	* TRB, TOB, TON, BASE@
+	* TIB, TIN, TIS
+	* ."hello" printing, SP, CR
+	* B2, B8, B10, B16
+	* Everything unaccounted for in this README
+
+## Possible future goals:
+	* DSSP Compiler
