@@ -120,7 +120,10 @@ elem * showStack(elem * stack, elem * sequence){
 }
 
 elem * ifplus(elem * stack, elem * sequence){
-	// This will segfault if conditional is last element in sequence
+	if(sequence->next == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
+		return stack;
+	}
 	if((stack == NULL) || (stack->value <= 0)) {
 		sequence->next = sequence->next->next;
 	}
@@ -128,7 +131,10 @@ elem * ifplus(elem * stack, elem * sequence){
 }
 
 elem * ifzero(elem * stack, elem * sequence){
-	// This will segfault if conditional is last element in sequence
+	if(sequence->next == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
+		return stack;
+	}
 	if((stack == NULL) || (stack->value != 0)) {
 		sequence->next = sequence->next->next;
 	}
@@ -136,7 +142,10 @@ elem * ifzero(elem * stack, elem * sequence){
 }
 
 elem * ifminus(elem * stack, elem * sequence){
-	// This will segfault if conditional is last element in sequence
+	if(sequence->next == NULL){
+		fprintf(stderr,"ERROR: Insufficient operands for IF-\n");
+		return stack;
+	}
 	if((stack == NULL) || (stack->value >= 0)) {
 		sequence->next = sequence->next->next;
 	}
