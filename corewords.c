@@ -166,11 +166,18 @@ elem * ifminus(elem * stack, elem * sequence, dict * vocab){
 elem * doloop(elem * stack, elem * sequence, dict * vocab){
 	int i;
 	int reps = stack->value;
+
 	elem * repeat = sequence->next;
 	if((sequence->next == NULL) || (stack == NULL)) {
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
 		return stack;
 	}
+
+	// Remove top stack value
+	elem * temp = stack->next;
+	free(stack);
+	stack = temp;
+
 	// Isolate the repeated word
 	sequence->next = sequence->next->next;
 	repeat->next = NULL;
