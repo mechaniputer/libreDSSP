@@ -132,7 +132,7 @@ void ifplus(stack * stack, elem * sequence, dict * vocab){
 
 void ifzero(stack * stack, elem * sequence, dict * vocab){
 	if((sequence->next == NULL ) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
+		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		return;
 	}
 
