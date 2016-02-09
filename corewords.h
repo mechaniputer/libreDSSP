@@ -22,26 +22,31 @@
 #include <stdlib.h>
 #include "elem.h"
 
+typedef struct dict dict;
+
 // Arithmetic
-elem * plus(elem * stack, elem * sequence);
-elem * multiply(elem * stack, elem * sequence);
-elem * minus(elem * stack, elem * sequence);
-elem * divide(elem * stack, elem * sequence);
-elem * negate(elem * stack, elem * sequence);
-elem * absval(elem * stack, elem * sequence);
+elem * plus(elem * stack, elem * sequence, dict * vocab);
+elem * multiply(elem * stack, elem * sequence, dict * vocab);
+elem * minus(elem * stack, elem * sequence, dict * vocab);
+elem * divide(elem * stack, elem * sequence, dict * vocab);
+elem * negate(elem * stack, elem * sequence, dict * vocab);
+elem * absval(elem * stack, elem * sequence, dict * vocab);
 
 // Display and interpreter
-elem * bye(elem * stack, elem * sequence);
-elem * showTop(elem * stack, elem * sequence);
-elem * showStack(elem * stack, elem * sequence);
+elem * bye(elem * stack, elem * sequence, dict * vocab);
+elem * showTop(elem * stack, elem * sequence, dict * vocab);
+elem * showStack(elem * stack, elem * sequence, dict * vocab);
 
 // Conditionals
-elem * ifplus(elem * stack, elem * sequence);
-elem * ifzero(elem * stack, elem * sequence);
-elem * ifminus(elem * stack, elem * sequence);
+elem * ifplus(elem * stack, elem * sequence, dict * vocab);
+elem * ifzero(elem * stack, elem * sequence, dict * vocab);
+elem * ifminus(elem * stack, elem * sequence, dict * vocab);
+
+// Looping and flow control
+elem * doloop(elem * stack, elem * sequence, dict * vocab);
 
 // Misc
-elem * drop(elem * stack, elem * sequence);
-elem * copy(elem * stack, elem * sequence);
+elem * drop(elem * stack, elem * sequence, dict * vocab);
+elem * copy(elem * stack, elem * sequence, dict * vocab);
 
 #endif

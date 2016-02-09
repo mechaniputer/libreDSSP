@@ -52,7 +52,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	elem * (*func)(elem *, elem *);
+	elem * (*func)(elem *, elem *,dict *);
 };
 
 struct subdict
@@ -76,6 +76,6 @@ elem * wordRun(elem * sequence, elem * stack, dict * vocab);
 // Attempts to define a new function
 elem * defWord(elem * seq, dict * vocab);
 // Defines built-in functions
-void defCore(char * name, elem * (*func)(elem *, elem*), dict * vocab);
+void defCore(char * name, elem * (*func)(elem *, elem*, dict*), dict * vocab);
 
 #endif

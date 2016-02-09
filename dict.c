@@ -69,7 +69,7 @@ elem * wordRun(elem * sequence, elem * stack, dict * vocab){
 	do{
 		if(!strcmp(tempCore->name, elemName)){
 			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
-			stack = tempCore->func(stack, sequence);
+			stack = tempCore->func(stack, sequence, vocab);
 			return stack;
 		}
 		tempCore = tempCore->next;
@@ -168,7 +168,7 @@ elem * defWord(elem * seq, dict * vocab){
 	return NULL;
 }
 
-void defCore(char * name, elem * (*func)(elem *, elem*), dict * vocab){
+void defCore(char * name, elem * (*func)(elem *, elem*, dict*), dict * vocab){
 	coreword * temp = vocab->core;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));
@@ -186,5 +186,3 @@ void defCore(char * name, elem * (*func)(elem *, elem*), dict * vocab){
 	temp->next->next = NULL;
 	return;
 }
-
-

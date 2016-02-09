@@ -19,9 +19,10 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "corewords.h"
+#include "dict.h"
 #include "elem.h"
 
-elem * plus(elem * stack, elem * sequence){
+elem * plus(elem * stack, elem * sequence, dict * vocab){
 	int sum;
 	if((stack == NULL) || (stack->next == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for +\n");
@@ -35,7 +36,7 @@ elem * plus(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * multiply(elem * stack, elem * sequence){
+elem * multiply(elem * stack, elem * sequence, dict * vocab){
 	int product;
 	if((stack == NULL) || (stack->next == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for +\n");
@@ -49,7 +50,7 @@ elem * multiply(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * minus(elem * stack, elem * sequence){
+elem * minus(elem * stack, elem * sequence, dict * vocab){
 	int diff;
 	if((stack == NULL) || (stack->next == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for -\n");
@@ -63,11 +64,21 @@ elem * minus(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * divide(elem * stack, elem * sequence){
+elem * divide(elem * stack, elem * sequence, dict * vocab){
+	int quotient;
+	if((stack == NULL) || (stack->next == NULL)){
+		fprintf(stderr,"ERROR: Insufficient operands for /\n");
+		return stack;
+	}
+	elem * temp = stack->next; // For dividing and because we free(stack)
+	quotient = temp->value / stack->value;
+	free(stack); // Get rid of top element
+	stack = temp; // We also need to revalue this element
+	stack->value = quotient;
 	return stack;
 }
 
-elem * negate(elem * stack, elem * sequence){
+elem * negate(elem * stack, elem * sequence, dict * vocab){
 	if(stack == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
 		return stack;
@@ -75,7 +86,7 @@ elem * negate(elem * stack, elem * sequence){
 	stack->value = -1 * (stack->value);
 }
 
-elem * absval(elem * stack, elem * sequence){
+elem * absval(elem * stack, elem * sequence, dict * vocab){
 	if(stack == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
 		return stack;
@@ -84,20 +95,20 @@ elem * absval(elem * stack, elem * sequence){
 	} else return stack;
 }
 
-elem * bye(elem * stack, elem * sequence){
+elem * bye(elem * stack, elem * sequence, dict * vocab){
 	printf("Exiting libreDSSP\n");
 	exit(0);
 }
 
 // TODO This will need to be modified to support multiple output modes
-elem * showTop(elem * stack, elem * sequence){
+elem * showTop(elem * stack, elem * sequence, dict * vocab){
 	if(stack != NULL){
 		printf("%d\n",stack->value);
 	}
 	return stack;
 }
 
-elem * showStack(elem * stack, elem * sequence){
+elem * showStack(elem * stack, elem * sequence, dict * vocab){
 	if(stack == NULL) return stack;
 
 	elem * temp = stack;
@@ -119,7 +130,7 @@ elem * showStack(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * ifplus(elem * stack, elem * sequence){
+elem * ifplus(elem * stack, elem * sequence, dict * vocab){
 	if(sequence->next == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		return stack;
@@ -130,7 +141,7 @@ elem * ifplus(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * ifzero(elem * stack, elem * sequence){
+elem * ifzero(elem * stack, elem * sequence, dict * vocab){
 	if(sequence->next == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		return stack;
@@ -141,7 +152,7 @@ elem * ifzero(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * ifminus(elem * stack, elem * sequence){
+elem * ifminus(elem * stack, elem * sequence, dict * vocab){
 	if(sequence->next == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for IF-\n");
 		return stack;
@@ -152,7 +163,23 @@ elem * ifminus(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * drop(elem * stack, elem * sequence){
+elem * doloop(elem * stack, elem * sequence, dict * vocab){
+	int i;
+	elem * repeat = sequence->next;
+	if((sequence->next == NULL) || (stack == NULL)) {
+		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
+		return stack;
+	}
+	// Isolate the repeated word
+	sequence->next = sequence->next->next;
+	repeat->next = NULL;
+	for(i = 0; i < stack->value; i++){
+		stack = run(stack, repeat, vocab);
+	}
+	return stack;
+}
+
+elem * drop(elem * stack, elem * sequence, dict * vocab){
 	if(stack == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
 		return stack;
@@ -163,7 +190,7 @@ elem * drop(elem * stack, elem * sequence){
 	return stack;
 }
 
-elem * copy(elem * stack, elem * sequence){
+elem * copy(elem * stack, elem * sequence, dict * vocab){
 	if(stack == NULL){
 		fprintf(stderr,"ERROR: Insufficient operands for C\n");
 		return stack;

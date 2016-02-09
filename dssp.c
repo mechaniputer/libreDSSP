@@ -49,6 +49,8 @@ int main(){
 	defCore("IF+", ifplus, vocab);
 	defCore("IF0", ifzero, vocab);
 	defCore("IF-", ifminus, vocab);
+	// Looping and flow control
+	defCore("DO", doloop, vocab);
 	// Misc
 	defCore("D", drop, vocab);
 	defCore("C", copy, vocab);

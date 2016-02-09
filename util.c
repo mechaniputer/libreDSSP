@@ -66,6 +66,7 @@ elem * run(elem * stack, elem * seqHead, dict * vocab){
 			stack = wordRun(tempSeq, stack, vocab);
 		}
 		if(tempSeq != NULL){ // This will be NULL if we did a function declaration
+			if(tempSeq->next == NULL) return stack; // Fixes DO loop crashes
 			seqPrev = tempSeq;
 			tempSeq = tempSeq->next;
 			free(seqPrev); // We should be done with this element

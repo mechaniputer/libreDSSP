@@ -8,6 +8,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* NEG, ABS
 	* BYE, ".."(show stack), "."(show top of stack)
 	* IF+, IF0, IF-
+	* DO
 	* "D"(drop), "C"(copy)
 	* Function declarations
 	* [comments]
@@ -18,7 +19,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* Multiple subvocabularies
 	* Variables, arrays, fixed variables,etc
 	* BR+, BR0, BR-, BRS, BR
-	* RP, DO
+	* RP
 	* EX, EX-, EX0, EX+, EXT
 	* TRB, TOB, TON, BASE@
 	* TIB, TIN, TIS
