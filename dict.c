@@ -131,7 +131,7 @@ void defWord(elem * seq, dict * vocab){
 		// See if it is a core word
 		if(coreSearch(seq->chars, vocab)){
 			fprintf(stderr,"ERROR: %s is in core dictionary\n",seq->chars);
-			return; // TODO We should free the sequence before returning
+			return;
 		}
 
 		// See if we already have this word, if we do then redefine
@@ -157,14 +157,13 @@ void defWord(elem * seq, dict * vocab){
 
 		if(seq->next == NULL){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
-			return; // TODO We should free the sequence before returning
+			return;
 		}else seq = seq->next;
 	}
 
 	// Successful definition, print name
 	printf("%s\n",temp->name);
 
-	// TODO We should free the entire sequence
 	return;
 }
 

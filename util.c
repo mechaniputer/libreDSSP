@@ -57,6 +57,8 @@ void run(stack * stack, elem * seqHead, dict * vocab){
 			push(stack, atoi(tempSeq->chars));
 		}else if (!strcmp(tempSeq->chars, ":")){ // Function declaration
 			defWord(seqHead,vocab);
+			// TODO We should free the entire sequence first;
+			tempSeq = NULL;
 		}else if (tempSeq->chars[0] == '['){ // Comment
 			// Do nothing
 		}else{ // Not a number or a function declaration
