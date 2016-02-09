@@ -8,7 +8,6 @@
 
 // Searches non-core dictionaries, returns word if it exists
 word * wordSearch(char * name, dict * vocab){
-	coreword * tempCore;
 	word * tempWord;
 
 	// Function must have a name greater than 1 char
@@ -26,6 +25,17 @@ word * wordSearch(char * name, dict * vocab){
 	}
 
 	return NULL;
+}
+
+// Searches non-core dictionaries, returns 1 if it exists
+int coreSearch(char * name, dict * vocab){
+	coreword * tempCore = vocab->core;
+
+	while(tempCore != NULL){
+		if (!strcmp(tempCore->name, name)) return 1;
+		tempCore = tempCore->next;
+	}
+	return 0;
 }
 
 // Searches dictionaries, runs a word if possible
@@ -99,8 +109,16 @@ elem * defWord(elem * seq, dict * vocab){
 
 	// Assign function name
 	if(seq->next != NULL){
-		// See if we already have this word
+
+		// See if it is a core word
+		if(coreSearch(seq->chars, vocab)){
+			fprintf(stderr,"ERROR: %s is in core dictionary\n",seq->chars);
+			return NULL; // TODO We should free the sequence before returning
+		}
+
+		// See if we already have this word, if we do then redefine
 		temp = wordSearch(seq->chars, vocab);
+
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->sub);
@@ -111,21 +129,21 @@ elem * defWord(elem * seq, dict * vocab){
 			strcpy(temp->definition, "");
 		}
 		seq = seq->next;
-	}else{
-		fprintf(stderr,"ERROR: Incomplete definition\n");
-	}
+
+	}else fprintf(stderr,"ERROR: Incomplete definition\n");
 
 	// TODO This limits the size of a declaration and should be dynamic
 	while(seq->chars[0] != ';'){
 		strcat(temp->definition, seq->chars);
 		strcat(temp->definition, " ");
+
 		if(seq->next == NULL){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
 			return NULL; // TODO We should free the sequence before returning
-		}else{
-			seq = seq->next;
-		}
+		}else seq = seq->next;
 	}
+
+	// Successful definition, print name
 	printf("%s\n",temp->name);
 
 	// TODO We should free the entire sequence
