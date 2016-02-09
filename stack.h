@@ -22,7 +22,7 @@
 typedef struct stack stack;
 struct stack
 {
-	int size;
+	int capacity;
 	int top;
 	int * array;
 };
@@ -31,5 +31,6 @@ stack * newStack();
 int top(stack * stack);
 int pop(stack * stack);
 void push(stack * stack, int value);
+void grow(stack * stack);
 
 #endif

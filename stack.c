@@ -21,7 +21,7 @@
 stack * newStack(){
 	stack * stack = malloc(sizeof(stack));
 	stack->array = malloc(10*sizeof(int)); // TODO Make dynamic
-	stack->size = 10;
+	stack->capacity = 10;
 	stack->top = -1; // -1 indicates empty stack
 	return stack;
 }
@@ -39,5 +39,11 @@ int pop(stack * stack) {
 void push(stack * stack, int value) {
 	(stack->top)++;
 	stack->array[stack->top] = value;
+	if((stack->capacity) == ((stack->top)+1)) grow(stack);
 	return;
+}
+
+void grow(stack * stack){
+	stack->capacity = 2 * (stack->capacity);
+	stack->array = realloc(stack->array, (stack->capacity)*sizeof(int));
 }
