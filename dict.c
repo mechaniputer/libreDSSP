@@ -6,9 +6,30 @@
 #include "util.h"
 #include "corewords.h"
 
+// Searches non-core dictionaries, returns word if it exists
+word * wordSearch(char * name, dict * vocab){
+	coreword * tempCore;
+	word * tempWord;
+
+	// Function must have a name greater than 1 char
+	if(name[0] == '\0') return NULL;
+
+	if(vocab->sub->wordlist != NULL){
+		// Search subdicts (for now just one)
+		tempWord = vocab->sub->wordlist;
+		do{
+			if(!strcmp(tempWord->name, name)){
+				return tempWord;
+			}
+			tempWord = tempWord->next;
+		}while(tempWord != NULL);
+	}
+
+	return NULL;
+}
+
 // Searches dictionaries, runs a word if possible
 elem * wordRun(elem * sequence, elem * stack, dict * vocab){
-	int done = 0;
 	char * elemName = sequence->chars;
 	coreword * tempCore;
 	word * tempWord;
@@ -26,7 +47,7 @@ elem * wordRun(elem * sequence, elem * stack, dict * vocab){
 		tempCore = tempCore->next;
 	}while(tempCore != NULL);
 
-	if(!done && (vocab->sub->wordlist != NULL)){
+	if(vocab->sub->wordlist != NULL){
 		// Search subdicts (for now just one)
 		tempWord = vocab->sub->wordlist;
 		do{
@@ -69,18 +90,26 @@ elem * defWord(elem * seq, dict * vocab){
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
-	// Append the new word
-	temp = newWord(vocab->sub);
-
 	// Skip over ':'
 	if(seq->next != NULL){
 		seq = seq->next;
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 	}
-	// Skip over function name
+
+	// Assign function name
 	if(seq->next != NULL){
-		strcpy(temp->name, seq->chars);
+		// See if we already have this word
+		temp = wordSearch(seq->chars, vocab);
+		if(temp == NULL){
+			// Append the new word
+			temp = newWord(vocab->sub);
+			// Name the new word
+			strcpy(temp->name, seq->chars);
+		}else{
+			// Wipe old definition
+			strcpy(temp->definition, "");
+		}
 		seq = seq->next;
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
@@ -88,7 +117,7 @@ elem * defWord(elem * seq, dict * vocab){
 
 	// TODO This limits the size of a declaration and should be dynamic
 	while(seq->chars[0] != ';'){
-		strcat(temp->definition, seq->chars); // SEGFAULT
+		strcat(temp->definition, seq->chars);
 		strcat(temp->definition, " ");
 		if(seq->next == NULL){
 			fprintf(stderr,"ERROR: Incomplete definition\n");

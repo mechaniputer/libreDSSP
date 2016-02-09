@@ -49,6 +49,8 @@ struct dict
 	subdict * sub;
 };
 
+// Looks for words to see if they are already defined
+word * wordSearch(char * name, dict * vocab);
 // Searches dictionaries, runs a word if possible
 elem * wordRun(elem * sequence, elem * stack, dict * vocab);
 // Attempts to define a new function
