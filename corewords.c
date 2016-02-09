@@ -131,33 +131,54 @@ elem * showStack(elem * stack, elem * sequence, dict * vocab){
 }
 
 elem * ifplus(elem * stack, elem * sequence, dict * vocab){
-	if(sequence->next == NULL){
+	if((sequence->next == NULL ) || (stack == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		return stack;
 	}
-	if((stack == NULL) || (stack->value <= 0)) {
+
+	// Remove top stack value
+	int stackval = stack->value;
+	elem * temp = stack->next;
+	free(stack);
+	stack = temp;
+
+	if(stackval <= 0){
 		sequence->next = sequence->next->next;
 	}
 	return stack;
 }
 
 elem * ifzero(elem * stack, elem * sequence, dict * vocab){
-	if(sequence->next == NULL){
+	if((sequence->next == NULL ) || (stack == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		return stack;
 	}
-	if((stack == NULL) || (stack->value != 0)) {
+
+	// Remove top stack value
+	int stackval = stack->value;
+	elem * temp = stack->next;
+	free(stack);
+	stack = temp;
+
+	if(stackval == 0){
 		sequence->next = sequence->next->next;
 	}
 	return stack;
 }
 
 elem * ifminus(elem * stack, elem * sequence, dict * vocab){
-	if(sequence->next == NULL){
+	if((sequence->next == NULL ) || (stack == NULL)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF-\n");
 		return stack;
 	}
-	if((stack == NULL) || (stack->value >= 0)) {
+
+	// Remove top stack value
+	int stackval = stack->value;
+	elem * temp = stack->next;
+	free(stack);
+	stack = temp;
+
+	if(stackval >= 0){
 		sequence->next = sequence->next->next;
 	}
 	return stack;

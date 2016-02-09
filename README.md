@@ -21,11 +21,18 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* BR+, BR0, BR-, BRS, BR
 	* RP
 	* EX, EX-, EX0, EX+, EXT
+	* SORT, SPIN, MAX, MIN
+	* 1+, 2+, 1-, 2-, etc
+	* CT, C2, C3, C4, etc
+	* ET, E2, E3, E4, etc
+	* T0, T1, etc
 	* TRB, TOB, TON, BASE@
 	* TIB, TIN, TIS
 	* ."hello" printing, SP, CR
 	* B2, B8, B10, B16
+	* Various bitwise operations
 	* Everything unaccounted for in this README
 
 ## Possible future goals:
+	* Full documentation and tutorial
 	* DSSP Compiler
