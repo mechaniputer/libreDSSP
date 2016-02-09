@@ -21,12 +21,13 @@
 
 #include "dict.h"
 #include "elem.h"
+#include "stack.h"
 #include "corewords.h"
 #include "util.h"
 
 int main(){
 	elem * seqHead;
-	elem * stack = NULL;
+	stack * stack = newStack();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
@@ -68,7 +69,7 @@ int main(){
 	while(1){
 		// Show prompt, get line of input
 		seqHead = parseInput(prompt());
-		stack = run(stack, seqHead, vocab);
+		run(stack, seqHead, vocab);
 	}
 	return 0;
 }

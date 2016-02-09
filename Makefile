@@ -16,6 +16,6 @@
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
 
 all: dssp
-dssp: dict.o corewords.o util.o
+dssp: stack.o dict.o corewords.o util.o
 clean:
 	rm -f dssp *.o

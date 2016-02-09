@@ -21,6 +21,7 @@
 #include <assert.h>
 #include "dict.h"
 #include "elem.h"
+#include "stack.h"
 #include "util.h"
 #include "corewords.h"
 
@@ -57,20 +58,20 @@ int coreSearch(char * name, dict * vocab){
 }
 
 // Searches dictionaries, runs a word if possible
-elem * wordRun(elem * sequence, elem * stack, dict * vocab){
+void wordRun(elem * sequence, stack * stack, dict * vocab){
 	char * elemName = sequence->chars;
 	coreword * tempCore;
 	word * tempWord;
 
-	if(elemName[0] == '\0') return stack;
+	if(elemName[0] == '\0') return;
 
 	// Search core dict first
 	tempCore = vocab->core;
 	do{
 		if(!strcmp(tempCore->name, elemName)){
 			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
-			stack = tempCore->func(stack, sequence, vocab);
-			return stack;
+			tempCore->func(stack, sequence, vocab);
+			return;
 		}
 		tempCore = tempCore->next;
 	}while(tempCore != NULL);
@@ -81,15 +82,15 @@ elem * wordRun(elem * sequence, elem * stack, dict * vocab){
 		do{
 			if(!strcmp(tempWord->name, elemName)){
 				// run programmed word
-				stack = run(stack, parseInput(tempWord->definition), vocab);
-				return stack;
+				run(stack, parseInput(tempWord->definition), vocab);
+				return;
 			}
 			tempWord = tempWord->next;
 		}while(tempWord != NULL);
 	}
 
 	fprintf(stderr,"ERROR: %s unrecognized\n",elemName);
-	return stack;
+	return;
 }
 
 word * newWord(subdict * dict){
@@ -112,8 +113,7 @@ word * newWord(subdict * dict){
 }
 
 // Attempts to define a new function
-// TODO Should replace if function exists, or error if core function
-elem * defWord(elem * seq, dict * vocab){
+void defWord(elem * seq, dict * vocab){
 	word * temp;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
@@ -131,7 +131,7 @@ elem * defWord(elem * seq, dict * vocab){
 		// See if it is a core word
 		if(coreSearch(seq->chars, vocab)){
 			fprintf(stderr,"ERROR: %s is in core dictionary\n",seq->chars);
-			return NULL; // TODO We should free the sequence before returning
+			return; // TODO We should free the sequence before returning
 		}
 
 		// See if we already have this word, if we do then redefine
@@ -157,7 +157,7 @@ elem * defWord(elem * seq, dict * vocab){
 
 		if(seq->next == NULL){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
-			return NULL; // TODO We should free the sequence before returning
+			return; // TODO We should free the sequence before returning
 		}else seq = seq->next;
 	}
 
@@ -165,10 +165,10 @@ elem * defWord(elem * seq, dict * vocab){
 	printf("%s\n",temp->name);
 
 	// TODO We should free the entire sequence
-	return NULL;
+	return;
 }
 
-void defCore(char * name, elem * (*func)(elem *, elem*, dict*), dict * vocab){
+void defCore(char * name, void (*func)(stack *, elem*, dict*), dict * vocab){
 	coreword * temp = vocab->core;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));

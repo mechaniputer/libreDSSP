@@ -23,6 +23,7 @@
 #include "util.h"
 #include "dict.h"
 #include "elem.h"
+#include "stack.h"
 
 // This can be reduced but it hits every case
 int isnum(char * foo){
@@ -45,34 +46,30 @@ int isnum(char * foo){
 
 
 // Takes a linked command sequence and attempts to run it as DSSP code
-elem * run(elem * stack, elem * seqHead, dict * vocab){
+void run(stack * stack, elem * seqHead, dict * vocab){
 	elem * seqPrev; // We use this to free each element after we are done reading it
-	elem * tempStack;
 	elem * tempSeq;
 
 	tempSeq = seqHead;
 	do{
 		assert(tempSeq != NULL);
 		if(isnum(tempSeq->chars)){ // Numerical constant
-			tempStack = stack;
-			stack = malloc(sizeof(elem));
-			stack->next = tempStack;
-			stack->value = atoi(tempSeq->chars);
+			push(stack, atoi(tempSeq->chars));
 		}else if (!strcmp(tempSeq->chars, ":")){ // Function declaration
-			tempSeq = defWord(seqHead,vocab);
+			defWord(seqHead,vocab);
 		}else if (tempSeq->chars[0] == '['){ // Comment
 			// Do nothing
 		}else{ // Not a number or a function declaration
-			stack = wordRun(tempSeq, stack, vocab);
+			wordRun(tempSeq, stack, vocab);
 		}
 		if(tempSeq != NULL){ // This will be NULL if we did a function declaration
-			if(tempSeq->next == NULL) return stack; // Fixes DO loop crashes
+			if(tempSeq->next == NULL) return; // Fixes DO loop crashes
 			seqPrev = tempSeq;
 			tempSeq = tempSeq->next;
 			free(seqPrev); // We should be done with this element
 		}
 	}while(tempSeq != NULL);
-	return stack;
+	return;
 }
 
 // Takes command line and splits it by spaces, returns sequence

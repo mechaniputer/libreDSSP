@@ -20,6 +20,7 @@
 #define DICT_H
 
 #include "elem.h"
+#include "stack.h"
 #include "corewords.h"
 
 /*	DICTIONARY HIERARCHY:
@@ -52,7 +53,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	elem * (*func)(elem *, elem *,dict *);
+	void (*func)(stack *, elem *,dict *);
 };
 
 struct subdict
@@ -72,10 +73,10 @@ word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
 int coreSearch(char * name, dict * vocab);
 // Searches dictionaries, runs a word if possible
-elem * wordRun(elem * sequence, elem * stack, dict * vocab);
+void wordRun(elem * sequence, stack * stack, dict * vocab);
 // Attempts to define a new function
-elem * defWord(elem * seq, dict * vocab);
+void defWord(elem * seq, dict * vocab);
 // Defines built-in functions
-void defCore(char * name, elem * (*func)(elem *, elem*, dict*), dict * vocab);
+void defCore(char * name, void (*func)(stack *, elem*, dict*), dict * vocab);
 
 #endif

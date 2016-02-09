@@ -21,32 +21,33 @@
 
 #include <stdlib.h>
 #include "elem.h"
+#include "stack.h"
 
 typedef struct dict dict;
 
 // Arithmetic
-elem * plus(elem * stack, elem * sequence, dict * vocab);
-elem * multiply(elem * stack, elem * sequence, dict * vocab);
-elem * minus(elem * stack, elem * sequence, dict * vocab);
-elem * divide(elem * stack, elem * sequence, dict * vocab);
-elem * negate(elem * stack, elem * sequence, dict * vocab);
-elem * absval(elem * stack, elem * sequence, dict * vocab);
+void plus(stack * stack, elem * sequence, dict * vocab);
+void multiply(stack * stack, elem * sequence, dict * vocab);
+void minus(stack * stack, elem * sequence, dict * vocab);
+void divide(stack * stack, elem * sequence, dict * vocab);
+void negate(stack * stack, elem * sequence, dict * vocab);
+void absval(stack * stack, elem * sequence, dict * vocab);
 
 // Display and interpreter
-elem * bye(elem * stack, elem * sequence, dict * vocab);
-elem * showTop(elem * stack, elem * sequence, dict * vocab);
-elem * showStack(elem * stack, elem * sequence, dict * vocab);
+void bye(stack * stack, elem * sequence, dict * vocab);
+void showTop(stack * stack, elem * sequence, dict * vocab);
+void showStack(stack * stack, elem * sequence, dict * vocab);
 
 // Conditionals
-elem * ifplus(elem * stack, elem * sequence, dict * vocab);
-elem * ifzero(elem * stack, elem * sequence, dict * vocab);
-elem * ifminus(elem * stack, elem * sequence, dict * vocab);
+void ifplus(stack * stack, elem * sequence, dict * vocab);
+void ifzero(stack * stack, elem * sequence, dict * vocab);
+void ifminus(stack * stack, elem * sequence, dict * vocab);
 
 // Looping and flow control
-elem * doloop(elem * stack, elem * sequence, dict * vocab);
+void doloop(stack * stack, elem * sequence, dict * vocab);
 
 // Misc
-elem * drop(elem * stack, elem * sequence, dict * vocab);
-elem * copy(elem * stack, elem * sequence, dict * vocab);
+void drop(stack * stack, elem * sequence, dict * vocab);
+void copy(stack * stack, elem * sequence, dict * vocab);
 
 #endif
