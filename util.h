@@ -35,5 +35,7 @@ int isnum(char * foo);
 void run(stack * stack, elem * seqHead, dict * vocab);
 elem * parseInput(char * line);
 char * prompt();
+// Searches dictionaries, runs a word if possible
+void wordRun(elem * sequence, stack * stack, dict * vocab);
 
 #endif

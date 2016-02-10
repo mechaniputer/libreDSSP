@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+
 #include "dict.h"
 #include "elem.h"
 #include "stack.h"
@@ -57,42 +58,6 @@ int coreSearch(char * name, dict * vocab){
 	return 0;
 }
 
-// Searches dictionaries, runs a word if possible
-void wordRun(elem * sequence, stack * stack, dict * vocab){
-	char * elemName = sequence->chars;
-	coreword * tempCore;
-	word * tempWord;
-
-	if(elemName[0] == '\0') return;
-
-	// Search core dict first
-	tempCore = vocab->core;
-	do{
-		if(!strcmp(tempCore->name, elemName)){
-			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
-			tempCore->func(stack, sequence, vocab);
-			return;
-		}
-		tempCore = tempCore->next;
-	}while(tempCore != NULL);
-
-	if(vocab->sub->wordlist != NULL){
-		// Search subdicts (for now just one)
-		tempWord = vocab->sub->wordlist;
-		do{
-			if(!strcmp(tempWord->name, elemName)){
-				// run programmed word
-				run(stack, parseInput(tempWord->definition), vocab);
-				return;
-			}
-			tempWord = tempWord->next;
-		}while(tempWord != NULL);
-	}
-
-	fprintf(stderr,"ERROR: %s unrecognized\n",elemName);
-	return;
-}
-
 word * newWord(subdict * dict){
 	assert(dict != NULL);
 	word * temp; // Lets us find the next empty spot
@@ -112,7 +77,7 @@ word * newWord(subdict * dict){
 	return temp;
 }
 
-// Attempts to define a new function
+// Attempts to define a new word
 void defWord(elem * seq, dict * vocab){
 	word * temp;
 	assert(vocab != NULL);
@@ -140,7 +105,6 @@ void defWord(elem * seq, dict * vocab){
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->sub);
-			// Name the new word
 			strcpy(temp->name, seq->chars);
 		}else{
 			// Wipe old definition
@@ -150,7 +114,6 @@ void defWord(elem * seq, dict * vocab){
 
 	}else fprintf(stderr,"ERROR: Incomplete definition\n");
 
-	// TODO This limits the size of a declaration and should be dynamic
 	while(seq->chars[0] != ';'){
 		strcat(temp->definition, seq->chars);
 		strcat(temp->definition, " ");

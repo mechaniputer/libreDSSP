@@ -47,7 +47,6 @@ int isnum(char * foo){
 	return 1;
 }
 
-
 // Takes a linked command sequence and attempts to run it as DSSP code
 void run(stack * stack, elem * seqHead, dict * vocab){
 	elem * seqPrev; // We use this to free each element after we are done reading it
@@ -119,7 +118,6 @@ elem * parseInput(char * line){
 }
 
 char * prompt(){
-	int i = 0;
 	char * line = readline ("* ");
 	add_history(line);
 	//Check for EOF.
@@ -128,6 +126,42 @@ char * prompt(){
 		return "BYE";
 	}
 	return line;
+}
+
+// Searches dictionaries, runs a word if possible
+void wordRun(elem * sequence, stack * stack, dict * vocab){
+	char * elemName = sequence->chars;
+	coreword * tempCore;
+	word * tempWord;
+
+	if(elemName[0] == '\0') return;
+
+	// Search core dict first
+	tempCore = vocab->core;
+	do{
+		if(!strcmp(tempCore->name, elemName)){
+			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
+			tempCore->func(stack, sequence, vocab);
+			return;
+		}
+		tempCore = tempCore->next;
+	}while(tempCore != NULL);
+
+	if(vocab->sub->wordlist != NULL){
+		// Search subdicts (for now just one)
+		tempWord = vocab->sub->wordlist;
+		do{
+			if(!strcmp(tempWord->name, elemName)){
+				// run programmed word
+				run(stack, parseInput(tempWord->definition), vocab);
+				return;
+			}
+			tempWord = tempWord->next;
+		}while(tempWord != NULL);
+	}
+
+	fprintf(stderr,"ERROR: %s unrecognized\n",elemName);
+	return;
 }
 
 

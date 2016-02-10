@@ -72,8 +72,6 @@ struct dict
 word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
 int coreSearch(char * name, dict * vocab);
-// Searches dictionaries, runs a word if possible
-void wordRun(elem * sequence, stack * stack, dict * vocab);
 // Attempts to define a new function
 void defWord(elem * seq, dict * vocab);
 // Defines built-in functions

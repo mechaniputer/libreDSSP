@@ -18,10 +18,15 @@
 
 #include <malloc.h>
 #include <stdlib.h>
+
 #include "corewords.h"
+// Will be needed for variables, currently only used by doloop for run()
 #include "dict.h"
 #include "elem.h"
 #include "stack.h"
+
+// In utils.h
+void run(stack * stack, elem * seqHead, dict * vocab);
 
 void plus(stack * stack, elem * sequence, dict * vocab){
 	int temp;
@@ -98,6 +103,7 @@ void bye(stack * stack, elem * sequence, dict * vocab){
 }
 
 // TODO This will need to be modified to support multiple output modes
+// Current mode will be readable from a var in vocab
 void showTop(stack * stack, elem * sequence, dict * vocab){
 	if(stack->top > -1) printf("%d",top(stack));
 	printf("\n");
@@ -191,4 +197,3 @@ void copy(stack * stack, elem * sequence, dict * vocab){
 	push(stack,top(stack));
 	return;
 }
-
