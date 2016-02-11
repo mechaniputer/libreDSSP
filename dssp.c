@@ -68,7 +68,7 @@ int main(){
 
 	while(1){
 		// Show prompt, get line of input
-		seqHead = parseInput(prompt());
+		seqHead = splitInput(prompt());
 		run(stack, seqHead, vocab);
 	}
 	return 0;

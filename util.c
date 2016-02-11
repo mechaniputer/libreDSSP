@@ -77,7 +77,7 @@ void run(stack * stack, elem * seqHead, dict * vocab){
 }
 
 // Takes command line and splits it by spaces, returns sequence
-elem * parseInput(char * line){
+elem * splitInput(char * line){
 	char ch;
 	int i = 0;
 	int j = 0;
@@ -153,7 +153,7 @@ void wordRun(elem * sequence, stack * stack, dict * vocab){
 		do{
 			if(!strcmp(tempWord->name, elemName)){
 				// run programmed word
-				run(stack, parseInput(tempWord->definition), vocab);
+				run(stack, splitInput(tempWord->definition), vocab);
 				return;
 			}
 			tempWord = tempWord->next;
