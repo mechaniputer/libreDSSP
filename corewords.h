@@ -26,28 +26,28 @@
 typedef struct dict dict;
 
 // Arithmetic
-void plus(stack * stack, elem * sequence, dict * vocab);
-void multiply(stack * stack, elem * sequence, dict * vocab);
-void minus(stack * stack, elem * sequence, dict * vocab);
-void divide(stack * stack, elem * sequence, dict * vocab);
-void negate(stack * stack, elem * sequence, dict * vocab);
-void absval(stack * stack, elem * sequence, dict * vocab);
+void plus(stack * stack, cmdstack * cmdstack, dict * vocab);
+void multiply(stack * stack, cmdstack * cmdstack, dict * vocab);
+void minus(stack * stack, cmdstack * cmdstack, dict * vocab);
+void divide(stack * stack, cmdstack * cmdstack, dict * vocab);
+void negate(stack * stack, cmdstack * cmdstack, dict * vocab);
+void absval(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Display and interpreter
-void bye(stack * stack, elem * sequence, dict * vocab);
-void showTop(stack * stack, elem * sequence, dict * vocab);
-void showStack(stack * stack, elem * sequence, dict * vocab);
+void bye(stack * stack, cmdstack * cmdstack, dict * vocab);
+void showTop(stack * stack, cmdstack * cmdstack, dict * vocab);
+void showStack(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Conditionals
-void ifplus(stack * stack, elem * sequence, dict * vocab);
-void ifzero(stack * stack, elem * sequence, dict * vocab);
-void ifminus(stack * stack, elem * sequence, dict * vocab);
+void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab);
+void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab);
+void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Looping and flow control
-void doloop(stack * stack, elem * sequence, dict * vocab);
+void doloop(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Misc
-void drop(stack * stack, elem * sequence, dict * vocab);
-void copy(stack * stack, elem * sequence, dict * vocab);
+void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
+void copy(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 #endif

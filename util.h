@@ -32,10 +32,10 @@
 #include "stack.h"
 
 int isnum(char * foo);
-void run(stack * stack, elem * seqHead, dict * vocab);
-elem * splitInput(char * line);
+void run(stack * stack, cmdstack * cmdstack, dict * vocab);
+void stackInput(char * line, cmdstack * cmdstack);
 char * prompt();
 // Searches dictionaries, runs a word if possible
-void wordRun(elem * sequence, stack * stack, dict * vocab);
+void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab);
 
 #endif

@@ -20,15 +20,13 @@
 #include <stdlib.h>
 
 #include "corewords.h"
-// Will be needed for variables, currently only used by doloop for run()
-#include "dict.h"
 #include "elem.h"
 #include "stack.h"
 
 // In utils.h
-void run(stack * stack, elem * seqHead, dict * vocab);
+void run(stack * stack, cmdstack * cmdstack, dict * vocab);
 
-void plus(stack * stack, elem * sequence, dict * vocab){
+void plus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int temp;
 	// -1 indicates empty stack
 	if(stack->top <= 0){
@@ -40,7 +38,7 @@ void plus(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void multiply(stack * stack, elem * sequence, dict * vocab){
+void multiply(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int temp1;
 	int temp2;
 	if(stack->top <= 0){
@@ -53,7 +51,7 @@ void multiply(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void minus(stack * stack, elem * sequence, dict * vocab){
+void minus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int temp;
 	// -1 indicates empty stack
 	if(stack->top <= 0){
@@ -65,7 +63,7 @@ void minus(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void divide(stack * stack, elem * sequence, dict * vocab){
+void divide(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int temp1;
 	int temp2;
 	if(stack->top <= 0){
@@ -78,7 +76,7 @@ void divide(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void negate(stack * stack, elem * sequence, dict * vocab){
+void negate(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
 		return;
@@ -87,7 +85,7 @@ void negate(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void absval(stack * stack, elem * sequence, dict * vocab){
+void absval(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
 		return;
@@ -97,20 +95,20 @@ void absval(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void bye(stack * stack, elem * sequence, dict * vocab){
+void bye(stack * stack, cmdstack * cmdstack, dict * vocab){
 	printf("Exiting libreDSSP\n");
 	exit(0);
 }
 
 // TODO This will need to be modified to support multiple output modes
 // Current mode will be readable from a var in vocab
-void showTop(stack * stack, elem * sequence, dict * vocab){
+void showTop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top > -1) printf("%d",top(stack));
 	printf("\n");
 	return;
 }
 
-void showStack(stack * stack, elem * sequence, dict * vocab){
+void showStack(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
 	if(stack->top < 0){
 		printf("\n");
@@ -124,63 +122,60 @@ void showStack(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void ifplus(stack * stack, elem * sequence, dict * vocab){
-	if((sequence->next == NULL ) || (stack->top < 0)){
+void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		return;
 	}
 
 	if(pop(stack) <= 0){
-		sequence->next = sequence->next->next;
+		cmdPop(cmdstack);
 	}
 	return;
 }
 
-void ifzero(stack * stack, elem * sequence, dict * vocab){
-	if((sequence->next == NULL ) || (stack->top < 0)){
+void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		return;
 	}
 
 	if(pop(stack) != 0){
-		sequence->next = sequence->next->next;
+		cmdPop(cmdstack);
 	}
 	return;
 }
 
-void ifminus(stack * stack, elem * sequence, dict * vocab){
-	if((sequence->next == NULL ) || (stack->top < 0)){
+void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		return;
 	}
 
 	if(pop(stack) >= 0){
-		sequence->next = sequence->next->next;
+		cmdPop(cmdstack);
 	}
 	return;
 }
 
 
-void doloop(stack * stack, elem * sequence, dict * vocab){
+void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
-	elem * repeat = sequence->next;
-	if((sequence->next == NULL) || (stack->top < 0)) {
+	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
 		return;
 	}
+	char * repeat = cmdPop(cmdstack);
 
 	int reps = pop(stack);
 
-	// Isolate the repeated word
-	sequence->next = sequence->next->next;
-	repeat->next = NULL;
 	for(i = 0; i < reps; i++){
-		run(stack, repeat, vocab);
+		cmdPush(cmdstack, repeat);
 	}
 	return;
 }
 
-void drop(stack * stack, elem * sequence, dict * vocab){
+void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
 		return;
@@ -189,7 +184,7 @@ void drop(stack * stack, elem * sequence, dict * vocab){
 	return;
 }
 
-void copy(stack * stack, elem * sequence, dict * vocab){
+void copy(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C\n");
 		return;

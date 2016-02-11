@@ -26,8 +26,8 @@
 #include "util.h"
 
 int main(){
-	elem * seqHead;
 	stack * stack = newStack();
+	cmdstack * cmdstack = newCmdStack();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
@@ -68,8 +68,8 @@ int main(){
 
 	while(1){
 		// Show prompt, get line of input
-		seqHead = splitInput(prompt());
-		run(stack, seqHead, vocab);
+		stackInput(prompt(),cmdstack);
+		run(stack, cmdstack, vocab);
 	}
 	return 0;
 }

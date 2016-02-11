@@ -78,59 +78,59 @@ word * newWord(subdict * dict){
 }
 
 // Attempts to define a new word
-void defWord(elem * seq, dict * vocab){
+void defWord(cmdstack * cmdstack, dict * vocab){
 	word * temp;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
 	// Skip over ':'
-	if(seq->next != NULL){
-		seq = seq->next;
+	if(cmdstack->top >= 0){
+		cmdPop(cmdstack);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 	}
 
 	// Assign function name
-	if(seq->next != NULL){
+	if(cmdstack->top >= 0){
 
 		// See if it is a core word
-		if(coreSearch(seq->chars, vocab)){
-			fprintf(stderr,"ERROR: %s is in core dictionary\n",seq->chars);
+		if(coreSearch(cmdTop(cmdstack), vocab)){
+			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdstack));
 			return;
 		}
 
 		// See if we already have this word, if we do then redefine
-		temp = wordSearch(seq->chars, vocab);
+		temp = wordSearch(cmdTop(cmdstack), vocab);
 
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->sub);
-			strcpy(temp->name, seq->chars);
+			strcpy(temp->name, cmdPop(cmdstack));
 		}else{
 			// Wipe old definition
 			strcpy(temp->definition, "");
 		}
-		seq = seq->next;
 
 	}else fprintf(stderr,"ERROR: Incomplete definition\n");
 
-	while(seq->chars[0] != ';'){
-		strcat(temp->definition, seq->chars);
+	while(strcmp(";", cmdTop(cmdstack))){
+		strcat(temp->definition, cmdPop(cmdstack));
 		strcat(temp->definition, " ");
 
-		if(seq->next == NULL){
+		if(cmdstack->top < 0){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
 			return;
-		}else seq = seq->next;
+		}
 	}
+	// Get rid of ";"
+	cmdPop(cmdstack);
 
 	// Successful definition, print name
 	printf("%s\n",temp->name);
-
 	return;
 }
 
-void defCore(char * name, void (*func)(stack *, elem*, dict*), dict * vocab){
+void defCore(char * name, void (*func)(stack *, cmdstack *, dict*), dict * vocab){
 	coreword * temp = vocab->core;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));

@@ -47,50 +47,42 @@ int isnum(char * foo){
 	return 1;
 }
 
-// Takes a linked command sequence and attempts to run it as DSSP code
-void run(stack * stack, elem * seqHead, dict * vocab){
-	elem * seqPrev; // We use this to free each element after we are done reading it
-	elem * tempSeq;
+// Looks at cmdTop(cmdstack), decides what to do
+void run(stack * stack, cmdstack * cmdstack, dict * vocab){
+	char * temp;
 
-	tempSeq = seqHead;
 	do{
-		assert(tempSeq != NULL);
-		if(isnum(tempSeq->chars)){ // Numerical constant
-			push(stack, atoi(tempSeq->chars));
-		}else if (!strcmp(tempSeq->chars, ":")){ // Function declaration
-			defWord(seqHead,vocab);
-			// TODO We should free the entire sequence first;
-			tempSeq = NULL;
-		}else if (tempSeq->chars[0] == '['){ // Comment
-			// Do nothing
+		temp = cmdTop(cmdstack);
+		assert(temp != NULL);
+		if(isnum(temp)){ // Numerical constant
+			push(stack, atoi(temp));
+			cmdPop(cmdstack);
+		}else if (!strcmp(temp, ":")){ // Function declaration
+			defWord(cmdstack,vocab);
+		}else if (temp[0] == '['){ // Comment
+			cmdPop(cmdstack);
 		}else{ // Not a number or a function declaration
-			wordRun(tempSeq, stack, vocab);
+			wordRun(cmdstack, stack, vocab);
 		}
-		if(tempSeq != NULL){ // This will be NULL if we did a function declaration
-			if(tempSeq->next == NULL) return; // Fixes DO loop crashes
-			seqPrev = tempSeq;
-			tempSeq = tempSeq->next;
-			free(seqPrev); // We should be done with this element
-		}
-	}while(tempSeq != NULL);
+	}while((cmdstack->top)>=0);
 	return;
 }
 
-// Takes command line and splits it by spaces, returns sequence
-elem * splitInput(char * line){
+// Takes command line and splits it by spaces, pushes it onto stack in reverse order
+void stackInput(char * line, cmdstack * cmdstack){
 	char ch;
 	int i = 0;
 	int j = 0;
-	elem * seqHead;
-	elem * seqcurr;
+	elem * seqhead;
+	elem * seqprev;
 	elem * seqtail;
 
-	seqHead = malloc(sizeof(elem));
-	seqtail = seqHead;
-	seqtail->next = NULL;
+	seqhead = malloc(sizeof(elem));
+	seqtail = seqhead;
+	seqhead->next = NULL;
 
-	// TODO Not safe!
-	while((line[j] != '\0') && (j < 79)){
+	// TODO Not safe or efficient
+	while(line[j] != '\0'){
 		ch = line[j++];
 		if (ch == '[') {
 			seqtail->chars[i++] = '[';
@@ -105,16 +97,23 @@ elem * splitInput(char * line){
 			seqtail->chars[i++] = ch;
 
 		} else if ((ch == ' ') && (i != 0)) { // Handles adjacent spaces
+			// Time to append a new sequence element
 			seqtail->chars[i] = '\0';
-			seqcurr = seqtail;
+			seqprev = seqtail;
 			seqtail = malloc(sizeof(elem));
-			seqcurr->next = seqtail; // old tail used to point to NULL, now to new elem
-			seqtail->next = NULL;
+			seqtail->next = seqprev; // New tail points to prev to make reverse list
 			i=0;
 		}
 	}
 	seqtail->chars[i] =  '\0';
-	return seqHead;
+
+	// Now we push it all onto the cmdstack in reverse order
+	do{
+		cmdPush(cmdstack, seqtail->chars);
+		seqtail = seqtail->next;
+	}while(seqtail != NULL);
+
+	return;
 }
 
 char * prompt(){
@@ -128,20 +127,20 @@ char * prompt(){
 	return line;
 }
 
-// Searches dictionaries, runs a word if possible
-void wordRun(elem * sequence, stack * stack, dict * vocab){
-	char * elemName = sequence->chars;
+// If top of cmdstack is a word, this function knows what to do
+void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
+	char * cmdName = cmdPop(cmdstack);
 	coreword * tempCore;
 	word * tempWord;
 
-	if(elemName[0] == '\0') return;
+	if(cmdName[0] == '\0') return;
 
 	// Search core dict first
 	tempCore = vocab->core;
 	do{
-		if(!strcmp(tempCore->name, elemName)){
-			// Run built-in function. sequence provided so that conditionals can conditionally delete adjacent words.
-			tempCore->func(stack, sequence, vocab);
+		if(!strcmp(tempCore->name, cmdName)){
+			// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
+			tempCore->func(stack, cmdstack, vocab);
 			return;
 		}
 		tempCore = tempCore->next;
@@ -151,17 +150,18 @@ void wordRun(elem * sequence, stack * stack, dict * vocab){
 		// Search subdicts (for now just one)
 		tempWord = vocab->sub->wordlist;
 		do{
-			if(!strcmp(tempWord->name, elemName)){
-				// run programmed word
-				run(stack, splitInput(tempWord->definition), vocab);
-				return;
+			if(!strcmp(tempWord->name, cmdName)){
+				// Push programmed word onto stack in reverse-order
+				// TODO: Store definitions in pre-split form
+				// TODO: Eventually store words as sequence of pointers
+				stackInput(tempWord->definition, cmdstack);
+				return; // We no longer call run() here since the cmdstack takes care of it
 			}
 			tempWord = tempWord->next;
 		}while(tempWord != NULL);
 	}
 
-	fprintf(stderr,"ERROR: %s unrecognized\n",elemName);
+	fprintf(stderr,"ERROR: %s unrecognized\n",cmdName);
 	return;
 }
-
 

@@ -53,7 +53,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	void (*func)(stack *, elem *,dict *);
+	void (*func)(stack *, cmdstack *,dict *);
 };
 
 struct subdict
@@ -73,8 +73,8 @@ word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
 int coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
-void defWord(elem * seq, dict * vocab);
+void defWord(cmdstack * cmdstack, dict * vocab);
 // Defines built-in functions
-void defCore(char * name, void (*func)(stack *, elem*, dict*), dict * vocab);
+void defCore(char * name, void (*func)(stack *, cmdstack *, dict *), dict * vocab);
 
 #endif
