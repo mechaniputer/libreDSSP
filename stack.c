@@ -18,7 +18,7 @@
 #include <malloc.h>
 #include "stack.h"
 
-stack * newStack(){
+stack * newStack() {
 	stack * stack = malloc(sizeof(stack));
 	stack->array = malloc(10*sizeof(int)); // TODO Make dynamic
 	stack->capacity = 10;
@@ -46,4 +46,33 @@ void push(stack * stack, int value) {
 void grow(stack * stack){
 	stack->capacity = 2 * (stack->capacity);
 	stack->array = realloc(stack->array, (stack->capacity)*sizeof(int));
+}
+
+cmdstack * newCmdStack(){
+	cmdstack * cmdstack = malloc(sizeof(cmdstack));
+	cmdstack->array = malloc(10*sizeof(char *)); // TODO Make dynamic
+	cmdstack->capacity = 10;
+	cmdstack->top = -1; // -1 indicates empty stack
+	return cmdstack;
+}
+
+// If stack is empty, do not use!
+char * cmdTop(cmdstack * cmdstack) {
+	return (cmdstack->array[cmdstack->top]);
+}
+
+// If stack is empty, do not use!
+char * cmdPop(cmdstack * cmdstack) {
+	return (cmdstack->array[(cmdstack->top)--]);
+}
+void cmdPush(cmdstack * cmdstack, char * cmd) {
+	(cmdstack->top)++;
+	cmdstack->array[cmdstack->top] = cmd;
+	if((cmdstack->capacity) == ((cmdstack->top)+1)) cmdGrow(cmdstack);
+	return;
+}
+
+void cmdGrow(cmdstack * cmdstack){
+	cmdstack->capacity = 2 * (cmdstack->capacity);
+	cmdstack->array = realloc(cmdstack->array, (cmdstack->capacity)*sizeof(char *));
 }

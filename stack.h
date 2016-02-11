@@ -27,10 +27,25 @@ struct stack
 	int * array;
 };
 
+typedef struct cmdstack cmdstack;
+struct cmdstack
+{
+	int capacity;
+	int top;
+	// Dynamic array of pointers to strings
+	char ** array;
+};
+
 stack * newStack();
 int top(stack * stack);
 int pop(stack * stack);
 void push(stack * stack, int value);
 void grow(stack * stack);
+
+cmdstack * newCmdStack();
+char * cmdTop(cmdstack * cmdstack);
+char * cmdPop(cmdstack * cmdstack);
+void cmdPush(cmdstack * cmdstack, char * cmd);
+void cmdGrow(cmdstack * cmdstack);
 
 #endif
