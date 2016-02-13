@@ -46,6 +46,12 @@ void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab);
 // Looping and flow control
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab);
 
+// Stack manipulation
+void exch2(stack * stack, cmdstack * cmdstack, dict * vocab);
+void exch3(stack * stack, cmdstack * cmdstack, dict * vocab);
+void exch4(stack * stack, cmdstack * cmdstack, dict * vocab);
+void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab);
+
 // Misc
 void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
 void copy(stack * stack, cmdstack * cmdstack, dict * vocab);

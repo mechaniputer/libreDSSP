@@ -175,6 +175,50 @@ void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+// Stack manipulation
+void exch2(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 0){
+		fprintf(stderr,"ERROR: Insufficient operands for E2\n");
+		return;
+	}
+	int temp = top(stack);
+	stack->array[stack->top] = stack->array[stack->top - 1];
+	stack->array[stack->top - 1] = temp;
+	return;
+}
+void exch3(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 1){
+		fprintf(stderr,"ERROR: Insufficient operands for E3\n");
+		return;
+	}
+	int temp = top(stack);
+	stack->array[stack->top] = stack->array[stack->top - 2];
+	stack->array[stack->top - 2] = temp;
+	return;
+}
+void exch4(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 2){
+		fprintf(stderr,"ERROR: Insufficient operands for E4\n");
+		return;
+	}
+	int temp = top(stack);
+	stack->array[stack->top] = stack->array[stack->top - 3];
+	stack->array[stack->top - 3] = temp;
+	return;
+}
+void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
+	int depth = pop(stack);
+	if (depth == 1) return;
+	if(stack->top <= depth-2){
+		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
+		return;
+	}
+	int temp = top(stack);
+	stack->array[stack->top] = stack->array[stack->top - (depth - 1)];
+	stack->array[stack->top - (depth - 1)] = temp;
+	return;
+}
+
 void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
