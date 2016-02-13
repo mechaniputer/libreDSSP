@@ -57,9 +57,12 @@ int main(){
 	defCore("E3", exch3, vocab);
 	defCore("E4", exch4, vocab);
 	defCore("ET", exchdepth, vocab);
-	// Misc
-	defCore("D", drop, vocab);
 	defCore("C", copy, vocab);
+	defCore("C2", copy2, vocab);
+	defCore("C3", copy3, vocab);
+	defCore("C4", copy4, vocab);
+	defCore("CT", copydepth, vocab);
+	defCore("D", drop, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

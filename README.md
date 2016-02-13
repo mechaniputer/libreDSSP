@@ -11,6 +11,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* DO
 	* "D"(drop), "C"(copy)
 	* ET, E2, E3, E4, etc
+	* CT, C2, C3, C4, etc
 	* Function declarations
 	* [comments]
 	* GNU readline support
@@ -24,7 +25,6 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* EX, EX-, EX0, EX+, EXT
 	* SORT, SPIN, MAX, MIN
 	* 1+, 2+, 1-, 2-, etc
-	* CT, C2, C3, C4, etc
 	* T0, T1, etc
 	* TRB, TOB, TON, BASE@
 	* TIB, TIN, TIS

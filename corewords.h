@@ -51,9 +51,11 @@ void exch2(stack * stack, cmdstack * cmdstack, dict * vocab);
 void exch3(stack * stack, cmdstack * cmdstack, dict * vocab);
 void exch4(stack * stack, cmdstack * cmdstack, dict * vocab);
 void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab);
-
-// Misc
-void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
 void copy(stack * stack, cmdstack * cmdstack, dict * vocab);
+void copy2(stack * stack, cmdstack * cmdstack, dict * vocab);
+void copy3(stack * stack, cmdstack * cmdstack, dict * vocab);
+void copy4(stack * stack, cmdstack * cmdstack, dict * vocab);
+void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab);
+void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 #endif

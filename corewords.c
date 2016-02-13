@@ -219,6 +219,49 @@ void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+void copy(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient operands for C\n");
+		return;
+	}
+	push(stack,top(stack));
+	return;
+}
+
+void copy2(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 0){
+		fprintf(stderr,"ERROR: Insufficient operands for C2\n");
+		return;
+	}
+	push(stack, stack->array[stack->top - 1]);
+	return;
+}
+void copy3(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 1){
+		fprintf(stderr,"ERROR: Insufficient operands for C3\n");
+		return;
+	}
+	push(stack, stack->array[stack->top - 2]);
+	return;
+}
+void copy4(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 2){
+		fprintf(stderr,"ERROR: Insufficient operands for C4\n");
+		return;
+	}
+	push(stack, stack->array[stack->top - 3]);
+	return;
+}
+void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab){
+	int depth = pop(stack);
+	if(stack->top <= depth-2){
+		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
+		return;
+	}
+	push(stack, stack->array[stack->top - (depth - 1)]);
+	return;
+}
+
 void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
@@ -228,11 +271,3 @@ void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void copy(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for C\n");
-		return;
-	}
-	push(stack,top(stack));
-	return;
-}
