@@ -26,6 +26,22 @@
 #include "util.h"
 #include "corewords.h"
 
+// Looks for defined variables
+variable * varSearch(char * name, dict * vocab){
+	variable * tempVar;
+	if(name[0] == '\0') return NULL;
+	if(vocab->var != NULL){
+		tempVar = vocab->var;
+		do{
+			if(!strcmp(tempVar->name, name)){
+				return tempVar;
+			}
+			tempVar = tempVar->next;
+		}while(tempVar != NULL);
+	}
+	return NULL;
+}
+
 // Searches non-core dictionaries, returns word if it exists
 word * wordSearch(char * name, dict * vocab){
 	word * tempWord;
@@ -109,6 +125,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		}else{
 			// Wipe old definition
 			strcpy(temp->definition, "");
+			cmdPop(cmdstack);
 		}
 
 	}else fprintf(stderr,"ERROR: Incomplete definition\n");

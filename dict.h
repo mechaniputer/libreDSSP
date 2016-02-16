@@ -25,7 +25,7 @@
 
 /*	DICTIONARY HIERARCHY:
 
-        dict
+        dict --- variable --- variable --- variable
        /    \
       /     subdict --- subdict --- subdict
   coreword     |           |           |
@@ -38,10 +38,19 @@
 
 */
 
+typedef struct variable variable;
 typedef struct word word;
 typedef struct coreword coreword;
 typedef struct subdict subdict;
 typedef struct dict dict;
+
+struct variable
+{
+	char name[8];
+	int value;
+	variable * next;
+};
+
 struct word
 {
 	char name[8];
@@ -66,8 +75,11 @@ struct dict
 {
 	coreword * core;
 	subdict * sub;
+	variable * var;
 };
 
+// Looks for defined variables
+variable * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined
 word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined

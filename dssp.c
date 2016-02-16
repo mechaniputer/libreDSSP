@@ -68,6 +68,12 @@ int main(){
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
 
+	// Dummy test variable
+	vocab->var = malloc(sizeof(variable));
+	strcpy(vocab->var->name,"answer");
+	vocab->var->value = 42;
+	vocab->var->next = NULL;
+
 	// Version
 	printf("\nlibreDSSP, version 0.0.0\n");
 

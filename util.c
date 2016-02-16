@@ -61,9 +61,7 @@ void run(stack * stack, cmdstack * cmdstack, dict * vocab){
 			defWord(cmdstack,vocab);
 		}else if (temp[0] == '['){ // Comment
 			cmdPop(cmdstack);
-		}else{ // Not a number or a function declaration
-			wordRun(cmdstack, stack, vocab);
-		}
+		}else wordRun(cmdstack, stack, vocab); // word or variable
 	}while((cmdstack->top)>=0);
 	return;
 }
@@ -127,11 +125,12 @@ char * prompt(){
 	return line;
 }
 
-// If top of cmdstack is a word, this function knows what to do
+// If top of cmdstack is a word (or a variable), this function knows what to do
 void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	char * cmdName = cmdPop(cmdstack);
 	coreword * tempCore;
 	word * tempWord;
+	variable * tempVar;
 
 	if(cmdName[0] == '\0') return;
 
@@ -155,13 +154,19 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 				// TODO: Store definitions in pre-split form
 				// TODO: Eventually store words as sequence of pointers
 				stackInput(tempWord->definition, cmdstack);
-				return; // We no longer call run() here since the cmdstack takes care of it
+				return;
 			}
 			tempWord = tempWord->next;
 		}while(tempWord != NULL);
 	}
 
-	fprintf(stderr,"ERROR: %s unrecognized\n",cmdName);
-	return;
+	tempVar = varSearch(cmdName, vocab);
+	if (tempVar != NULL){ // It's a variable
+		push(stack,tempVar->value);
+		return;
+	}else{
+		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName);
+		return;
+	}
 }
 
