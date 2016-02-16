@@ -1,6 +1,8 @@
 # libreDSSP
 ## A GPLv3 Licensed DSSP Interpreter
 
+libreDSSP (libre Dialog System for Structured Programming) is my attempt to write an interpreter for a very obscure language similar to Forth. This language originated in the Soviet Union and was designed for the Setun ternary computer.
+
 This is a work in progress. It isn't complete enough to be very useful yet.
 
 ## What works:
@@ -19,7 +21,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 ## What doesn't work yet:
 	* File IO
 	* Multiple subvocabularies
-	* Variables, arrays, fixed variables,etc
+	* Variables, arrays, fixed variables, etc
 	* BR+, BR0, BR-, BRS, BR
 	* RP
 	* EX, EX-, EX0, EX+, EXT
@@ -35,4 +37,5 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 
 ## Possible future goals:
 	* Full documentation and tutorial
+	* Floating point math
 	* DSSP Compiler
