@@ -46,15 +46,15 @@ typedef struct dict dict;
 
 struct variable
 {
-	char name[8];
+	char name[16];
 	int value;
 	variable * next;
 };
 
 struct word
 {
-	char name[8];
-	char definition[80];
+	char name[16];
+	char definition[160];
 	word * next;
 };
 

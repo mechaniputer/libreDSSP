@@ -95,22 +95,25 @@ void stackInput(char * line, cmdstack * cmdstack){
 	// TODO Not safe or efficient
 	while(line[j] != '\0'){
 		ch = line[j++];
+
 		if (ch == '[') {
 			seqtail->chars[i++] = '[';
-			while(((ch = line[j++]) != ']')){
+			while((ch = line[j++]) != ']'){
 				if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = ']';
+
 		} else if(!strncmp(line, ".\"", 2)) {
 			j++;
 			seqtail->chars[i++] = '.';
 			seqtail->chars[i++] = '\"';
-			while(((ch = line[j++]) != '\"')){
+			while((ch = line[j++]) != '\"'){
 				if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = '\"';
+
 		} else if(ch != ' ') {
 			if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
