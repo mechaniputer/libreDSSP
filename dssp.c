@@ -30,7 +30,9 @@ int main(){
 	cmdstack * cmdstack = newCmdStack();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
-	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add dicts later
+	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
+	vocab->sub->name = "DEFAULT";
+	vocab->sub->open = 1;
 
 	// Built-ins
 	vocab->core = malloc(sizeof(coreword)); // For built-in words
@@ -68,6 +70,7 @@ int main(){
 	defCore("!", defVar, vocab);
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
+	defCore("?$", listDicts, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

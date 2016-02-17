@@ -76,6 +76,7 @@ int coreSearch(char * name, dict * vocab){
 
 word * newWord(subdict * dict){
 	assert(dict != NULL);
+
 	word * temp; // Lets us find the next empty spot
 
 	if(dict->wordlist == NULL){ // First word in dictionary
@@ -99,6 +100,8 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
+	if(vocab->grow == NULL) vocab->grow = vocab->sub; // Grow first dict by default
+
 	// Skip over ':'
 	if(cmdstack->top >= 0){
 		cmdPop(cmdstack);
@@ -120,7 +123,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 		if(temp == NULL){
 			// Append the new word
-			temp = newWord(vocab->sub);
+			temp = newWord(vocab->grow);
 			strcpy(temp->name, cmdPop(cmdstack));
 		}else{
 			// Wipe old definition

@@ -62,5 +62,6 @@ void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
 void defVar(stack * stack, cmdstack * cmdstack, dict * vocab);
 void printNewline(stack * stack, cmdstack * cmdstack, dict * vocab);
 void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab);
+void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 #endif

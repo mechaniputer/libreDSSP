@@ -67,6 +67,8 @@ struct coreword
 
 struct subdict
 {
+	char * name;
+	int open;
 	word * wordlist;
 	subdict * next;
 };
@@ -75,6 +77,7 @@ struct dict
 {
 	coreword * core;
 	subdict * sub;
+	subdict * grow;
 	variable * var;
 };
 
