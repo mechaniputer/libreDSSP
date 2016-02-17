@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <readline/readline.h>
 
 #include "corewords.h"
 #include "dict.h"
@@ -399,5 +400,11 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	tempSub->open = 1;
 	cmdPop(cmdstack);
+	return;
+}
+
+void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
+	char * line = readline("");
+	push(stack, atoi(line));
 	return;
 }

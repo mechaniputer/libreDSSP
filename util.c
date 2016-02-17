@@ -140,7 +140,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 
 char * prompt(){
 	char * line = readline ("* ");
-	add_history(line);
+	if(strcmp(line, "")) add_history(line);
 	//Check for EOF.
 	if (!line){
 		printf("\n");

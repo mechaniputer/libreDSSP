@@ -75,6 +75,7 @@ int main(){
 	defCore("GROW", growSub, vocab);
 	defCore("SHUT", shutSub, vocab);
 	defCore("USE", openSub, vocab);
+	defCore("TIN", termInNum, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;
