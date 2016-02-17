@@ -45,19 +45,24 @@ variable * varSearch(char * name, dict * vocab){
 // Searches non-core dictionaries, returns word if it exists
 word * wordSearch(char * name, dict * vocab){
 	word * tempWord;
+	subdict * tempSub;
 
 	// Function must have a name greater than 1 char
 	if(name[0] == '\0') return NULL;
 
 	if(vocab->sub->wordlist != NULL){
-		// Search subdicts (for now just one)
-		tempWord = vocab->sub->wordlist;
-		do{
-			if(!strcmp(tempWord->name, name)){
-				return tempWord;
-			}
-			tempWord = tempWord->next;
-		}while(tempWord != NULL);
+		// Search subdicts
+		tempSub = vocab->sub;
+		while(tempSub != NULL){
+			tempWord = vocab->sub->wordlist;
+			do{
+				if(!strcmp(tempWord->name, name)){
+					return tempWord;
+				}
+				tempWord = tempWord->next;
+			}while(tempWord != NULL);
+			tempSub = tempSub->next;
+		}
 	}
 
 	return NULL;
