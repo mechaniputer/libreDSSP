@@ -15,6 +15,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* ET, E2, E3, E4, etc
 	* CT, C2, C3, C4, etc
 	* Function declarations
+	* Multiple subvocabularies
 	* Integer variables
 	* ."hello" printing, SP, CR
 	* [comments]
@@ -22,7 +23,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 
 ## What doesn't work yet:
 	* File IO
-	* Multiple subvocabularies
+	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses
 	* Arrays, fixed variables, etc
 	* BR+, BR0, BR-, BRS, BR
