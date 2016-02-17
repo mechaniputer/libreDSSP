@@ -28,6 +28,16 @@
 #include "elem.h"
 #include "stack.h"
 
+void textPrint(char * text){
+	assert(text != NULL);
+	int i;
+	int len = strlen(text) - 1;
+	for(i=2; i<len; i++){
+		printf("%c", text[i]);
+	}
+	return;
+}
+
 // This can be reduced but it hits every case
 int isnum(char * foo){
 	int i = 0;
@@ -61,6 +71,9 @@ void run(stack * stack, cmdstack * cmdstack, dict * vocab){
 			defWord(cmdstack,vocab);
 		}else if (temp[0] == '['){ // Comment
 			cmdPop(cmdstack);
+		}else if (!strncmp(temp, ".\"", 2)){
+			textPrint(temp);
+			cmdPop(cmdstack);
 		}else wordRun(cmdstack, stack, vocab); // word or variable
 	}while((cmdstack->top)>=0);
 	return;
@@ -85,13 +98,21 @@ void stackInput(char * line, cmdstack * cmdstack){
 		if (ch == '[') {
 			seqtail->chars[i++] = '[';
 			while(((ch = line[j++]) != ']')){
-				if(i>8) break; // TODO This limits a word or comment to 8 chars due to fixed size in struct
+				if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = ']';
-
+		} else if(!strncmp(line, ".\"", 2)) {
+			j++;
+			seqtail->chars[i++] = '.';
+			seqtail->chars[i++] = '\"';
+			while(((ch = line[j++]) != '\"')){
+				if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
+				seqtail->chars[i++] = ch;
+			}
+			seqtail->chars[i++] = '\"';
 		} else if(ch != ' ') {
-			if(i>8) break; // TODO This limits a word or comment to 8 chars due to fixed size in struct
+			if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
 
 		} else if ((ch == ' ') && (i != 0)) { // Handles adjacent spaces

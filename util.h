@@ -31,6 +31,7 @@
 #include "elem.h"
 #include "stack.h"
 
+void textPrint(char * text);
 int isnum(char * foo);
 void run(stack * stack, cmdstack * cmdstack, dict * vocab);
 void stackInput(char * line, cmdstack * cmdstack);
