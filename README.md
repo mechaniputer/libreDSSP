@@ -15,13 +15,15 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* ET, E2, E3, E4, etc
 	* CT, C2, C3, C4, etc
 	* Function declarations
+	* Integer variables
 	* [comments]
 	* GNU readline support
 
 ## What doesn't work yet:
 	* File IO
 	* Multiple subvocabularies
-	* Variables, arrays, fixed variables, etc
+	* Variable addresses
+	* Arrays, fixed variables, etc
 	* BR+, BR0, BR-, BRS, BR
 	* RP
 	* EX, EX-, EX0, EX+, EXT
