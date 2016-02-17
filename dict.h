@@ -91,5 +91,6 @@ int coreSearch(char * name, dict * vocab);
 void defWord(cmdstack * cmdstack, dict * vocab);
 // Defines built-in functions
 void defCore(char * name, void (*func)(stack *, cmdstack *, dict *), dict * vocab);
+subdict * newDict(dict * vocab, char * name);
 
 #endif

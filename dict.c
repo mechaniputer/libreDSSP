@@ -168,3 +168,14 @@ void defCore(char * name, void (*func)(stack *, cmdstack *, dict*), dict * vocab
 	temp->next->next = NULL;
 	return;
 }
+
+subdict * newDict(dict * vocab, char * name){
+	subdict * tempSub = vocab->sub;
+	while(tempSub->next != NULL) tempSub = tempSub->next;
+	tempSub->next = malloc(sizeof(subdict));
+	tempSub = tempSub->next;
+	tempSub->name = name;
+	tempSub->open = 1;
+	tempSub->next = NULL;
+	return tempSub;
+}

@@ -155,6 +155,7 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	coreword * tempCore;
 	word * tempWord;
 	variable * tempVar;
+	subdict * tempSub;
 
 	if(cmdName[0] == '\0') return;
 
@@ -170,18 +171,22 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	}while(tempCore != NULL);
 
 	if(vocab->sub->wordlist != NULL){
-		// Search subdicts (for now just one)
-		tempWord = vocab->sub->wordlist;
-		do{
-			if(!strcmp(tempWord->name, cmdName)){
-				// Push programmed word onto stack in reverse-order
-				// TODO: Store definitions in pre-split form
-				// TODO: Eventually store words as sequence of pointers
-				stackInput(tempWord->definition, cmdstack);
-				return;
-			}
-			tempWord = tempWord->next;
-		}while(tempWord != NULL);
+		tempSub = vocab->sub;
+		while(tempSub != NULL){
+			// Search subdicts (for now just one)
+			tempWord = tempSub->wordlist;
+			do{
+				if(!strcmp(tempWord->name, cmdName)){
+					// Push programmed word onto stack in reverse-order
+					// TODO: Store definitions in pre-split form
+					// TODO: Eventually store words as sequence of pointers
+					stackInput(tempWord->definition, cmdstack);
+					return;
+				}
+				tempWord = tempWord->next;
+			}while(tempWord != NULL);
+			tempSub = tempSub->next;
+		}
 	}
 
 	tempVar = varSearch(cmdName, vocab);

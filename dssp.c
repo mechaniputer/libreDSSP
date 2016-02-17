@@ -71,6 +71,8 @@ int main(){
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
 	defCore("?$", listDicts, vocab);
+	defCore("GROW", growSub, vocab);
+	defCore("SHUT", shutSub, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

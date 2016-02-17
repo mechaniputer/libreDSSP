@@ -340,3 +340,45 @@ void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	return;
 }
+
+void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
+	subdict * tempSub = vocab->sub;
+
+	if(strncmp(cmdTop(cmdstack),"$",1)){
+		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
+		cmdPop(cmdstack);
+		return;
+	}
+
+	while(tempSub != NULL){
+		if(!strcmp(cmdTop(cmdstack), tempSub->name)) {
+			break;
+		}
+		tempSub = tempSub->next;
+	}
+
+	if(tempSub == NULL){ // We are making a new subdict
+		tempSub = newDict(vocab, cmdTop(cmdstack));
+	}
+
+	vocab->grow = tempSub;
+	cmdPop(cmdstack);
+	return;
+}
+
+void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
+	subdict * tempSub = vocab->sub;
+
+	while(tempSub != NULL){
+		if(!strcmp(tempSub->name, cmdTop(cmdstack))) break;
+		tempSub = tempSub->next;
+	}
+
+	if (tempSub == NULL){
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack));
+		return;
+	}
+	tempSub->open = 0;
+	cmdPop(cmdstack);
+	return;
+}
