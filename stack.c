@@ -28,11 +28,13 @@ stack * newStack() {
 
 // If stack is empty, do not use!
 int top(stack * stack) {
+	assert(stack->top > -1);
 	return (stack->array[stack->top]);
 }
 
 // If stack is empty, do not use!
 int pop(stack * stack) {
+	assert(stack->top > -1);
 	return (stack->array[(stack->top)--]);
 }
 
@@ -58,11 +60,13 @@ cmdstack * newCmdStack(){
 
 // If stack is empty, do not use!
 char * cmdTop(cmdstack * cmdstack) {
+	assert(stack->top > -1);
 	return (cmdstack->array[cmdstack->top]);
 }
 
 // If stack is empty, do not use!
 char * cmdPop(cmdstack * cmdstack) {
+	assert(stack->top > -1);
 	return (cmdstack->array[(cmdstack->top)--]);
 }
 void cmdPush(cmdstack * cmdstack, char * cmd) {
