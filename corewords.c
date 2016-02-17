@@ -281,6 +281,11 @@ void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 
+	if(cmdstack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient operands for !\n");
+		return;
+	}
+
 	char * name = cmdPop(cmdstack);
 	int value = pop(stack);
 	variable * temp;
