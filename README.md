@@ -16,7 +16,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* CT, C2, C3, C4, etc
 	* Function declarations
 	* Integer variables
-	* ."hello" printing
+	* ."hello" printing, SP, CR
 	* [comments]
 	* GNU readline support
 
@@ -33,7 +33,6 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* T0, T1, etc
 	* TRB, TOB, TON, BASE@
 	* TIB, TIN, TIS
-	* SP, CR
 	* B2, B8, B10, B16
 	* Various bitwise operations
 	* Everything unaccounted for in this README

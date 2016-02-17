@@ -66,6 +66,8 @@ int main(){
 
 	// Misc
 	defCore("!", defVar, vocab);
+	defCore("CR", printNewline, vocab);
+	defCore("SP", printSpace, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

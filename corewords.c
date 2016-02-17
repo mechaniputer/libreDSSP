@@ -319,3 +319,11 @@ void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+void printNewline(stack * stack, cmdstack * cmdstack, dict * vocab){
+	printf("\n");
+	return;
+}
+void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab){
+	printf(" ");
+	return;
+}
