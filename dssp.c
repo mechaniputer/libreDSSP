@@ -31,7 +31,7 @@ int main(){
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
-	vocab->sub->name = "DEFAULT";
+	vocab->sub->name = "$DEFAULT";
 	vocab->sub->open = 1;
 
 	// Built-ins

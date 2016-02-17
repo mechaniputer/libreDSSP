@@ -333,7 +333,7 @@ void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab){
 void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab){
 	assert(vocab != NULL);
 	subdict * tempSub = vocab->sub;
-	printf("CORE\n");
+	printf("$PRIME\n");
 	while(tempSub != NULL){
 		printf("%s\n",tempSub->name);
 		tempSub = tempSub->next;
