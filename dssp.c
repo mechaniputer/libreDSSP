@@ -33,6 +33,7 @@ int main(){
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
 	vocab->sub->name = "$DEFAULT";
 	vocab->sub->open = 1;
+	vocab->sub->next = NULL;
 
 	// Built-ins
 	vocab->core = malloc(sizeof(coreword)); // For built-in words

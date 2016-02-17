@@ -54,7 +54,7 @@ word * wordSearch(char * name, dict * vocab){
 		// Search subdicts
 		tempSub = vocab->sub;
 		while(tempSub != NULL){
-			if(tempSub->open){
+			if((tempSub->open) && (tempSub->wordlist != NULL)){
 				tempWord = tempSub->wordlist;
 				do{
 					if(!strcmp(tempWord->name, name)){
