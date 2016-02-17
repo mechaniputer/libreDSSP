@@ -54,13 +54,15 @@ word * wordSearch(char * name, dict * vocab){
 		// Search subdicts
 		tempSub = vocab->sub;
 		while(tempSub != NULL){
-			tempWord = vocab->sub->wordlist;
-			do{
-				if(!strcmp(tempWord->name, name)){
-					return tempWord;
-				}
-				tempWord = tempWord->next;
-			}while(tempWord != NULL);
+			if(tempSub->open){
+				tempWord = tempSub->wordlist;
+				do{
+					if(!strcmp(tempWord->name, name)){
+						return tempWord;
+					}
+					tempWord = tempWord->next;
+				}while(tempWord != NULL);
+			}
 			tempSub = tempSub->next;
 		}
 	}
@@ -182,5 +184,6 @@ subdict * newDict(dict * vocab, char * name){
 	tempSub->name = name;
 	tempSub->open = 1;
 	tempSub->next = NULL;
+	vocab->grow = tempSub;
 	return tempSub;
 }

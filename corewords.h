@@ -65,5 +65,6 @@ void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab);
 void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab);
 void growSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab);
+void openSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 #endif

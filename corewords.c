@@ -333,9 +333,11 @@ void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab){
 void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab){
 	assert(vocab != NULL);
 	subdict * tempSub = vocab->sub;
-	printf("$PRIME\n");
+	printf("$PRIME OPEN\n");
 	while(tempSub != NULL){
-		printf("%s\n",tempSub->name);
+		printf("%s",tempSub->name);
+		if(tempSub->open) printf(" OPEN\n");
+		else printf(" CLOSED\n");
 		tempSub = tempSub->next;
 	}
 	return;
@@ -379,6 +381,23 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	tempSub->open = 0;
+	cmdPop(cmdstack);
+	return;
+}
+
+void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
+	subdict * tempSub = vocab->sub;
+
+	while(tempSub != NULL){
+		if(!strcmp(tempSub->name, cmdTop(cmdstack))) break;
+		tempSub = tempSub->next;
+	}
+
+	if (tempSub == NULL){
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack));
+		return;
+	}
+	tempSub->open = 1;
 	cmdPop(cmdstack);
 	return;
 }
