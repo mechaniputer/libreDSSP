@@ -104,7 +104,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 			}
 			seqtail->chars[i++] = ']';
 
-		} else if(!strncmp(line, ".\"", 2)) {
+		} else if((line[j-1] =='.') && (line[j] == '\"')) {
 			j++;
 			seqtail->chars[i++] = '.';
 			seqtail->chars[i++] = '\"';
