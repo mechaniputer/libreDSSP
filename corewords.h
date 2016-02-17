@@ -58,4 +58,7 @@ void copy4(stack * stack, cmdstack * cmdstack, dict * vocab);
 void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab);
 void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
 
+// Misc
+void defVar(stack * stack, cmdstack * cmdstack, dict * vocab);
+
 #endif

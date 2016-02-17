@@ -18,8 +18,11 @@
 
 #include <malloc.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "corewords.h"
+#include "dict.h"
 #include "elem.h"
 #include "stack.h"
 
@@ -268,6 +271,46 @@ void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	pop(stack);
+	return;
+}
+
+// Attempts to define a new variable
+void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient operands for !\n");
+		return;
+	}
+
+	char * name = cmdPop(cmdstack);
+	int value = pop(stack);
+	variable * temp;
+
+	assert(vocab != NULL);
+
+	// See if it is a core word
+	if(coreSearch(name, vocab)){
+		fprintf(stderr,"ERROR: %s is in core dictionary\n",name);
+		return;
+	}
+
+	if(wordSearch(name, vocab) != NULL){
+		fprintf(stderr,"ERROR: %s is in dictionary\n",name);
+		return;
+	}
+
+	if(vocab->var == NULL){
+		vocab->var = malloc(sizeof(variable));
+		temp = vocab->var;
+	}else{
+		temp = vocab->var;
+		while(temp->next != NULL) temp = temp->next;
+		temp->next = malloc(sizeof(variable));
+		temp = temp->next;
+	}
+
+	strcpy(temp->name, name);
+	temp->value = value;
+	temp->next = NULL;
 	return;
 }
 
