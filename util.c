@@ -99,7 +99,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 		if (ch == '[') {
 			seqtail->chars[i++] = '[';
 			while((ch = line[j++]) != ']'){
-				if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
+				if(i>80) break; // TODO This limits a word or comment to 80 chars due to fixed size in struct
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = ']';
@@ -109,13 +109,13 @@ void stackInput(char * line, cmdstack * cmdstack){
 			seqtail->chars[i++] = '.';
 			seqtail->chars[i++] = '\"';
 			while((ch = line[j++]) != '\"'){
-				if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
+				if(i>80) break; // TODO This limits a word or comment to 80 chars due to fixed size in struct
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = '\"';
 
 		} else if(ch != ' ') {
-			if(i>30) break; // TODO This limits a word or comment to 30 chars due to fixed size in struct
+			if(i>80) break; // TODO This limits a word or comment to 80 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
 
 		} else if ((ch == ' ') && (i != 0)) { // Handles adjacent spaces
