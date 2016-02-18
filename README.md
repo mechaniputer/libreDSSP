@@ -10,6 +10,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
 	* IF+, IF0, IF-
+	* BR+, BR0, BR-, BRS
 	* DO
 	* D (drop), C (copy), DS (drop entire stack)
 	* DEEP (push height of stack)
@@ -29,8 +30,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses
 	* Arrays, fixed variables, etc
-	* BR+, BR0, BR-, BRS, BR
-	* RP
+	* RP, BR
 	* SGN, NOT
 	* EX, EX-, EX0, EX+, EXT
 	* SORT, SPIN, MAX, MIN
