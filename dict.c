@@ -50,21 +50,19 @@ word * wordSearch(char * name, dict * vocab){
 	// Function must have a name greater than 1 char
 	if(name[0] == '\0') return NULL;
 
-	if(vocab->sub->wordlist != NULL){
-		// Search subdicts
-		tempSub = vocab->sub;
-		while(tempSub != NULL){
-			if((tempSub->open) && (tempSub->wordlist != NULL)){
-				tempWord = tempSub->wordlist;
-				do{
-					if(!strcmp(tempWord->name, name)){
-						return tempWord;
-					}
-					tempWord = tempWord->next;
-				}while(tempWord != NULL);
-			}
-			tempSub = tempSub->next;
+	// Search subdicts
+	tempSub = vocab->sub;
+	while(tempSub != NULL){
+		if((tempSub->open) && (tempSub->wordlist != NULL)){
+			tempWord = tempSub->wordlist;
+			do{
+				if(!strcmp(tempWord->name, name)){
+					return tempWord;
+				}
+				tempWord = tempWord->next;
+			}while(tempWord != NULL);
 		}
+		tempSub = tempSub->next;
 	}
 
 	return NULL;
