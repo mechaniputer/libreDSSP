@@ -45,16 +45,25 @@ int main(int argc, char *argv[]){
 	defCore("/", divide, vocab);
 	defCore("NEG", negate, vocab);
 	defCore("ABS", absval, vocab);
+
 	// Display and interpreter
 	defCore("BYE", bye, vocab);
 	defCore(".", showTop, vocab);
 	defCore("..", showStack, vocab);
+
 	// Conditionals
 	defCore("IF+", ifplus, vocab);
 	defCore("IF0", ifzero, vocab);
 	defCore("IF-", ifminus, vocab);
+	defCore("BR-", branchminus, vocab);
+	defCore("BR0", branchzero, vocab);
+	defCore("BR+", branchplus, vocab);
+	defCore("BRS", branchsign, vocab);
+	defCore("BR", branch, vocab);
+
 	// Looping and flow control
 	defCore("DO", doloop, vocab);
+
 	// Stack manipulation
 	defCore("E2", exch2, vocab);
 	defCore("E3", exch3, vocab);

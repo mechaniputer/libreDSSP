@@ -42,6 +42,11 @@ void showStack(stack * stack, cmdstack * cmdstack, dict * vocab);
 void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab);
 void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab);
 void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab);
+void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab);
+void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab);
+void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab);
+void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab);
+void branch(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Looping and flow control
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab);

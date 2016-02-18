@@ -162,6 +162,82 @@ void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 1) || (stack->top < 0)){
+		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
+		return;
+	}
+	if(pop(stack) < 0){ // Do the first thing
+		char * temp = cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, temp);
+	}else{ // Do the second thing
+		cmdPop(cmdstack);
+	}
+	return;
+}
+
+void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 1) || (stack->top < 0)){
+		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
+		return;
+	}
+	if(pop(stack) == 0){ // Do the first thing
+		char * temp = cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, temp);
+	}else{ // Do the second thing
+		cmdPop(cmdstack);
+	}
+	return;
+}
+
+void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 1) || (stack->top < 0)){
+		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
+		return;
+	}
+	if(pop(stack) > 0){ // Do the first thing
+		char * temp = cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, temp);
+	}else{ // Do the second thing
+		cmdPop(cmdstack);
+	}
+	return;
+}
+
+void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 1) || (stack->top < 0)){
+		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
+		return;
+	}
+	if(top(stack) < 0){ // Do the first thing
+		char * temp = cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, temp);
+	}else if(top(stack) == 0){ // Do the second thing
+		cmdPop(cmdstack);
+		char * temp = cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, temp);
+	}else{ // Do the third thing
+		cmdPop(cmdstack);
+		cmdPop(cmdstack);
+	}
+	pop(stack);
+	return;
+}
+
+void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if((cmdstack->top < 1) || (stack->top < 0)){
+		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+		return;
+	}
+	fprintf(stderr,"ERROR: BR not implemented\n");
+	return;
+}
 
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
