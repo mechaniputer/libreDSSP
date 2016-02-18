@@ -66,6 +66,7 @@ int main(){
 	defCore("C4", copy4, vocab);
 	defCore("CT", copydepth, vocab);
 	defCore("D", drop, vocab);
+	defCore("DS", dropStack, vocab);
 
 	// Misc
 	defCore("!", defVar, vocab);
@@ -76,6 +77,7 @@ int main(){
 	defCore("SHUT", shutSub, vocab);
 	defCore("USE", openSub, vocab);
 	defCore("TIN", termInNum, vocab);
+	defCore("DEPTH", stackDepth, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;

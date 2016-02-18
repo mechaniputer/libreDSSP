@@ -57,6 +57,7 @@ void copy3(stack * stack, cmdstack * cmdstack, dict * vocab);
 void copy4(stack * stack, cmdstack * cmdstack, dict * vocab);
 void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab);
 void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
+void dropStack(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Misc
 void defVar(stack * stack, cmdstack * cmdstack, dict * vocab);
@@ -67,5 +68,6 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void openSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab);
+void stackDepth(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 #endif

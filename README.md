@@ -8,12 +8,12 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 ## What works:
 	* Basic math operations (+,*,-,/)
 	* NEG, ABS
-	* BYE, ".."(show stack), "."(show top of stack)
+	* BYE, ..(show stack), .(show top of stack)
 	* IF+, IF0, IF-
 	* DO
-	* "D"(drop), "C"(copy)
-	* ET, E2, E3, E4, etc
-	* CT, C2, C3, C4, etc
+	* D (drop), C (copy), DS (drop entire stack)
+	* ET, E2, E3, E4
+	* CT, C2, C3, C4
 	* Function declarations
 	* Multiple subvocabularies
 	* Integer variables
@@ -29,10 +29,11 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* Arrays, fixed variables, etc
 	* BR+, BR0, BR-, BRS, BR
 	* RP
+	* SGN, NOT
 	* EX, EX-, EX0, EX+, EXT
 	* SORT, SPIN, MAX, MIN
 	* 1+, 2+, 1-, 2-, etc
-	* T0, T1, etc
+	* T0, T1
 	* TRB, TOB, TON, BASE@
 	* TIB, TIS
 	* B2, B8, B10, B16

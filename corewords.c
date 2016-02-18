@@ -274,6 +274,11 @@ void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+void dropStack(stack * stack, cmdstack * cmdstack, dict * vocab){
+	stack->top = -1;
+	return;
+}
+
 // Attempts to define a new variable
 void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
@@ -406,5 +411,10 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
 	char * line = readline("");
 	push(stack, atoi(line));
+	return;
+}
+
+void stackDepth(stack * stack, cmdstack * cmdstack, dict * vocab){
+	push(stack, (stack->top)+1);
 	return;
 }
