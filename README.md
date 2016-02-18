@@ -12,7 +12,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* IF+, IF0, IF-
 	* DO
 	* D (drop), C (copy), DS (drop entire stack)
-	* DEEP (push height of stack. May not have been in DSSP but useful)
+	* DEEP (push height of stack)
 	* ET, E2, E3, E4
 	* CT, C2, C3, C4
 	* Function declarations
