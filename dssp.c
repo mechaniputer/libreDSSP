@@ -25,7 +25,7 @@
 #include "corewords.h"
 #include "util.h"
 
-int main(){
+int main(int argc, char *argv[]){
 	stack * stack = newStack();
 	cmdstack * cmdstack = newCmdStack();
 
@@ -78,7 +78,7 @@ int main(){
 	defCore("USE", openSub, vocab);
 	defCore("TIN", termInNum, vocab);
 	defCore("TON", termOutNum, vocab);
-	defCore("DEPTH", stackDepth, vocab);
+	defCore("DEEP", stackDepth, vocab);
 
 	// Sub-Dictionaries
 	vocab->sub->next = NULL;
@@ -89,6 +89,27 @@ int main(){
 
 	// Copyright notice
 	printf("Copyright (C) 2016  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+
+	if(argc >= 2){
+		printf("Attempting to open %s... ",argv[1]);
+		FILE *file = fopen(argv[1], "r");
+		char buffer[160];
+		char * b = buffer;
+		size_t bufsize = 160;
+		size_t characters;
+
+		if (file == 0){
+			printf("Failed!\n");
+		}else{
+			printf("Success!\n");
+			while(EOF != (characters = getline(&b, &bufsize, file))){
+				buffer[characters-1] = '\0';
+				stackInput(buffer, cmdstack);
+				run(stack, cmdstack, vocab);
+			}
+			fclose(file);
+		}
+	}
 
 	while(1){
 		// Show prompt, get line of input

@@ -107,21 +107,22 @@ void bye(stack * stack, cmdstack * cmdstack, dict * vocab){
 // TODO This will need to be modified to support multiple output modes
 // Current mode will be readable from a var in vocab
 void showTop(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top > -1) printf("%d",top(stack));
+	if(stack->top > -1) printf("%d\n",top(stack));
 	return;
 }
 
 void showStack(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
 	if(stack->top < 0){
-		printf("\n");
+		printf("[]\n");
 		return;
 	}
 
+	printf("[");
 	for(i=0; i<=(stack->top); i++){
-		printf("%d ",stack->array[i]);
+		printf(" %d",stack->array[i]);
 	}
-	printf("\n");
+	printf("]\n");
 	return;
 }
 
