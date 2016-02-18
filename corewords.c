@@ -217,6 +217,10 @@ void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
 		return;
 	}
+	if(depth <= 0){
+		fprintf(stderr,"ERROR: Can only exchange from positive depth\n");
+		return;
+	}
 	int temp = top(stack);
 	stack->array[stack->top] = stack->array[stack->top - (depth - 1)];
 	stack->array[stack->top - (depth - 1)] = temp;
@@ -260,6 +264,10 @@ void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int depth = pop(stack);
 	if(stack->top <= depth-2){
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
+		return;
+	}
+	if(depth <= 0){
+		fprintf(stderr,"ERROR: Can only copy from positive depth\n");
 		return;
 	}
 	push(stack, stack->array[stack->top - (depth - 1)]);
@@ -438,7 +446,7 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
 	char * line = readline("");
-	push(stack, atoi(line));
+	if(line) push(stack, atoi(line));
 	return;
 }
 
