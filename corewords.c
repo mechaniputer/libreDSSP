@@ -320,6 +320,8 @@ void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(vocab->var == NULL){
 		vocab->var = malloc(sizeof(variable));
 		temp = vocab->var;
+		strcpy(temp->name, name);
+		temp->next = NULL;
 	}else{
 		temp = varSearch(name, vocab);
 		if(temp == NULL){
@@ -327,12 +329,12 @@ void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 			while(temp->next != NULL) temp = temp->next;
 			temp->next = malloc(sizeof(variable));
 			temp = temp->next;
+			strcpy(temp->name, name);
+			temp->next = NULL;
 		}
 	}
 
-	strcpy(temp->name, name);
 	temp->value = value;
-	temp->next = NULL;
 	return;
 }
 
