@@ -352,8 +352,19 @@ void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab){
 void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	subdict * tempSub = vocab->sub;
 
+	if(cmdstack->top < 0){
+		fprintf(stderr,"ERROR: Must specify a subvocabulary name\n");
+		return;
+	}
+
 	if(strncmp(cmdTop(cmdstack),"$",1)){
 		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
+		cmdPop(cmdstack);
+		return;
+	}
+
+	if(!strcmp(cmdTop(cmdstack),"$PRIME")){
+		fprintf(stderr,"ERROR: cannot alter $PRIME subvocabulary\n");
 		cmdPop(cmdstack);
 		return;
 	}
@@ -377,6 +388,17 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	subdict * tempSub = vocab->sub;
 
+	if(cmdstack->top < 0){
+		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
+		return;
+	}
+
+	if(!strcmp(cmdTop(cmdstack),"$PRIME")){
+		fprintf(stderr,"ERROR: cannot shut $PRIME subvocabulary\n");
+		cmdPop(cmdstack);
+		return;
+	}
+
 	while(tempSub != NULL){
 		if(!strcmp(tempSub->name, cmdTop(cmdstack))) break;
 		tempSub = tempSub->next;
@@ -393,6 +415,11 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	subdict * tempSub = vocab->sub;
+
+	if(cmdstack->top < 0){
+		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
+		return;
+	}
 
 	while(tempSub != NULL){
 		if(!strcmp(tempSub->name, cmdTop(cmdstack))) break;

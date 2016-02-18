@@ -16,7 +16,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* ET, E2, E3, E4
 	* CT, C2, C3, C4
 	* Function declarations
-	* Multiple subvocabularies
+	* GROW, USE, SHUT, ?$
 	* Integer variables
 	* TIN, TON
 	* ."hello" printing, SP, CR
