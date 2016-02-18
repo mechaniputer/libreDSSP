@@ -18,7 +18,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* Function declarations
 	* Multiple subvocabularies
 	* Integer variables
-	* Input with TIN
+	* TIN, TON
 	* ."hello" printing, SP, CR
 	* [comments]
 	* GNU readline support
@@ -35,7 +35,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* SORT, SPIN, MAX, MIN
 	* 1+, 2+, 1-, 2-, etc
 	* T0, T1
-	* TRB, TOB, TON, BASE@
+	* TRB, TOB, BASE@
 	* TIB, TIS
 	* B2, B8, B10, B16
 	* Various bitwise operations

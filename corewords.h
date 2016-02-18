@@ -68,6 +68,7 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void openSub(stack * stack, cmdstack * cmdstack, dict * vocab);
 void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab);
+void termOutNum(stack * stack, cmdstack * cmdstack, dict * vocab);
 void stackDepth(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 #endif

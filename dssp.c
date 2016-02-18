@@ -77,6 +77,7 @@ int main(){
 	defCore("SHUT", shutSub, vocab);
 	defCore("USE", openSub, vocab);
 	defCore("TIN", termInNum, vocab);
+	defCore("TON", termOutNum, vocab);
 	defCore("DEPTH", stackDepth, vocab);
 
 	// Sub-Dictionaries

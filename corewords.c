@@ -107,7 +107,7 @@ void bye(stack * stack, cmdstack * cmdstack, dict * vocab){
 // TODO This will need to be modified to support multiple output modes
 // Current mode will be readable from a var in vocab
 void showTop(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top > -1) printf("%d",pop(stack));
+	if(stack->top > -1) printf("%d",top(stack));
 	return;
 }
 
@@ -411,6 +411,11 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
 	char * line = readline("");
 	push(stack, atoi(line));
+	return;
+}
+
+void termOutNum(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top > -1) printf("%d",pop(stack));
 	return;
 }
 
