@@ -108,14 +108,14 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 	if(vocab->grow == NULL) vocab->grow = vocab->sub; // Grow first dict by default
 
 	// Skip over ':'
-	if(cmdstack->top >= 0){
+	if(cmdstack->top >= 2){
 		cmdPop(cmdstack);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 	}
 
 	// Assign function name
-	if(cmdstack->top >= 0){
+	if(cmdstack->top >= 1){
 
 		// See if it is a core word
 		if(coreSearch(cmdTop(cmdstack), vocab)){
