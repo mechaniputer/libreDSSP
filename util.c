@@ -127,14 +127,21 @@ void stackInput(char * line, cmdstack * cmdstack){
 			i=0;
 		}
 	}
-	seqtail->chars[i] =  '\0';
+
+	// Get rid of pesky empty element
+	if(i > 0){
+		seqtail->chars[i] =  '\0';
+	}else{
+		seqprev = seqtail;
+		seqtail = seqtail->next;
+		free(seqprev);
+	}
 
 	// Now we push it all onto the cmdstack in reverse order
-	do{
+	while(seqtail != NULL){
 		cmdPush(cmdstack, seqtail->chars);
 		seqtail = seqtail->next;
-	}while(seqtail != NULL);
-
+	}
 	return;
 }
 
