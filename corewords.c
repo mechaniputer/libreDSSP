@@ -231,11 +231,35 @@ void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
 }
 
 void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 1) || (stack->top < 0)){
+	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 		return;
 	}
-	fprintf(stderr,"ERROR: BR not implemented\n");
+	int temp = top(stack);
+
+	if(!strcmp("ELSE", cmdTop(cmdstack))){
+		pop(stack);
+		cmdPop(cmdstack);
+	}else if(temp == atoi(cmdTop(cmdstack))){
+		if((cmdstack->top < 3) || (stack->top < 0)){
+			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+			return;
+		}
+		pop(stack);
+		cmdPop(cmdstack);
+		char * result = cmdPop(cmdstack);
+		while(strcmp("ELSE", cmdPop(cmdstack)));
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, result);
+	}else{
+		if((cmdstack->top < 3) || (stack->top < 0)){
+			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+			return;
+		}
+		cmdPop(cmdstack);
+		cmdPop(cmdstack);
+		cmdPush(cmdstack, "BR");
+	}
 	return;
 }
 

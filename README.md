@@ -3,14 +3,18 @@
 
 libreDSSP (libre Dialog System for Structured Programming) is my attempt to write an interpreter for a very obscure language similar to Forth. This language originated in the Soviet Union and was designed for the Setun ternary computer.
 
-This is a work in progress. It isn't complete enough to be very useful yet.
+To my knowledge this is the only maintained DSSP implementation, and the first to be free software. It is lacking in many areas but progress is being made to add features and make it faster.
+
+The ultimate goal of this project is not to merely replicate DSSP as it once existed, but to improve on it where possible without betraying the philosophy of the language.
+
+Pull requests to solve bugs or improve style are welcome.
 
 ## What works:
 	* Basic math operations (+,*,-,/)
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
 	* IF+, IF0, IF-
-	* BR+, BR0, BR-, BRS
+	* BR+, BR0, BR-, BRS, BR
 	* DO
 	* D (drop), C (copy), DS (drop entire stack)
 	* DEEP (push height of stack)
@@ -30,7 +34,7 @@ This is a work in progress. It isn't complete enough to be very useful yet.
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses
 	* Arrays, fixed variables, etc
-	* RP, BR
+	* RP
 	* SGN, NOT
 	* EX, EX-, EX0, EX+, EXT
 	* SORT, SPIN, MAX, MIN
