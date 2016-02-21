@@ -32,22 +32,20 @@ void textPrint(char * text){
 	assert(text != NULL);
 	int i;
 	int len = strlen(text) - 1;
-	for(i=2; i<len; i++){
+
+	for(i = 2; i < len; i++){
 		printf("%c", text[i]);
 	}
 	return;
 }
 
-// This can be reduced but it hits every case
-int isnum(char * foo){
+int isNum(char * foo){
 	int i = 0;
-	char temp = foo[0];
 
-	if(foo == NULL) return 0;
-	if(strlen(foo) == 0) return 0;
+	if((foo == NULL) || (strlen(foo) == 0)) return 0;
 
 	// If first is minus, scan from beginning to see if all are digits
-	if((temp=='-') && (strlen(foo) > 1)){
+	if((foo[0] == '-') && (strlen(foo) > 1)){
 		for (i=1; i < (strlen(foo)); i++){
 			if(!isdigit(foo[i])) return 0;
 		}
@@ -57,24 +55,30 @@ int isnum(char * foo){
 	return 1;
 }
 
-// Looks at cmdTop(cmdstack), decides what to do
+// Looks at cmdTop(cmdstack), decides what to do until cmdstack is empty
 void run(stack * stack, cmdstack * cmdstack, dict * vocab){
 	char * temp;
 
 	do{
 		temp = cmdTop(cmdstack);
 		assert(temp != NULL);
-		if(isnum(temp)){ // Numerical constant
+
+		if(isNum(temp)){ // Numerical constant
 			push(stack, atoi(temp));
 			cmdPop(cmdstack);
+
 		}else if (!strcmp(temp, ":")){ // Function declaration
 			defWord(cmdstack,vocab);
+
 		}else if (temp[0] == '['){ // Comment
 			cmdPop(cmdstack);
+
 		}else if (!strncmp(temp, ".\"", 2)){
 			textPrint(temp);
 			cmdPop(cmdstack);
+
 		}else wordRun(cmdstack, stack, vocab); // word or variable
+
 	}while((cmdstack->top)>=0);
 	return;
 }
@@ -84,13 +88,11 @@ void stackInput(char * line, cmdstack * cmdstack){
 	char ch;
 	int i = 0;
 	int j = 0;
-	elem * seqhead;
 	elem * seqprev;
 	elem * seqtail;
 
-	seqhead = malloc(sizeof(elem));
-	seqtail = seqhead;
-	seqhead->next = NULL;
+	seqtail = malloc(sizeof(elem));
+	seqtail->next = NULL;
 
 	// TODO Not safe or efficient
 	while(line[j] != '\0'){
@@ -166,18 +168,15 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	if(cmdName[0] == '\0') return;
 
 	// Search core dict first
-	tempCore = vocab->core;
-	do{
-		if(!strcmp(tempCore->name, cmdName)){
-			// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
-			tempCore->func(stack, cmdstack, vocab);
-			return;
-		}
-		tempCore = tempCore->next;
-	}while(tempCore != NULL);
+	tempCore = coreSearch(cmdName, vocab);
+	if(tempCore != NULL){
+		// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
+		tempCore->func(stack, cmdstack, vocab);
+		return;
+	}
 
+	// Now search all other dicts
 	tempWord = wordSearch(cmdName, vocab);
-
 	if(tempWord != NULL){
 		// Push programmed word onto stack in reverse-order
 		// TODO: Store definitions in pre-split form

@@ -32,7 +32,7 @@
 #include "stack.h"
 
 void textPrint(char * text);
-int isnum(char * foo);
+int isNum(char * foo);
 void run(stack * stack, cmdstack * cmdstack, dict * vocab);
 void stackInput(char * line, cmdstack * cmdstack);
 char * prompt();

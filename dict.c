@@ -69,14 +69,14 @@ word * wordSearch(char * name, dict * vocab){
 }
 
 // Searches non-core dictionaries, returns 1 if it exists
-int coreSearch(char * name, dict * vocab){
+coreword * coreSearch(char * name, dict * vocab){
 	coreword * tempCore = vocab->core;
 
 	while(tempCore != NULL){
-		if (!strcmp(tempCore->name, name)) return 1;
+		if (!strcmp(tempCore->name, name)) return tempCore;
 		tempCore = tempCore->next;
 	}
-	return 0;
+	return NULL;
 }
 
 word * newWord(subdict * dict){

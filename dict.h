@@ -86,7 +86,7 @@ variable * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined
 word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
-int coreSearch(char * name, dict * vocab);
+coreword * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
 void defWord(cmdstack * cmdstack, dict * vocab);
 // Defines built-in functions
