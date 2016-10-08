@@ -59,7 +59,7 @@ int isNum(char * foo){
 void run(stack * stack, cmdstack * cmdstack, dict * vocab){
 	char * temp;
 
-	do{
+	if((cmdstack->top) > -1) do{
 		temp = cmdTop(cmdstack);
 		assert(temp != NULL);
 
