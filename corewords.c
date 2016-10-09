@@ -231,9 +231,12 @@ void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
 }
 
 void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
+	command *result;
 	command *branchCom = malloc(sizeof(struct command));
+	branchCom->text = malloc(3*sizeof(char));
 	strcpy(branchCom->text, "BR");
 	branchCom->func = NULL; // TODO This can be made faster with threading
+
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 		return;
@@ -250,7 +253,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 		}
 		pop(stack);
 		cmdPop(cmdstack);
-		command * result = cmdPop(cmdstack);
+		newCommand(cmdPop(cmdstack), &result);
 		while(strcmp("ELSE", cmdPop(cmdstack)->text));
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, result);
