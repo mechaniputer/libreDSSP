@@ -152,6 +152,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 		newcom = malloc(sizeof(struct command));
 		newcom->text = malloc(10*sizeof(char)); // This is bad
 		strcpy(newcom->text, seqtail->chars);
+		printf("new command is %s\n",seqtail->chars);
 		newcom->func = NULL;
 
 		cmdPush(cmdstack, newcom);

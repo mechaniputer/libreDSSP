@@ -272,7 +272,9 @@ void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
 		return;
 	}
-	command * repeat = cmdPop(cmdstack);
+	command * repeat;
+
+	newCommand(cmdPop(cmdstack), &repeat);
 
 	int reps = pop(stack);
 

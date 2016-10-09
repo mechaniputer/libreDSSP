@@ -85,4 +85,14 @@ void cmdPush(cmdstack * cmdstack, command * cmd) {
 void cmdGrow(cmdstack * cmdstack){
 	cmdstack->capacity = 2 * (cmdstack->capacity);
 	cmdstack->array = realloc(cmdstack->array, (cmdstack->capacity)*sizeof(command));
+	return;
+}
+
+// Takes a pointer to a command pointer and fills it in with a command
+void newCommand(command * oldcmd, command ** newcmd){
+	*newcmd = malloc(sizeof(struct command));
+	(*newcmd)->text = malloc(10 * sizeof(char)); // TODO FIXME
+	strcpy((*newcmd)->text, oldcmd->text);
+	(*newcmd)->func = oldcmd->func;
+	return;
 }
