@@ -120,18 +120,18 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 	if(cmdstack->top >= 1){
 
 		// See if it is a core word
-		if(coreSearch(cmdTop(cmdstack), vocab)){
-			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdstack));
+		if(coreSearch(cmdTop(cmdstack)->text, vocab)){
+			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdstack)->text);
 			return;
 		}
 
 		// See if we already have this word, if we do then redefine
-		temp = wordSearch(cmdTop(cmdstack), vocab);
+		temp = wordSearch(cmdTop(cmdstack)->text, vocab);
 
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->grow);
-			strcpy(temp->name, cmdPop(cmdstack));
+			strcpy(temp->name, cmdPop(cmdstack)->text);
 		}else{
 			// Wipe old definition
 			// TODO: Memory leak
@@ -141,8 +141,9 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 	}else fprintf(stderr,"ERROR: Incomplete definition\n");
 
-	while(strcmp(";", cmdTop(cmdstack))){
-		growWord(temp, cmdPop(cmdstack), vocab);
+	while(strcmp(";", cmdTop(cmdstack)->text)){
+		// TODO: This could be changed to improve threading
+		growWord(temp, cmdPop(cmdstack)->text, vocab);
 
 		if(cmdstack->top < 0){
 			fprintf(stderr,"ERROR: Incomplete definition\n");

@@ -16,6 +16,7 @@
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <malloc.h>
+#include <string.h>
 #include <assert.h>
 #include "stack.h"
 
@@ -60,20 +61,23 @@ cmdstack * newCmdStack(){
 }
 
 // If stack is empty, do not use!
-char * cmdTop(cmdstack * cmdstack) {
+command * cmdTop(cmdstack * cmdstack) {
 	assert(cmdstack->top > -1);
-	return (cmdstack->array[cmdstack->top].text);
+	return &(cmdstack->array[cmdstack->top]);
 }
 
 // If stack is empty, do not use!
-char * cmdPop(cmdstack * cmdstack) {
+command * cmdPop(cmdstack * cmdstack) {
 	assert(cmdstack->top > -1);
-	return (cmdstack->array[(cmdstack->top)--].text);
+	return &(cmdstack->array[(cmdstack->top)--]);
 }
-void cmdPush(cmdstack * cmdstack, char * cmd) {
+
+// As we add things to struct command, this needs to be expanded
+void cmdPush(cmdstack * cmdstack, command * cmd) {
 	(cmdstack->top)++;
-	cmdstack->array[cmdstack->top].text = cmd;
-	cmdstack->array[cmdstack->top].func = NULL; // TODO: Do something better than blindly assign NULL
+	cmdstack->array[cmdstack->top].text = malloc(10*sizeof(char)); // This is horrendous
+	strcpy(cmdstack->array[cmdstack->top].text, cmd->text);
+	cmdstack->array[cmdstack->top].func = cmd->func;
 	if((cmdstack->capacity) == ((cmdstack->top)+1)) cmdGrow(cmdstack);
 	return;
 }

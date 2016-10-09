@@ -58,30 +58,28 @@ int isNum(char * foo){
 
 // Looks at cmdTop(cmdstack), decides what to do until cmdstack is empty
 void run(stack * stack, cmdstack * cmdstack, dict * vocab){
-	char *temp;
-	command *sanic;
+	command *temp;
 
 	if((cmdstack->top) > -1) do{
 		temp = cmdTop(cmdstack);
 		assert(temp != NULL);
 
 		//TODO: Deepen threading support
-		sanic = &(cmdstack->array[cmdstack->top]);
-		if((sanic->func) != NULL){
+		if((temp->func) != NULL){
 			cmdPop(cmdstack);
-			sanic->func(stack, cmdstack, vocab);
-		}else if(isNum(temp)){ // Numerical constant
-			push(stack, atoi(temp));
+			temp->func(stack, cmdstack, vocab);
+		}else if(isNum(temp->text)){ // Numerical constant
+			push(stack, atoi(temp->text));
 			cmdPop(cmdstack);
 
-		}else if (!strcmp(temp, ":")){ // Function declaration
+		}else if (!strcmp(temp->text, ":")){ // Function declaration
 			defWord(cmdstack,vocab);
 
-		}else if (temp[0] == '['){ // Comment
+		}else if (temp->text[0] == '['){ // Comment
 			cmdPop(cmdstack);
 
-		}else if (!strncmp(temp, ".\"", 2)){
-			textPrint(temp);
+		}else if (!strncmp(temp->text, ".\"", 2)){
+			textPrint(temp->text);
 			cmdPop(cmdstack);
 
 		}else wordRun(cmdstack, stack, vocab); // word or variable
@@ -97,6 +95,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 	int j = 0;
 	elem * seqprev;
 	elem * seqtail;
+	command * newcom;
 
 	seqtail = malloc(sizeof(elem));
 	seqtail->next = NULL;
@@ -148,7 +147,14 @@ void stackInput(char * line, cmdstack * cmdstack){
 
 	// Now we push it all onto the cmdstack in reverse order
 	while(seqtail != NULL){
-		cmdPush(cmdstack, seqtail->chars);
+
+		// Construct a new command
+		newcom = malloc(sizeof(struct command));
+		newcom->text = malloc(10*sizeof(char)); // This is bad
+		strcpy(newcom->text, seqtail->chars);
+		newcom->func = NULL;
+
+		cmdPush(cmdstack, newcom);
 		seqtail = seqtail->next;
 	}
 	return;
@@ -168,15 +174,15 @@ char * prompt(){
 // If top of cmdstack is a word (or a variable), this function knows what to do
 void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	int i;
-	char * cmdName = cmdPop(cmdstack);
+	command * cmdName = cmdPop(cmdstack);
 	coreword * tempCore;
 	word * tempWord;
 	variable * tempVar;
 
-	if(cmdName[0] == '\0') return;
+	if(cmdName->text[0] == '\0') return;
 
 	// Search core dict first
-	tempCore = coreSearch(cmdName, vocab);
+	tempCore = coreSearch(cmdName->text, vocab);
 	if(tempCore != NULL){
 		// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
 		tempCore->func(stack, cmdstack, vocab);
@@ -184,7 +190,7 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	}
 
 	// Now search all other dicts
-	tempWord = wordSearch(cmdName, vocab);
+	tempWord = wordSearch(cmdName->text, vocab);
 	if(tempWord != NULL){
 		// Push programmed word onto stack in reverse-order
 		for(i = tempWord->length; i >= 0; i--){
@@ -194,12 +200,12 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 		return;
 	}
 
-	tempVar = varSearch(cmdName, vocab);
+	tempVar = varSearch(cmdName->text, vocab);
 	if (tempVar != NULL){ // It's a variable
 		push(stack,tempVar->value);
 		return;
 	}else{
-		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName);
+		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName->text);
 		return;
 	}
 }

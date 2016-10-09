@@ -168,7 +168,7 @@ void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	if(pop(stack) < 0){ // Do the first thing
-		char * temp = cmdPop(cmdstack);
+		command * temp = cmdPop(cmdstack);
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the second thing
@@ -183,7 +183,7 @@ void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	if(pop(stack) == 0){ // Do the first thing
-		char * temp = cmdPop(cmdstack);
+		command * temp = cmdPop(cmdstack);
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the second thing
@@ -198,7 +198,7 @@ void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	if(pop(stack) > 0){ // Do the first thing
-		char * temp = cmdPop(cmdstack);
+		command * temp = cmdPop(cmdstack);
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the second thing
@@ -213,13 +213,13 @@ void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	if(top(stack) < 0){ // Do the first thing
-		char * temp = cmdPop(cmdstack);
+		command * temp = cmdPop(cmdstack);
 		cmdPop(cmdstack);
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else if(top(stack) == 0){ // Do the second thing
 		cmdPop(cmdstack);
-		char * temp = cmdPop(cmdstack);
+		command * temp = cmdPop(cmdstack);
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the third thing
@@ -231,24 +231,27 @@ void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
 }
 
 void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
+	command *branchCom = malloc(sizeof(struct command));
+	strcpy(branchCom->text, "BR");
+	branchCom->func = NULL; // TODO This can be made faster with threading
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 		return;
 	}
 	int temp = top(stack);
 
-	if(!strcmp("ELSE", cmdTop(cmdstack))){
+	if(!strcmp("ELSE", cmdTop(cmdstack)->text)){
 		pop(stack);
 		cmdPop(cmdstack);
-	}else if(temp == atoi(cmdTop(cmdstack))){
+	}else if(temp == atoi(cmdTop(cmdstack)->text)){
 		if((cmdstack->top < 3) || (stack->top < 0)){
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 			return;
 		}
 		pop(stack);
 		cmdPop(cmdstack);
-		char * result = cmdPop(cmdstack);
-		while(strcmp("ELSE", cmdPop(cmdstack)));
+		command * result = cmdPop(cmdstack);
+		while(strcmp("ELSE", cmdPop(cmdstack)->text));
 		cmdPop(cmdstack);
 		cmdPush(cmdstack, result);
 	}else{
@@ -258,7 +261,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 		}
 		cmdPop(cmdstack);
 		cmdPop(cmdstack);
-		cmdPush(cmdstack, "BR");
+		cmdPush(cmdstack, branchCom);
 	}
 	return;
 }
@@ -269,7 +272,7 @@ void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
 		return;
 	}
-	char * repeat = cmdPop(cmdstack);
+	command * repeat = cmdPop(cmdstack);
 
 	int reps = pop(stack);
 
@@ -400,36 +403,36 @@ void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 
-	char * name = cmdPop(cmdstack);
+	command * name = cmdPop(cmdstack);
 	int value = pop(stack);
 	variable * temp;
 
 	assert(vocab != NULL);
 
 	// See if it is a core word
-	if(coreSearch(name, vocab)){
-		fprintf(stderr,"ERROR: %s is in core dictionary\n",name);
+	if(coreSearch(name->text, vocab)){
+		fprintf(stderr,"ERROR: %s is in core dictionary\n",name->text);
 		return;
 	}
 
-	if(wordSearch(name, vocab) != NULL){
-		fprintf(stderr,"ERROR: %s is in dictionary\n",name);
+	if(wordSearch(name->text, vocab) != NULL){
+		fprintf(stderr,"ERROR: %s is in dictionary\n",name->text);
 		return;
 	}
 
 	if(vocab->var == NULL){
 		vocab->var = malloc(sizeof(variable));
 		temp = vocab->var;
-		strcpy(temp->name, name);
+		strcpy(temp->name, name->text);
 		temp->next = NULL;
 	}else{
-		temp = varSearch(name, vocab);
+		temp = varSearch(name->text, vocab);
 		if(temp == NULL){
 			temp = vocab->var;
 			while(temp->next != NULL) temp = temp->next;
 			temp->next = malloc(sizeof(variable));
 			temp = temp->next;
-			strcpy(temp->name, name);
+			strcpy(temp->name, name->text);
 			temp->next = NULL;
 		}
 	}
@@ -468,27 +471,27 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 
-	if(strncmp(cmdTop(cmdstack),"$",1)){
+	if(strncmp(cmdTop(cmdstack)->text,"$",1)){
 		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
 		cmdPop(cmdstack);
 		return;
 	}
 
-	if(!strcmp(cmdTop(cmdstack),"$PRIME")){
+	if(!strcmp(cmdTop(cmdstack)->text,"$PRIME")){
 		fprintf(stderr,"ERROR: cannot alter $PRIME subvocabulary\n");
 		cmdPop(cmdstack);
 		return;
 	}
 
 	while(tempSub != NULL){
-		if(!strcmp(cmdTop(cmdstack), tempSub->name)) {
+		if(!strcmp(cmdTop(cmdstack)->text, tempSub->name)) {
 			break;
 		}
 		tempSub = tempSub->next;
 	}
 
 	if(tempSub == NULL){ // We are making a new subdict
-		tempSub = newDict(vocab, cmdTop(cmdstack));
+		tempSub = newDict(vocab, cmdTop(cmdstack)->text);
 	}
 
 	vocab->grow = tempSub;
@@ -504,19 +507,19 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 
-	if(!strcmp(cmdTop(cmdstack),"$PRIME")){
+	if(!strcmp(cmdTop(cmdstack)->text,"$PRIME")){
 		fprintf(stderr,"ERROR: cannot shut $PRIME subvocabulary\n");
 		cmdPop(cmdstack);
 		return;
 	}
 
 	while(tempSub != NULL){
-		if(!strcmp(tempSub->name, cmdTop(cmdstack))) break;
+		if(!strcmp(tempSub->name, cmdTop(cmdstack)->text)) break;
 		tempSub = tempSub->next;
 	}
 
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack));
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack)->text);
 		return;
 	}
 	tempSub->open = 0;
@@ -533,12 +536,12 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	while(tempSub != NULL){
-		if(!strcmp(tempSub->name, cmdTop(cmdstack))) break;
+		if(!strcmp(tempSub->name, cmdTop(cmdstack)->text)) break;
 		tempSub = tempSub->next;
 	}
 
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack));
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack)->text);
 		return;
 	}
 	tempSub->open = 1;
