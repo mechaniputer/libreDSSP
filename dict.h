@@ -51,10 +51,13 @@ struct variable
 	variable * next;
 };
 
+// TODO: array of commands
 struct word
 {
 	char name[16];
-	char definition[160];
+	int length;
+	int capacity;
+	command * array; // TODO: Make dynamic
 	word * next;
 };
 
@@ -62,7 +65,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	void (*func)(stack *, cmdstack *,dict *);
+	void (*func)(stack *, cmdstack *, dict *);
 };
 
 struct subdict
@@ -89,6 +92,7 @@ word * wordSearch(char * name, dict * vocab);
 coreword * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
 void defWord(cmdstack * cmdstack, dict * vocab);
+void growWord(word * word, char * com, dict * vocab);
 // Defines built-in functions
 void defCore(char * name, void (*func)(stack *, cmdstack *, dict *), dict * vocab);
 subdict * newDict(dict * vocab, char * name);

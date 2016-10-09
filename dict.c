@@ -64,11 +64,10 @@ word * wordSearch(char * name, dict * vocab){
 		}
 		tempSub = tempSub->next;
 	}
-
 	return NULL;
 }
 
-// Searches non-core dictionaries, returns 1 if it exists
+// Searches core dictionary, returns coreword if it exists
 coreword * coreSearch(char * name, dict * vocab){
 	coreword * tempCore = vocab->core;
 
@@ -95,6 +94,9 @@ word * newWord(subdict * dict){
 		temp->next = malloc(sizeof(word));
 		temp = temp->next;
 	}
+	temp->array = malloc(15*sizeof(command));
+	temp->length = -1;
+	temp->capacity = 15;
 	// temp should now point to fresh word
 	return temp;
 }
@@ -132,15 +134,15 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 			strcpy(temp->name, cmdPop(cmdstack));
 		}else{
 			// Wipe old definition
-			strcpy(temp->definition, "");
+			// TODO: Memory leak
+			temp->length = -1;
 			cmdPop(cmdstack);
 		}
 
 	}else fprintf(stderr,"ERROR: Incomplete definition\n");
 
 	while(strcmp(";", cmdTop(cmdstack))){
-		strcat(temp->definition, cmdPop(cmdstack));
-		strcat(temp->definition, " ");
+		growWord(temp, cmdPop(cmdstack), vocab);
 
 		if(cmdstack->top < 0){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
@@ -153,6 +155,21 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 	// Successful definition, print name
 	printf("%s\n",temp->name);
 	return;
+}
+
+void growWord(word * word, char * com, dict * vocab){
+	coreword * tempcore;
+	// TODO: Make dynamic
+	assert(word->length < (word->capacity - 1));
+	word->length++;
+	word->array[word->length].text = com;
+	// Speedup core words
+	tempcore = coreSearch(word->array[word->length].text, vocab);
+	if(tempcore != NULL){
+		word->array[word->length].func = tempcore->func;
+	}else{
+		word->array[word->length].func = NULL;
+	}
 }
 
 void defCore(char * name, void (*func)(stack *, cmdstack *, dict*), dict * vocab){

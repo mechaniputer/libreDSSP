@@ -19,7 +19,16 @@
 #ifndef STACK_H
 #define STACK_H
 
+typedef struct variable variable;
+typedef struct word word;
+typedef struct coreword coreword;
+typedef struct subdict subdict;
+typedef struct dict dict;
+
 typedef struct stack stack;
+typedef struct cmdstack cmdstack;
+typedef struct command command;
+
 struct stack
 {
 	int capacity;
@@ -27,14 +36,26 @@ struct stack
 	int * array;
 };
 
-typedef struct cmdstack cmdstack;
 struct cmdstack
 {
 	int capacity;
 	int top;
-	// Dynamic array of pointers to strings
-	char ** array;
+	command * array;
 };
+
+struct command
+{
+	// What to put here?
+	// Need to account for:
+	// * builtin function pointers
+	void (*func)(stack *, cmdstack *, dict *);
+	// * defined words
+	// * literals
+	// * strings ."hello"
+	// * anything that can be split by spaces
+	char * text;
+};
+
 
 stack * newStack();
 int top(stack * stack);

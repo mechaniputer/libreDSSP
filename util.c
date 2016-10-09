@@ -28,6 +28,7 @@
 #include "elem.h"
 #include "stack.h"
 
+// Deals with ."hello" print statements
 void textPrint(char * text){
 	assert(text != NULL);
 	int i;
@@ -57,13 +58,19 @@ int isNum(char * foo){
 
 // Looks at cmdTop(cmdstack), decides what to do until cmdstack is empty
 void run(stack * stack, cmdstack * cmdstack, dict * vocab){
-	char * temp;
+	char *temp;
+	command *sanic;
 
 	if((cmdstack->top) > -1) do{
 		temp = cmdTop(cmdstack);
 		assert(temp != NULL);
 
-		if(isNum(temp)){ // Numerical constant
+		//TODO: Deepen threading support
+		sanic = &(cmdstack->array[cmdstack->top]);
+		if((sanic->func) != NULL){
+			cmdPop(cmdstack);
+			sanic->func(stack, cmdstack, vocab);
+		}else if(isNum(temp)){ // Numerical constant
 			push(stack, atoi(temp));
 			cmdPop(cmdstack);
 
@@ -160,6 +167,7 @@ char * prompt(){
 
 // If top of cmdstack is a word (or a variable), this function knows what to do
 void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
+	int i;
 	char * cmdName = cmdPop(cmdstack);
 	coreword * tempCore;
 	word * tempWord;
@@ -179,9 +187,10 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	tempWord = wordSearch(cmdName, vocab);
 	if(tempWord != NULL){
 		// Push programmed word onto stack in reverse-order
-		// TODO: Store definitions in pre-split form
-		// TODO: Eventually store words as sequence of pointers
-		stackInput(tempWord->definition, cmdstack);
+		for(i = tempWord->length; i >= 0; i--){
+			stackInput(tempWord->array[i].text, cmdstack);
+			cmdstack->array[cmdstack->top].func = tempWord->array[i].func;
+		}
 		return;
 	}
 

@@ -21,7 +21,7 @@
 
 stack * newStack() {
 	stack * stack = malloc(sizeof(stack));
-	stack->array = malloc(10*sizeof(int)); // TODO Make dynamic
+	stack->array = malloc(10*sizeof(int));
 	stack->capacity = 10;
 	stack->top = -1; // -1 indicates empty stack
 	return stack;
@@ -53,7 +53,7 @@ void grow(stack * stack){
 
 cmdstack * newCmdStack(){
 	cmdstack * cmdstack = malloc(sizeof(cmdstack));
-	cmdstack->array = malloc(10*sizeof(char *)); // TODO Make dynamic
+	cmdstack->array = malloc(10*sizeof(command));
 	cmdstack->capacity = 10;
 	cmdstack->top = -1; // -1 indicates empty stack
 	return cmdstack;
@@ -62,22 +62,23 @@ cmdstack * newCmdStack(){
 // If stack is empty, do not use!
 char * cmdTop(cmdstack * cmdstack) {
 	assert(cmdstack->top > -1);
-	return (cmdstack->array[cmdstack->top]);
+	return (cmdstack->array[cmdstack->top].text);
 }
 
 // If stack is empty, do not use!
 char * cmdPop(cmdstack * cmdstack) {
 	assert(cmdstack->top > -1);
-	return (cmdstack->array[(cmdstack->top)--]);
+	return (cmdstack->array[(cmdstack->top)--].text);
 }
 void cmdPush(cmdstack * cmdstack, char * cmd) {
 	(cmdstack->top)++;
-	cmdstack->array[cmdstack->top] = cmd;
+	cmdstack->array[cmdstack->top].text = cmd;
+	cmdstack->array[cmdstack->top].func = NULL; // TODO: Do something better than blindly assign NULL
 	if((cmdstack->capacity) == ((cmdstack->top)+1)) cmdGrow(cmdstack);
 	return;
 }
 
 void cmdGrow(cmdstack * cmdstack){
 	cmdstack->capacity = 2 * (cmdstack->capacity);
-	cmdstack->array = realloc(cmdstack->array, (cmdstack->capacity)*sizeof(char *));
+	cmdstack->array = realloc(cmdstack->array, (cmdstack->capacity)*sizeof(command));
 }
