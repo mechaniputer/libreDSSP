@@ -1,0 +1,3 @@
+This directory contains two files.
+DSP.vim can be placed in your .vim/ftdetect directory to allow vim to detect .DSP files
+dssp.vim can be placed in your .vim/syntax directory to allow vim to highlight DSSP code
