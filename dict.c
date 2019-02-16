@@ -169,9 +169,12 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 void growWord(word * word, char * com, dict * vocab){
 	coreword * tempcore;
-	// TODO: Make dynamic
-	assert(word->length < (word->capacity - 1));
 	word->length++;
+	if(word->length >= word->capacity) {
+		word->capacity = word->length * 2;
+		word->array = realloc(word->array, word->capacity);
+	}
+	assert(word->length < word->capacity);
 	word->array[word->length].text = com;
 	// Speedup core words
 	tempcore = coreSearch(word->array[word->length].text, vocab);
