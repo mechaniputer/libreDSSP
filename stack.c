@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2016 Alan Beadle
+	Copyright 2019 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,17 +21,17 @@
 #include "stack.h"
 
 stack * newStack() {
-	stack * stack = malloc(sizeof(stack));
-	stack->array = malloc(10*sizeof(int));
-	stack->capacity = 10;
-	stack->top = -1; // -1 indicates empty stack
-	return stack;
+	stack * new_stack = malloc(sizeof(stack));
+	new_stack->array = malloc(10*sizeof(int));
+	new_stack->capacity = 10;
+	new_stack->top = -1; // -1 indicates empty stack
+	return new_stack;
 }
 
 // If stack is empty, do not use!
-int top(stack * stack) {
-	assert(stack->top > -1);
-	return (stack->array[stack->top]);
+int top(stack * workStack) {
+	assert(workStack->top > -1);
+	return (workStack->array[workStack->top]);
 }
 
 // If stack is empty, do not use!
@@ -53,11 +53,11 @@ void grow(stack * stack){
 }
 
 cmdstack * newCmdStack(){
-	cmdstack * cmdstack = malloc(sizeof(cmdstack));
-	cmdstack->array = malloc(10*sizeof(command));
-	cmdstack->capacity = 10;
-	cmdstack->top = -1; // -1 indicates empty stack
-	return cmdstack;
+	cmdstack * new_cmdstack = malloc(sizeof(cmdstack));
+	new_cmdstack->array = malloc(10*sizeof(command));
+	new_cmdstack->capacity = 10;
+	new_cmdstack->top = -1; // -1 indicates empty stack
+	return new_cmdstack;
 }
 
 // If stack is empty, do not use!
@@ -75,7 +75,7 @@ command * cmdPop(cmdstack * cmdstack) {
 // As we add things to struct command, this needs to be expanded
 void cmdPush(cmdstack * cmdstack, command * cmd) {
 	(cmdstack->top)++;
-	cmdstack->array[cmdstack->top].text = malloc(10*sizeof(char)); // This is horrendous
+	cmdstack->array[cmdstack->top].text = malloc((strlen(cmd->text)+1) * sizeof(char));
 	strcpy(cmdstack->array[cmdstack->top].text, cmd->text);
 	cmdstack->array[cmdstack->top].func = cmd->func;
 	if((cmdstack->capacity) == ((cmdstack->top)+1)) cmdGrow(cmdstack);
@@ -91,7 +91,7 @@ void cmdGrow(cmdstack * cmdstack){
 // Takes a pointer to a command pointer and fills it in with a command
 void newCommand(command * oldcmd, command ** newcmd){
 	*newcmd = malloc(sizeof(struct command));
-	(*newcmd)->text = malloc(10 * sizeof(char)); // TODO FIXME
+	(*newcmd)->text = malloc((strlen(oldcmd->text)+1) * sizeof(char));
 	strcpy((*newcmd)->text, oldcmd->text);
 	(*newcmd)->func = oldcmd->func;
 	return;

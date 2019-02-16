@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2016 Alan Beadle
+	Copyright 2019 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "util.h"
 
 int main(int argc, char *argv[]){
-	stack * stack = newStack();
+	stack * workStack = newStack();
 	cmdstack * cmdstack = newCmdStack();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
 	vocab->sub->next = NULL;
 
 	// Built-ins
-	vocab->core = malloc(sizeof(coreword)); // For built-in words
+	vocab->core = NULL;
 
 	// Arithmetic
 	defCore("+", plus, vocab);
@@ -94,10 +94,10 @@ int main(int argc, char *argv[]){
 	vocab->sub->wordlist = NULL;
 
 	// Version
-	printf("\nlibreDSSP, version 0.0.0\n");
+	printf("\nlibreDSSP, version 0.0.1\n");
 
 	// Copyright notice
-	printf("Copyright (C) 2016  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	printf("Copyright (C) 2019  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
 
 	if(argc >= 2){
 		printf("Attempting to open %s... ",argv[1]);
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
 			while(EOF != (characters = getline(&b, &bufsize, file))){
 				buffer[characters-1] = '\0';
 				stackInput(buffer, cmdstack);
-				run(stack, cmdstack, vocab);
+				run(workStack, cmdstack, vocab);
 			}
 			fclose(file);
 		}
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
 	while(1){
 		// Show prompt, get line of input
 		stackInput(prompt(),cmdstack);
-		run(stack, cmdstack, vocab);
+		run(workStack, cmdstack, vocab);
 	}
 	return 0;
 }

@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2016 Alan Beadle
+	Copyright 2019 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ int isNum(char * foo){
 }
 
 // Looks at cmdTop(cmdstack), decides what to do until cmdstack is empty
-void run(stack * stack, cmdstack * cmdstack, dict * vocab){
+void run(stack * workStack, cmdstack * cmdstack, dict * vocab){
 	command *temp;
 
 	if((cmdstack->top) > -1) do{
@@ -67,9 +67,9 @@ void run(stack * stack, cmdstack * cmdstack, dict * vocab){
 		//TODO: Deepen threading support
 		if((temp->func) != NULL){
 			cmdPop(cmdstack);
-			temp->func(stack, cmdstack, vocab);
+			temp->func(workStack, cmdstack, vocab);
 		}else if(isNum(temp->text)){ // Numerical constant
-			push(stack, atoi(temp->text));
+			push(workStack, atoi(temp->text));
 			cmdPop(cmdstack);
 
 		}else if (!strcmp(temp->text, ":")){ // Function declaration
@@ -82,7 +82,7 @@ void run(stack * stack, cmdstack * cmdstack, dict * vocab){
 			textPrint(temp->text);
 			cmdPop(cmdstack);
 
-		}else wordRun(cmdstack, stack, vocab); // word or variable
+		}else wordRun(cmdstack, workStack, vocab); // word or variable
 
 	}while((cmdstack->top)>=0);
 	return;
@@ -101,6 +101,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 	seqtail->next = NULL;
 
 	// TODO Not safe or efficient
+	// Handles comments, ."hello" printing, general command strings
 	while(line[j] != '\0'){
 		ch = line[j++];
 
@@ -122,11 +123,11 @@ void stackInput(char * line, cmdstack * cmdstack){
 			}
 			seqtail->chars[i++] = '\"';
 
-		} else if(ch != ' ') {
+		} else if(ch != ' ') { // All normal characters outside comments and print statements
 			if(i>80) break; // TODO This limits a word or comment to 80 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
 
-		} else if ((ch == ' ') && (i != 0)) { // Handles adjacent spaces
+		} else if ((ch == ' ') && (i != 0)) { // If (i == 0) then it's either an extra space or it follows a comment or ."hello" style print
 			// Time to append a new sequence element
 			seqtail->chars[i] = '\0';
 			seqprev = seqtail;
@@ -150,7 +151,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 
 		// Construct a new command
 		newcom = malloc(sizeof(struct command));
-		newcom->text = malloc(10*sizeof(char)); // This is bad
+		newcom->text = malloc((strlen(seqtail->chars)+1)*sizeof(char)); // This is bad
 		strcpy(newcom->text, seqtail->chars);
 		newcom->func = NULL;
 
@@ -172,7 +173,7 @@ char * prompt(){
 }
 
 // If top of cmdstack is a word (or a variable), this function knows what to do
-void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
+void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 	int i;
 	command * cmdName = cmdPop(cmdstack);
 	coreword * tempCore;
@@ -185,7 +186,7 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 	tempCore = coreSearch(cmdName->text, vocab);
 	if(tempCore != NULL){
 		// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
-		tempCore->func(stack, cmdstack, vocab);
+		tempCore->func(workStack, cmdstack, vocab);
 		return;
 	}
 
@@ -202,7 +203,7 @@ void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab){
 
 	tempVar = varSearch(cmdName->text, vocab);
 	if (tempVar != NULL){ // It's a variable
-		push(stack,tempVar->value);
+		push(workStack,tempVar->value);
 		return;
 	}else{
 		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName->text);

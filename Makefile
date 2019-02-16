@@ -1,6 +1,6 @@
 #	This file is part of libreDSSP.
 
-#	Copyright 2016 Alan Beadle
+#	Copyright 2019 Alan Beadle
 
 #	libreDSSP is free software: you can redistribute it and/or modify \
 	it under the terms of the GNU General Public License as published by \

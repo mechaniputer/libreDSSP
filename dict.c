@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2016 Alan Beadle
+	Copyright 2019 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -174,22 +174,26 @@ void growWord(word * word, char * com, dict * vocab){
 }
 
 void defCore(char * name, void (*func)(stack *, cmdstack *, dict*), dict * vocab){
-	coreword * temp = vocab->core;
+	coreword * temp = NULL;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));
 		strcpy(temp->name, name);
 		temp->func = (*func);
 		temp->next = NULL;
+		vocab->core = temp;
+		return;
+	}else{
+		temp = vocab->core;
+		// Find last defined func
+		while(temp->next != NULL){
+			temp = temp->next;
+		}
+		temp->next = malloc(sizeof(coreword));
+		strcpy(temp->next->name, name);
+		temp->next->func = (*func);
+		temp->next->next = NULL;
+		return;
 	}
-	// Find last defined func
-	while(temp->next != NULL){
-		temp = temp->next;
-	}
-	temp->next = malloc(sizeof(coreword));
-	strcpy(temp->next->name, name);
-	temp->next->func = (*func);
-	temp->next->next = NULL;
-	return;
 }
 
 subdict * newDict(dict * vocab, char * name){
