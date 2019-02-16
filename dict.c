@@ -114,6 +114,8 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		cmdPop(cmdstack);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
+		cmdClear(cmdstack);
+		return;
 	}
 
 	// Assign function name
@@ -122,6 +124,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		// See if it is a core word
 		if(coreSearch(cmdTop(cmdstack)->text, vocab)){
 			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdstack)->text);
+			cmdClear(cmdstack);
 			return;
 		}
 
@@ -139,7 +142,11 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 			cmdPop(cmdstack);
 		}
 
-	}else fprintf(stderr,"ERROR: Incomplete definition\n");
+	}else{
+		fprintf(stderr,"ERROR: Incomplete definition\n");
+		cmdClear(cmdstack);
+		return;
+	}
 
 	while(strcmp(";", cmdTop(cmdstack)->text)){
 		// TODO: This could be changed to improve threading
@@ -147,6 +154,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 		if(cmdstack->top < 0){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
+			cmdClear(cmdstack);
 			return;
 		}
 	}

@@ -1,7 +1,7 @@
 syn match Comment "\[.*\]"
 syn match Print "\.\".*\""
-syn keyword basicKeywords NEG ABS BYE IF+ IF0 IF- BR+ BR0 BR- BRS BR
-syn keyword basicKeywords IF+ IF0 IF- BR+ BR0 BR- BRS BR
+syn keyword basicKeywords NEG ABS BYE
+syn keyword basicKeywords IF+ IF0 IF-
 syn keyword basicKeywords BR+ BR0 BR- BRS BR
 syn keyword basicKeywords DO D C DS DEEP
 syn keyword basicKeywords ET E2 E3 E4

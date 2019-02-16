@@ -72,6 +72,12 @@ command * cmdPop(cmdstack * cmdstack) {
 	return &(cmdstack->array[(cmdstack->top)--]);
 }
 
+// Dumps all pending commands and returns
+void cmdClear(cmdstack * cmdstack) {
+	cmdstack->top = -1;
+	return;
+}
+
 // As we add things to struct command, this needs to be expanded
 void cmdPush(cmdstack * cmdstack, command * cmd) {
 	(cmdstack->top)++;

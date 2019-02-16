@@ -207,6 +207,7 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 		return;
 	}else{
 		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName->text);
+		cmdClear(cmdstack);
 		return;
 	}
 }

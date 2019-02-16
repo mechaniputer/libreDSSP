@@ -35,6 +35,7 @@ void plus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for +\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	temp = pop(stack);
@@ -47,6 +48,7 @@ void multiply(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int temp2;
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for *\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	temp1 = pop(stack);
@@ -60,6 +62,7 @@ void minus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for -\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	temp = pop(stack);
@@ -72,6 +75,7 @@ void divide(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int temp2;
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for /\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	temp1 = pop(stack);
@@ -83,6 +87,7 @@ void divide(stack * stack, cmdstack * cmdstack, dict * vocab){
 void negate(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	stack->array[stack->top] = -1 *stack->array[stack->top];
@@ -92,6 +97,7 @@ void negate(stack * stack, cmdstack * cmdstack, dict * vocab){
 void absval(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
+		cmdClear(cmdstack);
 		return;
 	} else if(top(stack) < 0) {
 		stack->array[stack->top] = -1 * (stack->array[stack->top]);
@@ -129,6 +135,7 @@ void showStack(stack * stack, cmdstack * cmdstack, dict * vocab){
 void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -141,6 +148,7 @@ void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -153,6 +161,7 @@ void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -165,6 +174,7 @@ void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	if(pop(stack) < 0){ // Do the first thing
@@ -180,6 +190,7 @@ void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	if(pop(stack) == 0){ // Do the first thing
@@ -195,6 +206,7 @@ void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	if(pop(stack) > 0){ // Do the first thing
@@ -210,6 +222,7 @@ void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	if(top(stack) < 0){ // Do the first thing
@@ -239,6 +252,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	int temp = top(stack);
@@ -249,6 +263,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}else if(temp == atoi(cmdTop(cmdstack)->text)){
 		if((cmdstack->top < 3) || (stack->top < 0)){
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+			cmdClear(cmdstack);
 			return;
 		}
 		pop(stack);
@@ -260,6 +275,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}else{
 		if((cmdstack->top < 3) || (stack->top < 0)){
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+			cmdClear(cmdstack);
 			return;
 		}
 		cmdPop(cmdstack);
@@ -273,6 +289,7 @@ void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	command * repeat;
@@ -291,6 +308,7 @@ void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 void exch2(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for E2\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	int temp = top(stack);
@@ -301,6 +319,7 @@ void exch2(stack * stack, cmdstack * cmdstack, dict * vocab){
 void exch3(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top <= 1){
 		fprintf(stderr,"ERROR: Insufficient operands for E3\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	int temp = top(stack);
@@ -311,6 +330,7 @@ void exch3(stack * stack, cmdstack * cmdstack, dict * vocab){
 void exch4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top <= 2){
 		fprintf(stderr,"ERROR: Insufficient operands for E4\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	int temp = top(stack);
@@ -323,10 +343,12 @@ void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if (depth == 1) return;
 	if(stack->top <= depth-2){
 		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	if(depth <= 0){
 		fprintf(stderr,"ERROR: Can only exchange from positive depth\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	int temp = top(stack);
@@ -338,6 +360,7 @@ void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 void copy(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	push(stack,top(stack));
@@ -347,6 +370,7 @@ void copy(stack * stack, cmdstack * cmdstack, dict * vocab){
 void copy2(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C2\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	push(stack, stack->array[stack->top - 1]);
@@ -355,6 +379,7 @@ void copy2(stack * stack, cmdstack * cmdstack, dict * vocab){
 void copy3(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top <= 1){
 		fprintf(stderr,"ERROR: Insufficient operands for C3\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	push(stack, stack->array[stack->top - 2]);
@@ -363,6 +388,7 @@ void copy3(stack * stack, cmdstack * cmdstack, dict * vocab){
 void copy4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top <= 2){
 		fprintf(stderr,"ERROR: Insufficient operands for C4\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	push(stack, stack->array[stack->top - 3]);
@@ -372,10 +398,12 @@ void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int depth = pop(stack);
 	if(stack->top <= depth-2){
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	if(depth <= 0){
 		fprintf(stderr,"ERROR: Can only copy from positive depth\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	push(stack, stack->array[stack->top - (depth - 1)]);
@@ -385,6 +413,7 @@ void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab){
 void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
+		cmdClear(cmdstack);
 		return;
 	}
 	pop(stack);
@@ -400,11 +429,13 @@ void dropStack(stack * stack, cmdstack * cmdstack, dict * vocab){
 void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for !\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
 	if(cmdstack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for !\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -417,11 +448,13 @@ void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// See if it is a core word
 	if(coreSearch(name->text, vocab)){
 		fprintf(stderr,"ERROR: %s is in core dictionary\n",name->text);
+		cmdClear(cmdstack);
 		return;
 	}
 
 	if(wordSearch(name->text, vocab) != NULL){
 		fprintf(stderr,"ERROR: %s is in dictionary\n",name->text);
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -473,18 +506,19 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if(cmdstack->top < 0){
 		fprintf(stderr,"ERROR: Must specify a subvocabulary name\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
 	if(strncmp(cmdTop(cmdstack)->text,"$",1)){
 		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
-		cmdPop(cmdstack);
+		cmdClear(cmdstack);
 		return;
 	}
 
 	if(!strcmp(cmdTop(cmdstack)->text,"$PRIME")){
 		fprintf(stderr,"ERROR: cannot alter $PRIME subvocabulary\n");
-		cmdPop(cmdstack);
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -509,12 +543,13 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if(cmdstack->top < 0){
 		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
 	if(!strcmp(cmdTop(cmdstack)->text,"$PRIME")){
 		fprintf(stderr,"ERROR: cannot shut $PRIME subvocabulary\n");
-		cmdPop(cmdstack);
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -525,6 +560,7 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if (tempSub == NULL){
 		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack)->text);
+		cmdClear(cmdstack);
 		return;
 	}
 	tempSub->open = 0;
@@ -537,6 +573,7 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if(cmdstack->top < 0){
 		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
+		cmdClear(cmdstack);
 		return;
 	}
 
@@ -547,6 +584,7 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if (tempSub == NULL){
 		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack)->text);
+		cmdClear(cmdstack);
 		return;
 	}
 	tempSub->open = 1;

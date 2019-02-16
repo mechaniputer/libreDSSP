@@ -66,6 +66,7 @@ void grow(stack * stack);
 cmdstack * newCmdStack();
 command * cmdTop(cmdstack * cmdstack);
 command * cmdPop(cmdstack * cmdstack);
+void cmdClear(cmdstack * cmdstack);
 void cmdPush(cmdstack * cmdstack, command * cmd);
 void cmdGrow(cmdstack * cmdstack);
 void newCommand(command * oldcmd, command ** newcmd);
