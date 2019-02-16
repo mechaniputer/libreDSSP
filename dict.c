@@ -97,6 +97,7 @@ word * newWord(subdict * dict){
 	temp->array = malloc(15*sizeof(command));
 	temp->length = -1;
 	temp->capacity = 15;
+	temp->next = NULL;
 	// temp should now point to fresh word
 	return temp;
 }
@@ -212,6 +213,7 @@ subdict * newDict(dict * vocab, char * name){
 	tempSub->name = name;
 	tempSub->open = 1;
 	tempSub->next = NULL;
+	tempSub->wordlist = NULL;
 	vocab->grow = tempSub;
 	return tempSub;
 }

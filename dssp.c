@@ -30,13 +30,9 @@ int main(int argc, char *argv[]){
 	cmdstack * cmdstack = newCmdStack();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
-	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
-	vocab->sub->name = "$DEFAULT";
-	vocab->sub->open = 1;
-	vocab->sub->next = NULL;
-
-	// Built-ins
 	vocab->core = NULL;
+	vocab->grow = NULL;
+	vocab->var = NULL;
 
 	// Arithmetic
 	defCore("+", plus, vocab);
@@ -90,6 +86,9 @@ int main(int argc, char *argv[]){
 	defCore("DEEP", stackDepth, vocab);
 
 	// Sub-Dictionaries
+	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
+	vocab->sub->name = "$DEFAULT";
+	vocab->sub->open = 1;
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
 
