@@ -55,12 +55,12 @@ word * wordSearch(char * name, dict * vocab){
 	while(tempSub != NULL){
 		if((tempSub->open) && (tempSub->wordlist != NULL)){
 			tempWord = tempSub->wordlist;
-			do{
+			while(tempWord != NULL){
 				if(!strcmp(tempWord->name, name)){
 					return tempWord;
 				}
 				tempWord = tempWord->next;
-			}while(tempWord != NULL);
+			}
 		}
 		tempSub = tempSub->next;
 	}
