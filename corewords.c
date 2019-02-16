@@ -90,7 +90,7 @@ void negate(stack * stack, cmdstack * cmdstack, dict * vocab){
 		cmdClear(cmdstack);
 		return;
 	}
-	stack->array[stack->top] = -1 *stack->array[stack->top];
+	stack->array[stack->top] = -(stack->array[stack->top]);
 	return;
 }
 
@@ -100,7 +100,7 @@ void absval(stack * stack, cmdstack * cmdstack, dict * vocab){
 		cmdClear(cmdstack);
 		return;
 	} else if(top(stack) < 0) {
-		stack->array[stack->top] = -1 * (stack->array[stack->top]);
+		stack->array[stack->top] = -(stack->array[stack->top]);
 	}
 	return;
 }
