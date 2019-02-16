@@ -101,19 +101,20 @@ int main(int argc, char *argv[]){
 	if(argc >= 2){
 		printf("Attempting to open %s... ",argv[1]);
 		FILE *file = fopen(argv[1], "r");
-		char buffer[160];
-		char * b = buffer;
-		size_t bufsize = 160;
+		char * bufptr = NULL;
+		size_t bufsize = 0;
 		size_t characters;
 
 		if (file == 0){
 			printf("Failed!\n");
 		}else{
 			printf("Success!\n");
-			while(EOF != (characters = getline(&b, &bufsize, file))){
-				buffer[characters-1] = '\0';
-				stackInput(buffer, cmdstack);
+			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
+				bufptr[characters-1] = '\0';
+				stackInput(bufptr, cmdstack);
 				run(workStack, cmdstack, vocab);
+				free(bufptr);
+				bufsize = 0;
 			}
 			fclose(file);
 		}
