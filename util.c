@@ -88,7 +88,7 @@ void run(stack * workStack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-// Takes command line and splits it by spaces, pushes it onto stack in reverse order
+// Takes command line and splits it by spaces or tabs, pushes it onto stack in reverse order
 void stackInput(char * line, cmdstack * cmdstack){
 	char ch;
 	int i = 0;
@@ -123,11 +123,11 @@ void stackInput(char * line, cmdstack * cmdstack){
 			}
 			seqtail->chars[i++] = '\"';
 
-		} else if(ch != ' ') { // All normal characters outside comments and print statements
+		} else if((ch != ' ') && (ch != '\t')) { // All normal characters outside comments and print statements
 			if(i>80) break; // TODO This limits a word or comment to 80 chars due to fixed size in struct
 			seqtail->chars[i++] = ch;
 
-		} else if ((ch == ' ') && (i != 0)) { // If (i == 0) then it's either an extra space or it follows a comment or ."hello" style print
+		} else if (((ch == ' ') || (ch == '\t')) && (i != 0)) { // If (i == 0) then it's either an extra space or it follows a comment or ."hello" style print
 			// Time to append a new sequence element
 			seqtail->chars[i] = '\0';
 			seqprev = seqtail;
