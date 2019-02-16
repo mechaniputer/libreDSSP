@@ -274,6 +274,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 		cmdPush(cmdstack, result);
 	}else{
 		if((cmdstack->top < 3) || (stack->top < 0)){
+			free(branchCom);
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 			cmdClear(cmdstack);
 			return;

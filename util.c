@@ -156,7 +156,9 @@ void stackInput(char * line, cmdstack * cmdstack){
 		newcom->func = NULL;
 
 		cmdPush(cmdstack, newcom);
+		seqprev = seqtail;
 		seqtail = seqtail->next;
+		free(seqprev);
 	}
 	return;
 }
