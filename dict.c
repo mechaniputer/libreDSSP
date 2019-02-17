@@ -172,7 +172,7 @@ void growWord(word * word, char * com, dict * vocab){
 	word->length++;
 	if(word->length >= word->capacity) {
 		word->capacity = word->length * 2;
-		word->array = realloc(word->array, word->capacity);
+		word->array = realloc(word->array, word->capacity * sizeof(command));
 	}
 	assert(word->length < word->capacity);
 	word->array[word->length].text = com;

@@ -22,7 +22,7 @@
 typedef struct elem elem;
 struct elem
 {
-	char chars[82];
+	char chars[162];
 	int value;
 	elem * next;
 };
