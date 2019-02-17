@@ -123,7 +123,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 			if(i>160){
 				fprintf(stderr,"ERROR: Maximum expression length exceeded\n");
 				cmdClear(cmdstack);
-				free(seqtail);
+				free(seqtail); // FIXME free entire sequence to prevent memory leak
 				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
 			}
 
@@ -138,7 +138,7 @@ void stackInput(char * line, cmdstack * cmdstack){
 			if(i>160){
 				fprintf(stderr,"ERROR: Maximum expression length exceeded\n");
 				cmdClear(cmdstack);
-				free(seqtail);
+				free(seqtail); // FIXME free entire sequence to prevent memory leak
 				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
 			}
 			seqtail->chars[i++] = ch;
@@ -149,19 +149,27 @@ void stackInput(char * line, cmdstack * cmdstack){
 			seqtail->chars[i++] = '.';
 			seqtail->chars[i++] = '\"';
 			while((ch = line[j++]) != '\"'){
+				if(ch == '\0') break;
 				if(i>160){
 					cmdClear(cmdstack);
-					free(seqtail);
+					free(seqtail); // FIXME free entire sequence to prevent memory leak
 					return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
 				}
 				seqtail->chars[i++] = ch;
 			}
-			seqtail->chars[i++] = '\"';
+			if (ch == '\"'){
+				seqtail->chars[i++] = ch;
+			}else{
+				fprintf(stderr,"ERROR: Print statement missing endquote\n");
+				cmdClear(cmdstack);
+				free(seqtail); // FIXME free entire sequence to prevent memory leak
+				return;
+			}
 
 		} else if((ch != ' ') && (ch != '\t')) { // All normal characters outside comments and print statements
 			if(i>160){
 				cmdClear(cmdstack);
-				free(seqtail);
+				free(seqtail); // FIXME free entire sequence to prevent memory leak
 				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
 			}
 			seqtail->chars[i++] = ch;
