@@ -13,7 +13,7 @@ Pull requests to solve bugs or improve style are welcome.
 Run 'make' to build it. You may wish to use the included tutorial by running './dssp TUTOR.DSP'.
 Vim source highlighting files are included in vim/.
 
-## What works:
+## What works
 	* Basic math operations (+,*,-,/)
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
@@ -33,7 +33,7 @@ Vim source highlighting files are included in vim/.
 	* GNU readline support
 	* Read from file at start
 
-## What doesn't work yet:
+## What doesn't work yet
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses
@@ -50,7 +50,7 @@ Vim source highlighting files are included in vim/.
 	* Various bitwise operations
 	* Everything unaccounted for in this README
 
-## Possible future goals:
+## Possible future goals
 	* Full documentation and tutorial
 	* Floating point math
 	* DSSP Compiler
