@@ -9,6 +9,10 @@ The ultimate goal of this project is not to merely replicate DSSP as it once exi
 
 Pull requests to solve bugs or improve style are welcome.
 
+## Getting started
+Run 'make' to build it. You may wish to use the included tutorial by running './dssp TUTOR.DSP'.
+Vim source highlighting files are included in vim/.
+
 ## What works:
 	* Basic math operations (+,*,-,/)
 	* NEG, ABS
