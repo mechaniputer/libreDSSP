@@ -58,6 +58,7 @@ int isNum(char * foo){
 
 // Looks at cmdTop(cmdstack), decides what to do until cmdstack is empty
 void run(stack * workStack, cmdstack * cmdstack, dict * vocab){
+	if(cmdstack->unfinished_comment || cmdstack->unfinished_func) return;
 	command *temp;
 
 	if((cmdstack->top) > -1) do{
@@ -89,6 +90,10 @@ void run(stack * workStack, cmdstack * cmdstack, dict * vocab){
 }
 
 // Takes command line and splits it by spaces or tabs, pushes it onto stack in reverse order
+// This function is in desperate need of being rewritten.
+// It is difficult to read but the goal is fairly straightforward.
+// A line is given as input, and it must be split into commands which may be comments, print statements, function definitions, or anything else.
+// The hard part is parsing to find the boundaries between these types of things.
 void stackInput(char * line, cmdstack * cmdstack){
 	char ch;
 	int i = 0;
@@ -97,35 +102,74 @@ void stackInput(char * line, cmdstack * cmdstack){
 	elem * seqtail;
 	command * newcom;
 
-	seqtail = malloc(sizeof(elem));
-	seqtail->next = NULL;
+	if(cmdstack->unfinished_comment){
+		assert(cmdstack->incomplete_tail != NULL);
+		seqtail = cmdstack->incomplete_tail;
+		i = strlen(seqtail->chars);
+	}else if (cmdstack->unfinished_func){
+		seqtail = malloc(sizeof(elem));
+		seqtail->next = cmdstack->incomplete_tail;
+	}else{
+		seqtail = malloc(sizeof(elem));
+		seqtail->next = NULL;
+	}
 
 	// TODO Not safe or efficient
 	// Handles comments, ."hello" printing, general command strings
 	while(line[j] != '\0'){
 		ch = line[j++];
 
-		if (ch == '[') {
-			seqtail->chars[i++] = '[';
-			while((ch = line[j++]) != ']'){
-				if(i>160) break; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+		if(cmdstack->unfinished_comment == 1){ // unfinished (potentially multiline) comment
+			if(i>160){
+				fprintf(stderr,"ERROR: Maximum expression length exceeded\n");
+				cmdClear(cmdstack);
+				free(seqtail);
+				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+			}
+
+			if (ch == ']'){
+				seqtail->chars[i++] = ch;
+				cmdstack->unfinished_comment = 0;
+				cmdstack->incomplete_tail = NULL;
+			}else{ // Not the terminating char but still belongs in the comment
 				seqtail->chars[i++] = ch;
 			}
-			seqtail->chars[i++] = ']';
-
+		}else if (ch == '[') {
+			if(i>160){
+				fprintf(stderr,"ERROR: Maximum expression length exceeded\n");
+				cmdClear(cmdstack);
+				free(seqtail);
+				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+			}
+			seqtail->chars[i++] = ch;
+			cmdstack->unfinished_comment = 1; // 1 indicates an unfinished comment, possibly spanning several lines
+			cmdstack->incomplete_tail = seqtail;
 		} else if((line[j-1] =='.') && (line[j] == '\"')) {
 			j++;
 			seqtail->chars[i++] = '.';
 			seqtail->chars[i++] = '\"';
 			while((ch = line[j++]) != '\"'){
-				if(i>160) break; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+				if(i>160){
+					cmdClear(cmdstack);
+					free(seqtail);
+					return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+				}
 				seqtail->chars[i++] = ch;
 			}
 			seqtail->chars[i++] = '\"';
 
 		} else if((ch != ' ') && (ch != '\t')) { // All normal characters outside comments and print statements
-			if(i>160) break; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+			if(i>160){
+				cmdClear(cmdstack);
+				free(seqtail);
+				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
+			}
 			seqtail->chars[i++] = ch;
+			if (ch == ':'){ // Beginning of a function definition
+				cmdstack->unfinished_func++; // There might be several nested function declarations! We can't fill the cmdstack until all of them are complete.
+			}else if (cmdstack->unfinished_func && (ch == ';')){
+				cmdstack->unfinished_func--;
+			}
 
 		} else if (((ch == ' ') || (ch == '\t')) && (i != 0)) { // If (i == 0) then it's either an extra space or it follows a comment or ."hello" style print
 			// Time to append a new sequence element
@@ -135,6 +179,20 @@ void stackInput(char * line, cmdstack * cmdstack){
 			seqtail->next = seqprev; // New tail points to prev to make reverse list
 			i=0;
 		}
+	}
+
+	if(cmdstack->unfinished_comment){
+		seqtail->chars[i] =  '\0';
+		return;
+	}else if(cmdstack->unfinished_func){
+		if(i > 0){ // The current seqtail has stuff
+			seqtail->chars[i] =  '\0';
+			cmdstack->incomplete_tail = seqtail;
+		}else{
+			cmdstack->incomplete_tail = seqtail->next;
+			free(seqtail);
+		}
+		return;
 	}
 
 	// Get rid of pesky empty element
@@ -163,8 +221,13 @@ void stackInput(char * line, cmdstack * cmdstack){
 	return;
 }
 
-char * prompt(){
-	char * line = readline ("* ");
+char * prompt(int unfinished){
+	char *line;
+	if(unfinished){
+		line = readline ("? ");
+	}else{
+		line = readline ("* ");
+	}
 	//Check for EOF.
 	if (!line){
 		printf("\n");

@@ -19,6 +19,8 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include "elem.h"
+
 typedef struct variable variable;
 typedef struct word word;
 typedef struct coreword coreword;
@@ -40,6 +42,9 @@ struct cmdstack
 {
 	int capacity;
 	int top;
+	int unfinished_comment;
+	int unfinished_func;
+	elem * incomplete_tail;
 	command * array;
 };
 

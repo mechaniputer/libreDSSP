@@ -19,6 +19,7 @@
 #include <string.h>
 #include <assert.h>
 #include "stack.h"
+#include "elem.h"
 
 stack * newStack() {
 	stack * new_stack = malloc(sizeof(stack));
@@ -57,6 +58,9 @@ cmdstack * newCmdStack(){
 	new_cmdstack->array = malloc(10*sizeof(command));
 	new_cmdstack->capacity = 10;
 	new_cmdstack->top = -1; // -1 indicates empty stack
+	new_cmdstack->unfinished_comment = 0;
+	new_cmdstack->unfinished_func = 0;
+	new_cmdstack->incomplete_tail = NULL;
 	return new_cmdstack;
 }
 
@@ -75,6 +79,9 @@ command * cmdPop(cmdstack * cmdstack) {
 // Dumps all pending commands and returns
 void cmdClear(cmdstack * cmdstack) {
 	cmdstack->top = -1;
+	cmdstack->unfinished_comment = 0;
+	cmdstack->unfinished_func = 0;
+	cmdstack->incomplete_tail = NULL;
 	return;
 }
 

@@ -122,7 +122,7 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		// Show prompt, get line of input
-		stackInput(prompt(),cmdstack);
+		stackInput(prompt(cmdstack->unfinished_comment || cmdstack->unfinished_func), cmdstack);
 		run(workStack, cmdstack, vocab);
 	}
 	return 0;

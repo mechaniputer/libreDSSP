@@ -1,4 +1,22 @@
-[TODO Fix formatting once multiline functions and longer comments/prints work]
+[  This file is part of libreDSSP.                                       ]
+[                                                                        ]
+[  Copyright 2019 Alan Beadle                                            ]
+[                                                                        ]
+[  libreDSSP is free software: you can redistribute it and/or modify     ]
+[  it under the terms of the GNU General Public License as published by  ]
+[  the Free Software Foundation, either version 3 of the License, or     ]
+[  (at your option) any later version.                                   ]
+[                                                                        ]
+[  libreDSSP is distributed in the hope that it will be useful,          ]
+[  but WITHOUT ANY WARRANTY; without even the implied warranty of        ]
+[  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         ]
+[  GNU General Public License for more details.                          ]
+[                                                                        ]
+[  You should have received a copy of the GNU General Public License     ]
+[  along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.    ]
+
+[Interactive libreDSSP tutor]
+
 : next CR STEP BR 0 step0 1 step1 2 step2 3 step3 4 step4 5 step5 ELSE allDone ;
 
 : incStep STEP 1 + ! STEP ;
@@ -7,31 +25,56 @@
 : nextRemind CR ." (Enter 'next' when you are ready to continue)" CR ;
 
 [Printing to the screen]
-: step0 ." As a first step, try making the interpreter display a message. You can do" CR ." this by typing a period followed by a double quote, followed by your message," CR ." and finally another double quote before hitting enter. For example you" CR ." could type .'hello' but with double quotes in place of single quotes" CR nextRemind incStep ;
+: step0 ." As a first step, try making the interpreter display a message. You can do" CR
+	." this by typing a period followed by a double quote, followed by your message," CR
+	." and finally another double quote before hitting enter. For example you" CR
+	." could type .'hello' but with double quotes in place of single quotes" CR
+	nextRemind incStep ;
 
 [Placing values, viewing top value]
-: step1 ." You can place integers on the stack by typing them and hitting enter." CR ." You can then enter '.' to print the top of the stack.  Try entering" CR ." an integer and then view it with '.'" CR incStep nextRemind ;
+: step1 ." You can place integers on the stack by typing them and hitting enter." CR
+	." You can then enter '.' to print the top of the stack.  Try entering" CR
+	." an integer and then view it with '.'" CR
+	incStep nextRemind ;
 
 [Viewing entire stack with multiple values]
-: step2 DEEP BR 0 s2d0 1 s2d1 ELSE s2dd ." Note: you can perform several actions in order" ." by separating them with spaces" CR ." like this: 7 3 ." CR nextRemind ;
+: step2 DEEP BR 0 s2d0 1 s2d1 ELSE s2dd
+	." Note: you can perform several actions in order by separating them with spaces" CR
+	." like this: 7 3 ." CR
+	nextRemind ;
 : s2d0 ." You must add something to the stack before continuing." CR ;
-: s2d1 ." Good. Now add another value to the stack and " ."type '..' to view the whole" CR ." stack at once." CR incStep ;
-: s2dd ." Looks like you added more than one value to the stack. " ."Now enter '..' to view" CR ." the whole stack at once." CR incStep ;
+: s2d1 ." Good. Now add another value to the stack and type '..' to view the whole" CR
+	." stack at once." CR
+	incStep ;
+: s2dd ." Looks like you added more than one value to the stack. Now enter '..' to view" CR
+	." the whole stack at once." CR
+	incStep ;
 
 [Basic arithmetic]
 : step3 DEEP 1 - BR+ s3enough s3few nextRemind ;
 : s3few ." Please make sure that there are several values on the stack before continuing." CR ;
-: s3enough ." Now we will learn how to perform basic arithmetic on integers using the stack." CR ." The four basic arithmetic operators (+ - * /) all work in a similar way. Entering" CR ." any of these four operators will apply that operator" ." to the top two elements of" CR ." the stack, leaving the result in their place. Give it a try and use '..' to view" CR ." the effect that it has on the stack." CR DEEP ! PREVDEPTH incStep ;
+: s3enough ." Now we will learn how to perform basic arithmetic on integers using the stack." CR
+	." The four basic arithmetic operators (+ - * /) all work in a similar way. Entering" CR
+	." any of these four operators will apply that operator" ." to the top two elements of" CR
+	." the stack, leaving the result in their place. Give it a try and use '..' to view" CR
+	." the effect that it has on the stack." CR
+	DEEP ! PREVDEPTH incStep ;
 
 [Clearing the stack]
 : step4 PREVDEPTH DEEP - BR- step4bad step4ok nextRemind ;
-: step4bad ." It doesn't look like you did any math operations yet." CR ." Please try one of: + - * /" CR ;
-: step4ok ." Nice. Now let's completely clear the stack. There are several ways to do this." CR ." One way is to repeatedly enter 'D' to drop the top element until none are left." CR ." Another way is to enter 'DS' to drop all elements at once." CR incStep ;
+: step4bad ." It doesn't look like you did any math operations yet." CR
+	." Please try one of: + - * /" CR ;
+: step4ok ." Nice. Now let's completely clear the stack. There are several ways to do this." CR
+	." One way is to repeatedly enter 'D' to drop the top element until none are left." CR
+	." Another way is to enter 'DS' to drop all elements at once." CR
+	incStep ;
 
 [Defining variables]
 : step5 DEEP BR 0 step5empty ELSE step5bad CR ;
-: step5empty ." Very good. Unfortunately the rest of the tutorial has yet to be implemented" CR allDone ;
-: step5bad ." You need to clear the stack before continuing." CR nextRemind ;
+: step5empty ." Very good. Unfortunately the rest of the tutorial has yet to be implemented" CR
+	allDone ;
+: step5bad ." You need to clear the stack before continuing." CR
+	nextRemind ;
 
 [Defining functions]
 [Defining functions with conditionals]
@@ -40,7 +83,9 @@
 [Using recursion]
 [Subdictionaries]
 
-: allDone ." Congratulations, you have completed the libreDSSP tutorial!" CR ." As a next step, you may wish to study the source file of this tutorial." CR CR BYE ;
+: allDone ." Congratulations, you have completed the libreDSSP tutorial!" CR
+	." As a next step, you may wish to study the source file of this tutorial." CR CR
+	BYE ;
 
 : cheat 5 6 3 DO next + next DS next ;
 
