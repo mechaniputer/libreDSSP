@@ -26,7 +26,7 @@
 [Clearing the stack]
 : step4 PREVDEPTH DEEP - BR- step4bad step4ok nextRemind ;
 : step4bad ." It doesn't look like you did any math operations yet." CR ." Please try one of: + - * /" CR ;
-: step4ok ." Nice. Now let's completely clear the stack. There are several ways to do this." CR ." One way is to repeatedly enter 'D' to drop the top element until none are left." CR ." another way is to enter 'DS' to drop all elements at once." CR incStep ;
+: step4ok ." Nice. Now let's completely clear the stack. There are several ways to do this." CR ." One way is to repeatedly enter 'D' to drop the top element until none are left." CR ." Another way is to enter 'DS' to drop all elements at once." CR incStep ;
 
 [Defining variables]
 : step5 DEEP BR 0 step5empty ELSE step5bad CR ;
