@@ -254,7 +254,7 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 	variable * tempVar;
 
 	if(cmdName->text[0] == '\0'){
-		fprintf(stderr,"ERROR: command stack contains empty string\n");
+		fprintf(stderr,"ERROR: command stack contains empty string. Please file a libreDSSP bug report because this should never happen.\n");
 		cmdClear(cmdstack);
 		return;
 	}
