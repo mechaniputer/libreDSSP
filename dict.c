@@ -105,7 +105,6 @@ word * newWord(subdict * dict){
 // Attempts to define a new word
 void defWord(cmdstack * cmdstack, dict * vocab){
 	word * temp;
-	command * to_free;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
@@ -113,8 +112,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 	// Skip over ':'
 	if(cmdstack->top >= 2){
-		to_free = cmdPop(cmdstack);
-		if(to_free != NULL) free(to_free->text);
+		cmdDrop(cmdstack);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 		cmdClear(cmdstack);
@@ -137,15 +135,14 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->grow);
-			to_free = cmdPop(cmdstack);
+			command *to_free = cmdPop(cmdstack);
 			assert(to_free->text != NULL);
 			strcpy(temp->name, to_free->text);
 			free(to_free->text);
 		}else{
 			// Wipe old definition
 			temp->length = -1;
-			to_free = cmdPop(cmdstack);
-			if(to_free->text != NULL) free(to_free->text);
+			cmdDrop(cmdstack);
 		}
 
 	}else{
@@ -156,7 +153,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 	while(strcmp(";", cmdTop(cmdstack)->text)){
 		// TODO: This could be changed to improve threading
-		growWord(temp, cmdPop(cmdstack)->text, vocab);
+		growWord(temp, cmdPop(cmdstack)->text, vocab); // Cannot free the text array because it will be used by the word definition hereafter
 
 		if(cmdstack->top < 0){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
@@ -165,8 +162,7 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		}
 	}
 	// Get rid of ";"
-	to_free = cmdPop(cmdstack);
-	if(to_free->text != NULL) free(to_free->text);
+	cmdDrop(cmdstack);
 
 	// Successful definition, print name
 	printf("%s\n",temp->name);
