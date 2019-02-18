@@ -1,0 +1,125 @@
+The following text was produced using Google Translate on a portion of this document: http://www.mathnet.ru/links/6766d24f14d0cf126d1f7bcd9e8b83f7/ps182.pdf
+Note that this document only refers to one implementation of DSSP so libreDSSP does not need to perfectly match this behavior. This is just yet another source of hints.
+Also look at http://brokestream.com/daf.txt
+The implementation described below actually has object-oriented features which are described in a later section of the document.
+In some places 'DSSP' translated as 'PRSP'. They are the same thing in the source material. The formatting is sometimes misleading but you can refer to the original document when in doubt.
+
+
+4. Characteristics of language PRSP-T and its libraries Language
+
+DSSP-T is a trine-oriented version of the DSSP language, in which the best Trinity virtual machine and ternary DSSP 49 were preserved features of different versions of DSSP ([13] –22]) developed for binary machines.
+Consider the main features of the PRSP-T language, highlighting those features that significantly distinguish it from the PRSP language described in [22].
+
+
+4.1. The main features of the language PRSP-T
+
+The syntax of DSSP-T language is as simple as the usual DSSP. The program is recorded as a sequence of words in a free format, word delimiters are spaces (or characters equal to them), as well as comments. The dictionary is built without sub-dictionary and section divisions, but it can be cleaned, and it is possible to mark words that must always remain visible (undeletable) in the dictionary.
+
+In the language of PRSP-T, various versions of commentary brackets are allowed so that none of the symbols ([{}]) used for comments should prohibit a programmer from using his own words. To customize the desired type of comments, the following words are provided: (), [], and {}. Comments are also allowed, separated by double opening brackets ((, [[and {{until the end of the current line.
+
+PRSP has a two-stage architecture. All basic operations perform operations on data placed on the operand stack (arithmetic stack). One element of the stack is associated with one machine word of 27 trits or 3 days. The stack of operands grows in the direction of increasing addresses. The control stack (or the stack of returns) is located in memory so as to grow towards the stack of operands (in the direction of decreasing addresses). The elements of the stack are 27-word words, which, as a rule, are treated as return addresses from the procedures. It is assumed that in addition to the return addresses to the control stack, a special kind of structure can be placed - the so-called situation traps. To declare new words representing certain entities in the PRSP program, special service words are used, the so-called compiler words:
+
+PROGRAM: VALUE VAR VCTR ARR
+2 TEXT SITUATION :ASM ;ASM
+
+In the PRSP-T language, the name of the main word of the program, from which the execution of the entire program is to start, is usually set in the first line of the source program after the PROGRAM service word (example: PROGRAM DKINT). A word is a procedure (named P) in the PRSP program is defined as follows:
+
+P P1 P2 ... PN;
+
+When executed, such a procedure P will sequentially trigger the execution of the words from which its body is constructed: P1, ... PN.
+
+Moreover, in the PRSP program it is not required that all words used in such a definition should already be defined in advance. In the designated body of the new procedure, it is allowed to use those words that can be defined later. In general, the declaration of a variable in the PRSP program looks like this:
+
+TypeName VAR Name Perform
+{Example:} TRYTE VAR X
+
+The type of a variable depends on which word with a type name was used before its declaration. If the type has not been set, then it is assumed by default (at present it is the TWORD type that defines the ternary word). When declaring a vector (one-dimensional array):
+
+{N} VCTR Vector name
+{Example:} 10 VCTR Y
+
+its upper bound N is set in the stack (lower bound = 0). So in this example, the vector Y [0: N] is declared with N + 1 elements. When declaring a multidimensional array of the form:
+
+{L1, .., Lm, m} ARR NameMas
+{Example:} 10 20 2 ARR M
+
+on the stack, its dimension m and m of the upper bounds for each dimension are specified. So the example declares an array M [0: 10.0: 20]. The type of the elements of the array being declared is determined by the word with the type name, which was used immediately before the declaration. Initially, in the PRSP-T language, there was only a minimal set of prefix operations on variables and arrays: operations of taking values (by name), addresses ’ and assigning values ! . And in the basic vocabulary of the language for declaring variables and as elements of arrays, only words are provided — types that represent the ability to work with trite, two-string values and trinity words:
+
+TRYTE DTRYTE TWORD
+
+At the same time, it was assumed that the language would be complemented by means of object-oriented programming, which would allow extending the set of prefix operations (methods) for the existing data types, as well as creating new data types. In the language of PRSP-T, in addition to the decimal and 16-decimal numbers, you can also specify the threefold and 9th numbers, which characterize the values in the so-called ternary symmetric number system. Each of these numbers is identified by special prefixes:
+
+{nine-digit numbers:} # 8765 0n qwer 0N QWER # 1234 2
+{ternary numbers:}. ++ 0––. . ++ 0–– 0t ++ 0–– 0T ++ 0–– 3
+{16 numbers:} $ 13579ace 0x1290abcd 0X345678EF 4
+{10 numbers:} 56789 +24680 –13579.
+
+Latin capital letters and small letters in the numbers do not differ, and you can use both digits (8765) and letters (qwer or QWER) to represent negative nine-digit numbers (–1, –2, –3, –4). For the representation of symbolic constants, the generally accepted form of their entry in the apostrophes of ‘X’ (as in C and Pascal) is used.
+
+Although numeric constants - characters are automatically recognized (by their specific images) as special words, in the PRSP-T language, you can declare a word that represents a constant, giving it the desired name:
+
+{N} VALUE Nickname
+{Example:} 10 VALUE Ten
+ 
+With such a declaration, the value of the constant N (10) is set in the stack, which will be placed on the arithmetic stack when calling the constant word Ten. In the PRSP-T language, you can also define a word that defines a constant string:
+
+TEXT NameX String
+{Example:} TEXT Red “Red”
+
+When calling the name of such a constant, the strings in the arithmetic stack will contain its parameters: the address of the beginning of the string and the length (number of characters). In the language of DSSP-T, the usual notation of words for operations of integer arithmetic is preserved, but they are performed on numbers represented in the three-fold symmetric number system, so that the results of some operations (for example, shifts and divisions with the remainder) may be different than in binary machine:
+
+1 {division with remainder:} 47/3 {[16, -1] instead of [15.2]}
+2 {right shift divides by 3:} 47 SHR {[16] instead of [23]}
+3 {left shift multiplies by 3:} 13 SHL {[39] instead of [26]}
+
+In the PRSP-T language, there are no words &, & 0, ‘+’ and INV that performed the usual actions on individual bits of a binary machine word. Instead, there are words that allow you to perform various actions on the nitas of the ternary machine word:
+
+TMIN TMAX TADD TMUL NEG
+
+For access to single and double trite, as well as to the words of the ternary memory, PRSP-T provides read operations: @T, @TT and @W and write:! T,! TT and! W. To advance through memory, add 3 to the value of the address to the next triple word In the language of PRSP-T, the full range of PRSP is presented - the teams of conditional call procedures provided for the organization of branches in the PRSP program:
+
+IF– IF0 IF+ BR– BR0 BR+ BRS BR ELSE
+
+To provide the possibility of calculating logical conditions equivalent to the means of constructing logical expressions of high-level languages, PRSP-T has relational operations for comparing two numbers: <, <=, =, <>,> = and>, as well as operations of logical connectives : NOT, AND, and OR, producing a value of 1 (YES) or 0 (NO).
+
+In addition, in the language of PRSP-T, words are also provided for operations for comparing two numbers and estimating the sign of a number: CMP and SGN, providing threefold results: –1 (less), 0 (equal), +1 (more), which Further, they can be used to calculate a complex ternary condition by applying the third-floor operations: TMIN, TMAX, TADD, TMUL and NEG.
+
+During the creation and development of PRSPs, two different
+concepts of the organization of cycles. The first is based on the fact that the loop condition must be specified in the loop command itself. The second implies that the exit from the cycle can be carried out from any place on the body of the cycle by special commands, and the cycle command itself should only ensure that the procedure of its body is repeated.
+
+The first concept was identified by the DWON team in the first version of PRSP-NC [13], which essentially inherited the command of the <DW P> cycle of the Setun-70 machine. This command repeatedly called the following procedure, while the top of the stack remained non-zero. Then it was proposed (in the PRSP-PM [15]) to improve this cycle command and allocate the condition calculation to a separate procedure, and remove the condition value from the stack after it was checked. So there was a design
+
+The first concept was identified by the DWON team in the first version of PRSP-NC [13], which essentially inherited the command of the <DW P> cycle of the Setun-70 machine. This command repeatedly called the following procedure, while the top of the stack remained non-zero. Then it was proposed (in the PRSP-PM [15]) to improve this cycle command and allocate the condition calculation to a separate procedure, and remove the condition value from the stack after it was checked. So there was a design
+
+WHILE condition DO body
+
+which later (in PRSP / S [18]) turned into a team:
+
+condition DW body
+
+Together with it, the DO-team was proposed for organizing a loop with a counter, as well as a team of an infinite loop LOOP, which perform these types of cycles more efficiently than the universal DW command.
+
+The second concept of cycle organization was proposed in the PRSP-80 version [14]. Commands appeared in it to call the loop body procedure a specified or infinite number of times: DO, RP. Special commands were provided for emergency exit from the loop by condition or unconditionally: EX–, EX0, EX + and EX. These commands could carry out the required exit from the cycle from any point of both the procedure itself and the procedures it caused. Both concepts of organizing cycles were used in PRSP for a long enough period and therefore became familiar to many PRSP program developers. In order to provide each of them with the desired way of organizing cycles, teams of cycles of both these concepts are provided in the language of PRSP-T:
+
+DW DO– LOOP RP DO EX EX + EX– EX0
+
+The language of PRSP-T supports the full version of the structured mechanism for handling exceptional situations as in PRSP / S [18]. Commands are provided for setting up three types of reactions (Notify, Escape, Retry) on a given (body trace) situation (a); on the situation passed through the stack (b); ANY arbitrary situation (c):
+
+(a B C)
+ON S! React, ON_ S! _NOTIFY React, ON ANY React
+EON S! React, ON_ S! _ESCAPE React, EON ANY React
+RON S! React, ON_ S! _RETRY React, RON ANY React
+
+Previously required to declare the situation as a variable (or object) of a special kind. To do this, use the corresponding declaration declaration:
+
+SITUATION NameSit UltimateReaction
+{Example:} SITUATION S! FReactOnS!
+
+With such a declaration, in addition to the name of the situation, the name of the word is also specified - the final reaction procedure that will be called (as Notify) an excited situation will not meet any established reaction). Word from situation name S! causes excitement of the situation. You can also initiate a situation passed through the stack by using the _RAISE command:
+
+ON_ S! {S!} ... {S!} _RAISE {}
+
+or re-initiate the same situation with the RERAISE team. The program developed in PRSP-TVM should be able to communicate with external devices that can be provided by the currently available execution environment. As the minimum set of input and output devices available to the PRSP program that is executed, it currently provides interactive communication via the terminal console and accessing the files of the operating environment for sequential read and write. When constructing the bodies of some new words of the PRSP program, it may be necessary to program such actions that can only be expressed by the commands of the basic machine (ie, the TVM commands). Therefore, the PRSP-T language provides the ability to define a new PRSP word by specifying the procedure for its execution in the TVM assembler language. Such a definition is given between the official words: ASM and; ASM.
+
+
+
