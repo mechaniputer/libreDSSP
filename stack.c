@@ -71,9 +71,20 @@ command * cmdTop(cmdstack * cmdstack) {
 }
 
 // If stack is empty, do not use!
+void cmdDrop(cmdstack * cmdstack) {
+	assert(cmdstack->top > -1);
+	cmdFree(&(cmdstack->array[(cmdstack->top)--]));
+}
+
+// If stack is empty, do not use!
 command * cmdPop(cmdstack * cmdstack) {
 	assert(cmdstack->top > -1);
 	return &(cmdstack->array[(cmdstack->top)--]);
+}
+
+// A place to put the stuff you need to do when discarding a command
+void cmdFree(command * to_free){
+	if(to_free->text != NULL) free(to_free->text);
 }
 
 // Dumps all pending commands and returns
@@ -86,6 +97,8 @@ void cmdClear(cmdstack * cmdstack) {
 }
 
 // As we add things to struct command, this needs to be expanded
+// FIXME What is even going on here? Why don't we just store a reference to the struct?
+// FIXME This should be fixed when the command stack is rewritten as a queue.
 void cmdPush(cmdstack * cmdstack, command * cmd) {
 	(cmdstack->top)++;
 	cmdstack->array[cmdstack->top].text = malloc((strlen(cmd->text)+1) * sizeof(char));

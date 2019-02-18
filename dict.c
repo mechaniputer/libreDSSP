@@ -105,6 +105,7 @@ word * newWord(subdict * dict){
 // Attempts to define a new word
 void defWord(cmdstack * cmdstack, dict * vocab){
 	word * temp;
+	command * to_free;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
@@ -112,7 +113,8 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 
 	// Skip over ':'
 	if(cmdstack->top >= 2){
-		cmdPop(cmdstack);
+		to_free = cmdPop(cmdstack);
+		if(to_free != NULL) free(to_free->text);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
 		cmdClear(cmdstack);
@@ -135,12 +137,15 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->grow);
-			strcpy(temp->name, cmdPop(cmdstack)->text);
+			to_free = cmdPop(cmdstack);
+			assert(to_free->text != NULL);
+			strcpy(temp->name, to_free->text);
+			free(to_free->text);
 		}else{
 			// Wipe old definition
-			// TODO: Memory leak
 			temp->length = -1;
-			cmdPop(cmdstack);
+			to_free = cmdPop(cmdstack);
+			if(to_free->text != NULL) free(to_free->text);
 		}
 
 	}else{
@@ -160,7 +165,8 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 		}
 	}
 	// Get rid of ";"
-	cmdPop(cmdstack);
+	to_free = cmdPop(cmdstack);
+	if(to_free->text != NULL) free(to_free->text);
 
 	// Successful definition, print name
 	printf("%s\n",temp->name);

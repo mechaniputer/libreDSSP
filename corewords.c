@@ -140,7 +140,7 @@ void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	if(pop(stack) <= 0){
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	return;
 }
@@ -153,7 +153,7 @@ void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	if(pop(stack) != 0){
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	return;
 }
@@ -166,7 +166,7 @@ void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	if(pop(stack) >= 0){
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	return;
 }
@@ -179,10 +179,10 @@ void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	if(pop(stack) < 0){ // Do the first thing
 		command * temp = cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the second thing
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	return;
 }
@@ -195,10 +195,10 @@ void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	if(pop(stack) == 0){ // Do the first thing
 		command * temp = cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the second thing
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	return;
 }
@@ -211,10 +211,10 @@ void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	if(pop(stack) > 0){ // Do the first thing
 		command * temp = cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the second thing
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	return;
 }
@@ -227,24 +227,24 @@ void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	if(top(stack) < 0){ // Do the first thing
 		command * temp = cmdPop(cmdstack);
-		cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
+		cmdDrop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else if(top(stack) == 0){ // Do the second thing
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 		command * temp = cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 		cmdPush(cmdstack, temp);
 	}else{ // Do the third thing
-		cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
+		cmdDrop(cmdstack);
 	}
 	pop(stack);
 	return;
 }
 
 void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
-	command *result;
+	command *tempcmd;
 	command *branchCom = malloc(sizeof(struct command));
 	branchCom->text = malloc(3*sizeof(char));
 	strcpy(branchCom->text, "BR");
@@ -259,7 +259,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 	if(!strcmp("ELSE", cmdTop(cmdstack)->text)){
 		pop(stack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
 	}else if(temp == atoi(cmdTop(cmdstack)->text)){
 		if((cmdstack->top < 3) || (stack->top < 0)){
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
@@ -267,11 +267,11 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 			return;
 		}
 		pop(stack);
-		cmdPop(cmdstack);
-		newCommand(cmdPop(cmdstack), &result);
+		cmdDrop(cmdstack);
+		tempcmd = cmdPop(cmdstack);
 		while(strcmp("ELSE", cmdPop(cmdstack)->text));
-		cmdPop(cmdstack);
-		cmdPush(cmdstack, result);
+		cmdPop(cmdstack); // FIXME Why is it not safe to free this?
+		cmdPush(cmdstack, tempcmd);
 	}else{
 		if((cmdstack->top < 3) || (stack->top < 0)){
 			free(branchCom);
@@ -279,13 +279,17 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 			cmdClear(cmdstack);
 			return;
 		}
-		cmdPop(cmdstack);
-		cmdPop(cmdstack);
+		cmdDrop(cmdstack);
+		cmdDrop(cmdstack);
 		cmdPush(cmdstack, branchCom);
 	}
 	return;
 }
 
+// FIXME frees are tricky here.
+// FIXME If the stack grows then any prior references to commands on the stack become invalid.
+// FIXME This problem could result in bugs literally anywhere in the interpreter!!!
+// FIXME However those problems seem to manifest here especially because it is one of the only core words where the stack is likely to grow a lot.
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
 	if((cmdstack->top < 0) || (stack->top < 0)){
@@ -293,9 +297,10 @@ void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 		cmdClear(cmdstack);
 		return;
 	}
-	command * repeat;
-
-	newCommand(cmdPop(cmdstack), &repeat);
+	command *repeat; // This one will be the master copy
+	command *to_free = cmdPop(cmdstack); // We must free this before the stack gets a chance to grow
+	newCommand(to_free, &repeat); // This produces a local copy that can't get realloced away if the cmdstack decides to grow
+	cmdFree(to_free);
 
 	int reps = pop(stack);
 
@@ -535,7 +540,7 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	vocab->grow = tempSub;
-	cmdPop(cmdstack);
+	cmdDrop(cmdstack);
 	return;
 }
 
@@ -560,12 +565,12 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack)->text);
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdTop(cmdstack)->text);
 		cmdClear(cmdstack);
 		return;
 	}
 	tempSub->open = 0;
-	cmdPop(cmdstack);
+	cmdDrop(cmdstack);
 	return;
 }
 
@@ -584,12 +589,12 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdPop(cmdstack)->text);
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdTop(cmdstack)->text);
 		cmdClear(cmdstack);
 		return;
 	}
 	tempSub->open = 1;
-	cmdPop(cmdstack);
+	cmdDrop(cmdstack);
 	return;
 }
 

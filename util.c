@@ -67,21 +67,22 @@ void run(stack * workStack, cmdstack * cmdstack, dict * vocab){
 
 		//TODO: Deepen threading support
 		if((temp->func) != NULL){
-			cmdPop(cmdstack);
+			cmdPop(cmdstack); // We still need temp to exist for a little while
 			temp->func(workStack, cmdstack, vocab);
+			//cmdFree(temp); // FIXME Why is it not safe to free this?
 		}else if(isNum(temp->text)){ // Numerical constant
 			push(workStack, atoi(temp->text));
-			cmdPop(cmdstack);
+			cmdDrop(cmdstack); // This frees temp
 
 		}else if (!strcmp(temp->text, ":")){ // Function declaration
 			defWord(cmdstack,vocab);
 
 		}else if (temp->text[0] == '['){ // Comment
-			cmdPop(cmdstack);
+			cmdDrop(cmdstack);
 
 		}else if (!strncmp(temp->text, ".\"", 2)){
 			textPrint(temp->text);
-			cmdPop(cmdstack);
+			cmdDrop(cmdstack);
 
 		}else wordRun(cmdstack, workStack, vocab); // word or variable
 
@@ -225,6 +226,11 @@ void stackInput(char * line, cmdstack * cmdstack){
 		seqprev = seqtail;
 		seqtail = seqtail->next;
 		free(seqprev);
+
+		// FIXME once the cmdstack is rewritten as a queue these frees will be deprecated hopefully
+		// Currently they are needed because we cannot directly use the text field in the command stack or else stuff gets weird
+		free(newcom->text);
+		free(newcom);
 	}
 	return;
 }
@@ -255,6 +261,7 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 
 	if(cmdName->text[0] == '\0'){
 		fprintf(stderr,"ERROR: command stack contains empty string. Please file a libreDSSP bug report because this should never happen.\n");
+		if(cmdName->text != NULL) cmdFree(cmdName);
 		cmdClear(cmdstack);
 		return;
 	}
@@ -264,6 +271,7 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 	if(tempCore != NULL){
 		// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
 		tempCore->func(workStack, cmdstack, vocab);
+		if(cmdName->text != NULL) cmdFree(cmdName);
 		return;
 	}
 
@@ -275,16 +283,19 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 			stackInput(tempWord->array[i].text, cmdstack);
 			cmdstack->array[cmdstack->top].func = tempWord->array[i].func;
 		}
+		//if(cmdName->text != NULL) cmdFree(cmdName); // FIXME Why is it not safe to free this?
 		return;
 	}
 
 	tempVar = varSearch(cmdName->text, vocab);
 	if (tempVar != NULL){ // It's a variable
 		push(workStack,tempVar->value);
+		if(cmdName->text != NULL) cmdFree(cmdName);
 		return;
 	}else{
 		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName->text);
 		cmdClear(cmdstack);
+		if(cmdName->text != NULL) cmdFree(cmdName);
 		return;
 	}
 }
