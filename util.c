@@ -253,7 +253,11 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 	word * tempWord;
 	variable * tempVar;
 
-	if(cmdName->text[0] == '\0') return;
+	if(cmdName->text[0] == '\0'){
+		fprintf(stderr,"ERROR: command stack contains empty string\n");
+		cmdClear(cmdstack);
+		return;
+	}
 
 	// Search core dict first
 	tempCore = coreSearch(cmdName->text, vocab);
