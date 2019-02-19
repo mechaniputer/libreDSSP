@@ -19,7 +19,7 @@ syn match dsspDictWord '\<\%(?\$\|GROW\|SHUT\|USE\)\>'
 syn match dsspVarWord '\<!\>'
 
 syn match dsspBranch '\<BR\>' nextgroup=dsspLabel skipwhite skipempty
-syn match dsspLabel '\<\d\+\>' contained nextgroup=dsspBranchWord skipwhite skipempty
+syn match dsspLabel '\<-\?\d\+\>' contained nextgroup=dsspBranchWord skipwhite skipempty
 syn match dsspLabel '\<ELSE\>' contained
 syn match dsspBranchWord '\<\k\+\>' contained nextgroup=dsspLabel skipwhite skipempty
 
