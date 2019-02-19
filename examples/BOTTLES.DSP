@@ -34,5 +34,6 @@
     ."No more bottles of beer on the wall,"
 	." no more bottles of beer!" CR
     ."Go to the store and buy some more, "
-    99 + TON ." bottles of beer on the wall!"
+    99 +
+	TON ." bottles of beer on the wall!"
     ;
