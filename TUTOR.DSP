@@ -17,10 +17,22 @@
 
 [Interactive libreDSSP tutor]
 
-: next CR STEP BR 0 step0 1 step1 2 step2 3 step3 4 step4 5 step5 ELSE allDone ;
+: next CR STEP BR 
+	0 step0
+	1 step1
+	2 step2
+	3 step3
+	4 step4
+	5 step5
+	6 step6
+	7 step7
+	8 step8
+	9 step9
+	ELSE allDone ;
 
 : incStep STEP 1 + ! STEP ;
 : restart DS 0 ! STEP step0 ;
+: cheat 5 6 3 DO next + next DS next CR step6good 3 DO next ;
 
 : nextRemind CR ." (Enter 'next' when you are ready to continue)" CR ;
 
@@ -29,7 +41,7 @@
 	." this by typing a period followed by a double quote, followed by your message," CR
 	." and finally another double quote before hitting enter. For example you" CR
 	." could type .'hello' but with double quotes in place of single quotes" CR
-	nextRemind incStep ;
+	incStep nextRemind ;
 
 [Placing values, viewing top value]
 : step1 ." You can place integers on the stack by typing them and hitting enter." CR
@@ -70,15 +82,57 @@
 	incStep ;
 
 [Defining variables]
-: step5 DEEP BR 0 step5empty ELSE step5bad CR ;
-: step5empty ." Very good. Unfortunately the rest of the tutorial has yet to be implemented" CR
-	allDone ;
-: step5bad ." You need to clear the stack before continuing." CR
-	nextRemind ;
+: step5 DEEP BR 0 step5empty ELSE step5bad nextRemind ;
+: step5empty ." Very good. Now you will learn to define a function." CR
+	." A function declaration begins with a ':' followed by the name of the function, followed by" CR
+	." the function body, ending with a ';'. Each of these are space-separated. For example to" CR
+	." define a function that adds 2 to the value on top of the stack and prints the result, you could enter:" CR
+	." : addtwo 2 + . ;" CR CR
+	." To proceed, define a function named double which multiplies the value at the top of the" CR
+	." stack by two. You can optionally use the 'C' operator which makes a clone of the item at the top" CR
+	." of the stack. You could also use multiplication." CR
+	incStep ;
+: step5bad ." You need to clear the stack before continuing." CR ;
 
 [Defining functions]
+: double ; [The user must redefine this]
+: step6 42 double BR 84 step6good ELSE step6bad nextRemind ;
+: step6bad ." Uh oh. Your double function isn't working. Try one of the solutions below:" CR
+	." : double C + ;" CR
+	." : double 2 * ;" CR ;
+: step6good ." Nice! Looks like you were able to successfully define the 'double' function!" CR
+	." Here are two valid solutions:" CR
+	." : double C + ;" CR
+	." : double 2 * ;" CR
+	incStep ;
+
+[Using IF conditionals]
+: step7 ." Next you will learn to use conditionals. libreDSSP has many conditional operators including:" CR
+	." IF- IF0 IF+ BR+ BR0 BR- BRS BR" CR
+	." First we will learn about the three IF operators. These operators must be followed by at least one" CR
+	." word. Each type of IF statement has a different condition. If the condition is met then the word following" CR
+	." the IF statement is evaluated normally. If the condition is not met then the next word is skipped." CR
+	." The conditions for each of the IF statements are straightforward. IF+ evaluates the next word if the top" CR
+	." of the stack is a positive number and otherwise skips it. IF- does the opposite, evaluating the following" CR
+	." word only when the top of the stack is negative. IF0 evaluates the following word if the top of the stack" CR
+	." is 0 and skips it if the top of the stack is nonzero." CR
+	." Try putting numbers on the stack and typing things like: IF+ .'positive' (but use double quotes to make" CR
+	." the printing work)" CR
+	incStep
+	nextRemind ;
+
+[Using BR+ BR0 BR- BRS]
+: step8 ." This step will teach you about some of the BR conditionals. Unfortunately it hasn't been implemented yet." CR
+	incStep
+	nextRemind ;
+
+[Using BR ELSE]
+: step9 ." This step will teach you about the BR-ELSE conditional. Unfortunately this step hasn't been implemented yet." CR
+	allDone
+	incStep
+	nextRemind ;
+
 [Defining functions with conditionals]
-[Defining functions with branches]
 [Commenting your code]
 [Using recursion]
 [Subdictionaries]
@@ -86,8 +140,6 @@
 : allDone ." Congratulations, you have completed the libreDSSP tutorial!" CR
 	." As a next step, you may wish to study the source file of this tutorial." CR CR
 	BYE ;
-
-: cheat 5 6 3 DO next + next DS next ;
 
 [We will start at step 0]
 0 ! STEP

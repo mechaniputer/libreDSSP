@@ -290,6 +290,7 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 // FIXME If the stack grows then any prior references to commands on the stack become invalid.
 // FIXME This problem could result in bugs literally anywhere in the interpreter!!!
 // FIXME However those problems seem to manifest here especially because it is one of the only core words where the stack is likely to grow a lot.
+// TODO There are definitely bugs present in this function which sometimes cause the interpreter to crash.
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
 	int i;
 	if((cmdstack->top < 0) || (stack->top < 0)){
