@@ -5,7 +5,7 @@ syn iskeyword @,33-64,_,~
 syn keyword dsspTodo contained TODO FIXME XXX
 syn region dsspComment start="\[" end="\]" keepend contains=dsspTodo,@Spell
 
-syn match dsspNumber '\<\d\+\>'
+syn match dsspNumber '\<-\?\d\+\>'
 
 syn region dsspPrint start='\."' end='"'
 
