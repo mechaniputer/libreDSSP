@@ -8,7 +8,7 @@ To our knowledge this is the only maintained DSSP implementation, and the first 
 The ultimate goal of this project is not to merely replicate DSSP as it once existed, but to improve on it where possible without betraying the philosophy of the language.
 
 ## Getting started
-Run 'make' to build it. You may wish to use the included tutorial by running './dssp TUTOR.DSP'.
+Run 'make' to build it. You may wish to use the included tutorial by running './dssp examples/TUTOR.DSP'.
 Vim source highlighting files are included in vim/.
 
 ## Contributing
