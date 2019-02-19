@@ -96,7 +96,8 @@
 
 [Defining functions]
 : double ; [The user must redefine this]
-: step6 42 double BR 84 step6good ELSE step6bad nextRemind ;
+: step6 42 double BR 84 step6b ELSE step6bad nextRemind ;
+: step6b -4 double BR -8 step6good ELSE step6bad ;
 : step6bad ." Uh oh. Your double function isn't working. Try one of the solutions below:" CR
 	." : double C + ;" CR
 	." : double 2 * ;" CR ;
