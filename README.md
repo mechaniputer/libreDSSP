@@ -39,6 +39,7 @@ Let me know if you are interested in setting up other resources such as an irc c
 	* Read from file at start
 
 ## What doesn't work yet
+	* =, <, >
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses using '
