@@ -108,7 +108,12 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
-	if(vocab->grow == NULL) vocab->grow = vocab->sub; // Grow first dict by default
+	// Shouldn't just pick one that's open since we don't want to pollute a random dictionary
+	if(vocab->grow == NULL){
+		fprintf(stderr,"ERROR: Target dictionary not designated\n");
+		cmdClear(cmdstack);
+		return;
+	}
 
 	// Skip over ':'
 	if(cmdstack->top >= 2){
@@ -191,7 +196,7 @@ void defCore(char * name, void (*func)(stack *, cmdstack *, dict*), dict * vocab
 	coreword * temp = NULL;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));
-		strcpy(temp->name, name);
+		strcpy(temp->name, name); // FIXME core word names have fixed bound on length
 		temp->func = (*func);
 		temp->next = NULL;
 		vocab->core = temp;
@@ -215,7 +220,8 @@ subdict * newDict(dict * vocab, char * name){
 	while(tempSub->next != NULL) tempSub = tempSub->next;
 	tempSub->next = malloc(sizeof(subdict));
 	tempSub = tempSub->next;
-	tempSub->name = name;
+	tempSub->name = malloc(strlen(name)+1);
+	strcpy(tempSub->name, name);
 	tempSub->open = 1;
 	tempSub->next = NULL;
 	tempSub->wordlist = NULL;

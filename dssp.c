@@ -91,6 +91,7 @@ int main(int argc, char *argv[]){
 	vocab->sub->open = 1;
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
+	vocab->grow = vocab->sub; // We will grow this dictionary by default
 
 	// Version
 	printf("\nlibreDSSP, version 0.0.1\n");

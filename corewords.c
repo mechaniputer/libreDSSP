@@ -541,6 +541,7 @@ void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 
 	vocab->grow = tempSub;
+	tempSub->open = 1;
 	cmdDrop(cmdstack);
 	return;
 }
@@ -571,6 +572,7 @@ void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 		return;
 	}
 	tempSub->open = 0;
+	vocab->grow = NULL;
 	cmdDrop(cmdstack);
 	return;
 }
