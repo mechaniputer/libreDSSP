@@ -271,7 +271,9 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 	if(tempCore != NULL){
 		// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
 		tempCore->func(workStack, cmdstack, vocab);
-		if(cmdName->text != NULL) cmdFree(cmdName);
+		// TODO Cannot free this because the function we are calling might change what this reference refers to due to the array-based stack.
+		// TODO The only fix is to rewrite the cmdstack as a dynamic queue
+		//cmdFree(cmdName);
 		return;
 	}
 
@@ -283,7 +285,9 @@ void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
 			stackInput(tempWord->array[i].text, cmdstack);
 			cmdstack->array[cmdstack->top].func = tempWord->array[i].func;
 		}
-		//if(cmdName->text != NULL) cmdFree(cmdName); // FIXME Why is it not safe to free this?
+		// TODO Cannot free this because the function we are calling might change what this reference refers to due to the array-based stack.
+		// TODO The only fix is to rewrite the cmdstack as a dynamic queue
+		//cmdFree(cmdName);
 		return;
 	}
 
