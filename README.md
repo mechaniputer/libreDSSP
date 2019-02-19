@@ -1,7 +1,7 @@
 # libreDSSP
 ## A GPLv3 Licensed DSSP Interpreter
 
-libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was designed for the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and types. This implementation is not yet complete, but it is complete enough to experiment with. Work has resumed after a long delay but it will continue to be sporadic due to my busy schedule.
+libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was designed for the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. This implementation is not yet complete, but it is complete enough to experiment with. Work has resumed after a long delay but it will continue to be sporadic due to my busy schedule.
 
 To our knowledge this is the only maintained DSSP implementation, and the first to be free software. It is lacking in many areas but progress is being made to add features and make it faster.
 
@@ -56,7 +56,7 @@ Let me know if you are interested in setting up other resources such as an irc c
 	* Everything unaccounted for in this README
 
 ## Possible future goals
-	* Full documentation and tutorial
+	* Full documentation
 	* Floating point math
 	* DSSP Compiler
 	* Multithreading support
