@@ -1,0 +1,295 @@
+The following text was produced using Google translate. The original text can be
+found on pages 83-88 of http://www.sorucom.ru/files/page/sorucom-2011_0.pdf The
+original article is titled "A Creation and Development History of Dialogue
+System for Structured  Programming (DSSP): from Ternary Computer «Setun-70» to
+Ternary Virtual Machine" and it was written by Burtsev A., Sidorov S. at the
+Research Institute for System Studies RAS, MSU Computers Research Laboratory,
+and appeared in the proceedings of SORUCOM-2011. 
+
+
+General System Description The Structured Programming Interactive System (PRSP)
+[1] was created in the early 80s of the 20th century in a computer problem
+laboratory at the faculty of the VMK MSU under the guidance of N. P .
+Brusentsova. PRSP was designed to significantly facilitate the development of
+software (software) for a wide class of small digital machines - mini - and
+microcomputers. DSSP was a logical result of a number of works on the
+improvement of the minicomputer architecture, carried out over a number of years
+by a team of employees led by N. P .  Brusentsova. The stages of this work were
+marked by the creation of the first in the world three-way small digital machine
+(CM) “Setun”, then the experimental machine “Setun-70”, which was later (in
+1975) modernized to support structured programming at the level of machine
+commands [2 ]. When creating the PRSP, several goals were pursued at once.
+First, the PRSP was created as a software simulator (emulator) of a new binary
+digital minimizer, in which it was intended to embody the valuable ideas of two
+- stack architecture and structured control commands inherited from the Setun-70
+modernized ternary CM. In the role of such a simulator or, figuratively
+speaking, a virtual processor, in essence, an internal PRSP interpreter
+functions, which is the core (core) of the system.  Secondly, PRSP was created
+as an integrated development environment for programs, easily accessible for
+mastering a wide class of users of microcomputer equipment and personal
+computers. Therefore, when creating PRSPs, the idea of ​​the FORT
+vocabulary organization (Forth) was borrowed and the dialogue nature of user
+interaction was ensured at all stages of program development: starting from its
+editing to final debugging. Such dialogue with the user is provided by an
+external interpreter of PRSP functioning in the mode of execution of the flow of
+words - commands. The program, compiled in the input language of the PRSP, is
+first converted into an internal representation, for the description of which a
+special term is used - the threaded code. The set of software components that
+perform such a transformation is called compiling tools or simply a system
+compiler. The internal and external interpreter, compiler and dictionary of the
+kernel, as well as the built-in text editor and debugger together make up the
+basic software package of the system. Based on it, by expanding the dictionary,
+each user can create his own version of PRSP extension, which meets the needs of
+his application area. Programming in PRSP is to fill her vocabulary with new
+words. Any operation (procedure) supported by the system is designated by a
+separate word (which is understood as any sequence of printed characters other
+than a space). The combination of words understood by the system is its language
+(dictionary). The system is expanded by defining new words that can be used in
+the system immediately after being added to the dictionary. Any action performed
+by the system is triggered by a word. The words in the system perform a variety
+of functions: • perform calculations (+ - *) or data processing (E3 C2 DD) on
+the stack; • memory access (@ W! W) or variables (! ’); • serve to organize
+branching (IF + BR-BRS) and cycles (DW RP); • ensure the construction of
+new-word bodies and their addition to the dictionary (: VAR); • control the
+state of the dictionary (FORGET :: CLEAR) or even the process of performing the
+task in the system (LOAD SAVE). DSSP is characterized by a two-stage
+architecture. The operand stack, over which all data processing operations
+operate, results in a compact Polish inverse record of arithmetic expressions,
+and the control stack serves to save return addresses from procedures. The
+following two characteristics of PRSP distinguish it favorably from the FORT
+system: • a specific procedural version of the structured control commands; 84
+SORUCOM-2011 • support for step-by-step (step-by-step) downlink (top-down)
+program development. In PRSP, each of the branch commands instead of navigating
+through the body of the sewn code (as is usually done in the FORT system) calls
+the word procedure selected by the condition, and each cycle command organizes a
+multiple word procedure call as long as the call is allowed by the cycle
+condition. Thus, in DSSP, support for structured programming is carried out
+directly at the level of a crosslinked code in the same way as such support was
+provided in CM “Setun-70” at the level of machine commands. The definition of a
+new word in PRSP and in FORT syntactically looks the same:: P P1 P2 ... Pn;
+[definition of a new procedure with the name P] However, the FORT allows such a
+definition only if all the words P1 P2 ... Pn have already been defined and
+become known to the system, and the PRSP assumes that in this sequence of words
+P1 P2 ... Pn can There are also words that have not yet been defined, but it is
+assumed that they will be defined later. It is thanks to this feature of PRSP
+that it is possible to develop a program using the downstream analysis: first
+determine the main word, then the next level words from which it is determined,
+and so gradually descend to a detailed definition of the simplest words. The
+first version of PRSP The first version of PRSP (PRSP - NC) was created in
+1980-1982. for microcomputers “Electronics NTs-03 D” [3, 4]. Already in this
+version, the characteristics of the assembler CM “Setun-70” [5] are reflected in
+the PRSP: its structured control commands for organizing branching (BRS) and
+conditional loop (DW0N). In order to provide technology for step-by-step
+downward development of the program, for the internal presentation of the
+program in this version of PRSP, a special kind of crosslinked code was
+proposed, called the “crosslinked code of double indirection”. PRSP for
+computers of unified architecture At the next stage of its development, PRSP was
+created for microcomputers (“Electronics - NC 80”) of the so-called unified
+architecture (PDP-11). Moreover, along with the main version of PRSP-80 [6], in
+this period (1982–1984), experimental versions were also developed, which are
+options for the development of PRSPs focused on building peripheral control
+programs (PRSP-PM [7]) and operating systems real time (DSSP - RV [8]). In each
+of these versions, the direct stitched code was used for the internal
+representation of the program, and the main loop of the internal interpreter was
+implemented by one command of the base machine (JSR @ R5 +). In PRSP -80, new
+commands were proposed for organizing cycles (RP, DO) with outputs by condition
+(EX-, EX0, EX +), as well as a typed set of prefix operations (! '...) for
+uniform work with variables and arrays of various types. As part of the basic
+software, a built-in assembler appeared [9], which made it possible to create
+new-word bodies in the code of the basic machine. The organization of the
+dictionary was improved [10] (it became relocatable, sub-dictionaries and
+sections appeared in it), which made it possible to simplify the development of
+complex multimodular programs. To automate the assembly of both the PRSP itself
+and the finished application program, special tools were proposed: the linker
+[11] and the target compiler [12], and they were implemented in the language of
+the PRSP itself. Although experimental versions of PRSP - PM and PRSP - RT did
+not gain any independent development, the proposed new software mechanisms were
+partially implemented in subsequent versions of PRSP. This is the mechanism of
+exceptional situations, the coroutine mechanism, the interrupt mechanism at the
+level of the sewn code, as well as various means of organization and interaction
+of parallel processes. In order to successfully master students and
+schoolchildren of program development skills, PRSPs published (1987–1988) study
+guides and guidelines [13, 14]. The language of PRSP (PARADISE) described in
+them has become a de facto standard for many years. A little later, DSPP was
+implemented on computers of a unified architecture not only as an independent
+resident system, but also as a separate application, which, along with other
+tasks, can function in the environment of the RAFOS operating system (RT-11)
+[15] and RTOS ( RSX-11) [16]. In the PRSP dictionary, new commands have appeared
+for interacting with the services of the OS used, in particular, for working
+with files. Distribution of PRSPs to other computer platforms Since the early
+1990s, PRSP has been actively used in NIISI RAS as a tool programming
+environment for the development of internal software [17] of a number of
+computer modules created on the basis of various microprocessors (MC68020,
+R3000, Intel80386) . Later on, the development of the PRSP and its expansion to
+other platforms was performed both by the staff of the NIUL MSU MSU together
+with students and postgraduates, and the staff of the NIISI RAS [18]. As a
+result, over the years, PRSP has been implemented for computers of the most
+varied architecture and in various operating environments. By the mid-90s, PRSP
+functioned on almost all computer boards - forms (PDP-11, Intel 8080, Intel
+80x86, Motorola 68020, VAX, R3000) and in operating environments (RT-11, RSX-11,
+UNIX, CP / M, MSDOS, Windows), have spread in our country. Burtsev A. A.,
+Sidorov S. BUT . The history of creation and development of PRSP 85 PRSPs for
+32-bit microcomputers Along with 16-bit, 32-bit versions of PRSPs (PRSP -32)
+appeared, operating with 32-bit anddata, addresses and stacks. For the Intel
+80386 platform, a PRSP version -32p [19] was created, which allowed DOS4gw
+extender to work (in protected mode) with expanded memory capacity under DOS
+control. Thus, the annoying restriction (640 KB) on the extensibility of the
+system itself, which prevents the construction of large-scale application
+programs, was overcome. Subsequently (1997–98), the core of PRSP -32p underwent
+significant modernization. First, a new mechanism was built into the kernel for
+interrupting at the level of stitched code [20]. This mechanism ensured the
+interruption of PRSP - the program not after the execution of the next command
+of the basic machine, but only after the completion of the next PRSP - command.
+This guaranteed the indivisibility of the execution of words - primitives, t. e.
+operations implemented in the base machine code. With such a mechanism, it
+became possible to execute as a response to an interruption any PRSP command,
+including initiating a situation in the current process, switching to another
+parallel process, or sending a signal to resume the delayed process. Secondly, a
+coroutine mechanism was added to the core of PRSP [21]. And if earlier
+dispatchers of parallel processes in PRSP [22] could be implemented only in the
+code of the base machine (in its assembler language), then new mechanisms
+(interrupts and coroutines) allowed the creation of various monitors that
+control the development of parallel processes, like program modules, fully
+developed in the language of PRSP. Mobile version of PRSP / S Separate PRSP
+versions for different platforms were poorly compatible with each other. Their
+common shortcoming was that the core of each of them was created in the
+assembler language of the base machine, which made it difficult to transfer the
+created software to other computer platforms. In 1998 in NIISI RAS on the
+initiative of M. N. Shumakov a mobile version of PRSP (PRSP / S) was created,
+the core of which was written in C language [23]. PRSP / C provides the mobility
+of the resulting code. This means that a program developed in the language of
+PRSP in one implementation environment PRSP / S can be directly executed in
+another implementation environment PRSP / S, without requiring any changes in
+the source text of the program, or in the resulting final executable code. PRSP
+/ C uses a special signed stitched code with relative addressing, specially
+adapted to ensure the mobility of the interpreter in the C language (the body of
+the primitive procedure is represented in it by the C number — the function of
+the interpreter core, which implements its operation). Due to the noted
+portability property, the core PRSP developed in C and originally implemented to
+work in the Windows operating system family was then successfully transferred to
+other platforms (Solaris OS for Ultra Sparc, MS-DOS with DOS-extender DOS4gw,
+Linux). During the development of the core in the C language, such a
+modernization of the work with data was carried out, thanks to which, in PRSP,
+the possibility of constructing new types was later provided [24], similar to
+the means of object - oriented programming. PRSP in the world of science and
+modern computer technology. Thus, for almost 20 years of its development from
+version to version (PRSP - NC ==> PRSP -80 ==> PRSP -32 ==> PRSP -32p ==> PRSP /
+C) PRSP is constantly improved, acquiring new features inherent in modern
+languages ​​and programming systems. As a result, PRSP has turned into
+a programming environment [25], which allows to apply a wide range of modern
+methods of structured development of complex software systems, concentrating in
+itself the means for structured, modular, object - oriented and parallel
+programming, as well as means for structured processing of exceptional
+situations. However, despite the marked advantages, PRSP did not receive wide
+enough popularity in the market of programming systems for microcomputers. It
+must be admitted that it was pressed into this area by the integrated
+programming environments with the C and Pascal languages. In our opinion, the
+reason for this was not the inferiority of the PRSP itself, but the market laws
+that came into force. The PRSP lost the competition, which it could not have won
+in the current conditions. After all, PRSP was created, developed and offered
+not as a market product, but as a scientific product, the result of a number of
+research projects aimed at improving the architecture of microcomputers and
+their system software. For many years, PRSP was used to perform term papers and
+dissertations, as well as to develop useful programs that have important
+scientific and practical importance. We list some of them: • Software equipment
+of the automated training system “Mentor” [26]. • The system of automated
+training courses for the MES “Mentor” [27]. • Cross - system for microprocessor
+K 580 in PRSP [28]. • Production system in PRSP -80 [29]. • Adaptable debugging
+system for the development of microcontroller devices [30]. • System of internal
+software DPROM [17]. • Computerization system of Boolean algebra in PRSP [31]. •
+DED - on-screen debugger and editor in the microworld style [33]. As a
+confirmation of the high scientific assessment of PRSPs, below is a list of
+prepared Candi - 86 SORUCOM-2011 Danish dissertations, the topics of which were
+closely related to its creation and development [in brackets the year defended
+the dissertation]: • [1983] Zlatkus G. AT . Interactive Structured Programming
+System (PRSP) for microcomputers. • [1986] Rudnev I. BUT . Path research and
+implementation of DSSP based compilation of programs for embedded
+microprocessors. • [1987] Sidorov S. BUT . The study of mobility PRSP and the
+development of means of its transfer. • [1988] Zakharov V. B. Software
+development tools in PRSP. • [1991] Grachev A. YU . Structuring data in the
+dialogue programming system PRSP. • [1996] Burtsev A. BUT . Expansion of
+programming languages ​​by means of exception handling. The results of
+scientific research related to the development of PRSPs have been regularly
+published in computer-related journals and collections of papers, as well as
+reported at many international conferences (including in English [32-36]). In
+1996, thanks to the efforts of the staff of NIISI RAS M. N. Shumakov and H. M.
+Lokteva on the Internet (www.dssp.msk.ru),) opened the first site dedicated to
+PRSP. At present, information on PRSPs on the Internet can be found at the
+following addresses: • www.forth.org.ru/~dssp (the first PRSP - the site of
+Shumakov and Loktev “moved” here); • www.computer-museum.ru/histsoft/dssp.htm
+(PRSP page on the website of the virtual computer museum). Like any “invaluable”
+scientific product produced in our country, PRSP was distributed virtually free
+of charge. In Soviet times, it was handed over to exploitation under agreements
+on scientific and technical cooperation, and with the advent of the PRSP website
+on the Internet, anyone could download it (and with the source code). It can be
+said that PRSP was an open system [18] and was distributed as free software.
+DSSP developed intensively until there were problems of financial support for
+the areas of scientific research accompanying it. The sharp decline in
+scientific funding led to the forced cessation of work on the further
+development of PRSP. Perhaps, therefore, many useful ideas inherent in modern
+programming systems have not been embodied in PRSP. For example, it has not yet
+become a visual development environment for programs with an attractive
+graphical environment and still functions as a console application, offering the
+user a simple dialog in command line mode. PRSP for a ternary virtual machine
+Currently, when binary digital machines have approached the ceiling of their
+potential capabilities, there is a need to build a ternary processor on a modern
+element base, as well as the development of software for it. Therefore, the work
+on creating a simulation model of a ternary processor, as well as a cross -
+system for developing ternary programs for it, was accelerated in the NILE
+computer of Moscow State University. As the main language in this development
+system, it was intended to implement (except for the assembler language) the
+ternary variant of the PRSP language (PRSP - T). As an imitation model of a
+ternary processor, a variant of software implementation (in C language) was
+proposed (in 2010), called TVM - a ternary virtual machine. TVM is launched as a
+console application, accepts an encoded ternary file for execution and simulates
+the effect of its execution. At the same time, TVM allows not only to trace (in
+slow motion) all stages of the process of the ternary program execution, but
+also to control the process of this process in dialogue mode (for example, run
+the program in parts, suspending it at necessary points to view the contents of
+registers and memory cells). An assembler of the created ternary processor was
+developed as a tool for preparing the coded ternary program together with TBM.
+When developing the TVM architecture, many decisions had to be made - from the
+presentation of ternary information and the format of a machine word to the
+composition of commands and principles of interaction with the binary periphery.
+With unlimited possibilities of software implementation, the main ordering
+factor was the desire to implement such a microprocessor in the form of a real
+microcircuit in the near future. In binary machines, the ternary data element -
+trit - can be represented by a pair of bits (p, n), the values ​​of
+which are (1.0), (0,0), (0,1) interpret respectively as ternary values: 1, 0,
+-1. Traits (out of 9 trites) and ternary machine words (out of 3 x or 27 or
+trit) can be represented as a pair of bit vectors (p [s], n [s]) (with size s =
+9 for treyt and s = 27 for the ternary word), which in binary machines can
+correspond to s-bit binary words. At the level of the TVM assembly language (and
+further at the level of higher languages), only threefold data will be presented
+in the program. This approach allows you to navigate the implementation of the
+ternary processor on the existing binary element base (in anticipation of better
+times, when the real ternary elements and ternary CAD systems will be created).
+For many years, PRSP was used as a profitable alternative to programming in
+assembly language. In order to ensure the possibility of developing programs for
+TVM in the PRSP - T language, the implementation (in C) of the cross - compiler
+from this language to TVM assembler was proposed. Together with the cross -
+compiler, an assembler core, a library of standard modules and a command
+interpreter for running the PRSP - programs in a dialog mode were developed.
+Together, these software tools Burtsev A. A., Sidorov S. BUT . The history of
+the creation and development of PRSP 87 constitute a single cross - system for
+developing programs for a ternary virtual machine, which has received the title
+PRSP - TVM. The PRSP language - T has a number of features that distinguish it
+from the input languages ​​of various PRSP versions implemented for
+various binary machines. The basis of the PRSP - T language is an incomplete
+subset of the basic PRSP language [13], in which there are no typical operations
+of binary arithmetic, logic and memory access by binary addresses - the
+corresponding operations inherent in threefold logic and threefold symmetric
+arithmetic are suggested instead. Since the PRSP - T language is focused on
+processing not in the interpretation mode, but in the compilation mode, it lacks
+the means for constructing new compiling words operating in the program layout
+mode. When developing the PRSP - T language, it was intended to embody the best
+features of all previous PRSP versions in it. Therefore, it added a number of
+useful expressive tools that have long been well proven in various versions of
+PRSP. The development of the internal representation, interpreter and compiler
+of PRSP programs has always been subject to the principle “one word of text is
+translated into one word of code”. Following this principle, it was possible to
+develop such a system of TVM commands that allows it to directly execute program
+code, which is an internal representation of the PRSP program. So now it can be
+said that the stitched code generated by PRSP - compiler will become a
+procedural code, which is to be directly executed by the hardware implemented by
+the machine.
