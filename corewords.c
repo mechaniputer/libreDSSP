@@ -105,6 +105,94 @@ void absval(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+void add1(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 1+\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] += 1;
+	return;
+}
+
+void add2(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 2+\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] += 2;
+	return;
+}
+
+void add3(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 3+\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] += 3;
+	return;
+}
+
+void add4(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 4+\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] += 4;
+	return;
+}
+
+void sub1(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 1-\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] -= 1;
+	return;
+}
+
+void sub2(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 2-\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] -= 2;
+	return;
+}
+
+void sub3(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 3-\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] -= 3;
+	return;
+}
+
+void sub4(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top == -1){
+		fprintf(stderr,"ERROR: Insufficient operands for 4-\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	stack->array[stack->top] -= 4;
+	return;
+}
+
 void bye(stack * stack, cmdstack * cmdstack, dict * vocab){
 	printf("Exiting libreDSSP\n");
 	exit(0);

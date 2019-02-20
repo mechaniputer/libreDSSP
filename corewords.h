@@ -33,6 +33,16 @@ void divide(stack * stack, cmdstack * cmdstack, dict * vocab);
 void negate(stack * stack, cmdstack * cmdstack, dict * vocab);
 void absval(stack * stack, cmdstack * cmdstack, dict * vocab);
 
+void add1(stack * stack, cmdstack * cmdstack, dict * vocab);
+void add2(stack * stack, cmdstack * cmdstack, dict * vocab);
+void add3(stack * stack, cmdstack * cmdstack, dict * vocab);
+void add4(stack * stack, cmdstack * cmdstack, dict * vocab);
+
+void sub1(stack * stack, cmdstack * cmdstack, dict * vocab);
+void sub2(stack * stack, cmdstack * cmdstack, dict * vocab);
+void sub3(stack * stack, cmdstack * cmdstack, dict * vocab);
+void sub4(stack * stack, cmdstack * cmdstack, dict * vocab);
+
 // Display and interpreter
 void bye(stack * stack, cmdstack * cmdstack, dict * vocab);
 void showTop(stack * stack, cmdstack * cmdstack, dict * vocab);

@@ -22,6 +22,7 @@ Also let us know if you are interested in setting up other resources such as an 
 
 ## What works
 	* Basic math operations (+,*,-,/)
+	* 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
 	* IF+, IF0, IF-
@@ -50,7 +51,6 @@ Also let us know if you are interested in setting up other resources such as an 
 	* SGN, NOT
 	* EX, EX-, EX0, EX+, EXT
 	* SORT, SPIN, MAX, MIN
-	* 1+, 2+, 1-, 2-, etc
 	* T0, T1
 	* TRB, TOB, BASE@
 	* TIB, TIS

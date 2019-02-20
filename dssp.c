@@ -42,6 +42,16 @@ int main(int argc, char *argv[]){
 	defCore("NEG", negate, vocab);
 	defCore("ABS", absval, vocab);
 
+	defCore("1+", add1, vocab);
+	defCore("2+", add2, vocab);
+	defCore("3+", add3, vocab);
+	defCore("4+", add4, vocab);
+
+	defCore("1-", sub1, vocab);
+	defCore("2-", sub2, vocab);
+	defCore("3-", sub3, vocab);
+	defCore("4-", sub4, vocab);
+
 	// Display and interpreter
 	defCore("BYE", bye, vocab);
 	defCore(".", showTop, vocab);
