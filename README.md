@@ -16,7 +16,9 @@ Pull requests with good style that solve actual problems are appreciated. When i
 
 The libreDSSP tutor (TUTOR.DSP) does not yet cover all of the implemented language features. Pull requests to add or improve training steps are appreciated.
 
-Let me know if you are interested in setting up other resources such as an irc channel or a website. I don't currently have the time to manage anything like that.
+One of our greatest challenges is finding unambiguous information about this obscure language. If you have anything that might help with that, let us know.
+
+Also let us know if you are interested in setting up other resources such as an irc channel or a website. I don't currently have the time to manage anything like that.
 
 ## What works
 	* Basic math operations (+,*,-,/)
