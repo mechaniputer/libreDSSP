@@ -33,15 +33,15 @@ void divide(stack * stack, cmdstack * cmdstack, dict * vocab);
 void negate(stack * stack, cmdstack * cmdstack, dict * vocab);
 void absval(stack * stack, cmdstack * cmdstack, dict * vocab);
 
-void add1(stack * stack, cmdstack * cmdstack, dict * vocab);
-void add2(stack * stack, cmdstack * cmdstack, dict * vocab);
-void add3(stack * stack, cmdstack * cmdstack, dict * vocab);
-void add4(stack * stack, cmdstack * cmdstack, dict * vocab);
+void plus1(stack * stack, cmdstack * cmdstack, dict * vocab);
+void plus2(stack * stack, cmdstack * cmdstack, dict * vocab);
+void plus3(stack * stack, cmdstack * cmdstack, dict * vocab);
+void plus4(stack * stack, cmdstack * cmdstack, dict * vocab);
 
-void sub1(stack * stack, cmdstack * cmdstack, dict * vocab);
-void sub2(stack * stack, cmdstack * cmdstack, dict * vocab);
-void sub3(stack * stack, cmdstack * cmdstack, dict * vocab);
-void sub4(stack * stack, cmdstack * cmdstack, dict * vocab);
+void minus1(stack * stack, cmdstack * cmdstack, dict * vocab);
+void minus2(stack * stack, cmdstack * cmdstack, dict * vocab);
+void minus3(stack * stack, cmdstack * cmdstack, dict * vocab);
+void minus4(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Display and interpreter
 void bye(stack * stack, cmdstack * cmdstack, dict * vocab);
@@ -57,8 +57,9 @@ void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab);
 void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab);
 void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab);
 void branch(stack * stack, cmdstack * cmdstack, dict * vocab);
+void equality(stack * stack, cmdstack * cmdstack, dict * vocab);
 
-// Looping and flow control
+// Looping
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Stack manipulation

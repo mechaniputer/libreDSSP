@@ -23,6 +23,7 @@ Also let us know if you are interested in setting up other resources such as an 
 ## What works
 	* Basic math operations (+,*,-,/)
 	* 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
+	* =
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
 	* IF+, IF0, IF-
@@ -42,7 +43,7 @@ Also let us know if you are interested in setting up other resources such as an 
 	* Read from file at start
 
 ## What doesn't work yet
-	* =, <, >
+	* <, >
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses using '

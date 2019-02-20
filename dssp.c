@@ -42,15 +42,15 @@ int main(int argc, char *argv[]){
 	defCore("NEG", negate, vocab);
 	defCore("ABS", absval, vocab);
 
-	defCore("1+", add1, vocab);
-	defCore("2+", add2, vocab);
-	defCore("3+", add3, vocab);
-	defCore("4+", add4, vocab);
+	defCore("1+", plus1, vocab);
+	defCore("2+", plus2, vocab);
+	defCore("3+", plus3, vocab);
+	defCore("4+", plus4, vocab);
 
-	defCore("1-", sub1, vocab);
-	defCore("2-", sub2, vocab);
-	defCore("3-", sub3, vocab);
-	defCore("4-", sub4, vocab);
+	defCore("1-", minus1, vocab);
+	defCore("2-", minus2, vocab);
+	defCore("3-", minus3, vocab);
+	defCore("4-", minus4, vocab);
 
 	// Display and interpreter
 	defCore("BYE", bye, vocab);
@@ -66,6 +66,7 @@ int main(int argc, char *argv[]){
 	defCore("BR+", branchplus, vocab);
 	defCore("BRS", branchsign, vocab);
 	defCore("BR", branch, vocab);
+	defCore("=", equality, vocab);
 
 	// Looping and flow control
 	defCore("DO", doloop, vocab);

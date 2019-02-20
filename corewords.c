@@ -105,7 +105,7 @@ void absval(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void add1(stack * stack, cmdstack * cmdstack, dict * vocab){
+void plus1(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 1+\n");
@@ -116,7 +116,7 @@ void add1(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void add2(stack * stack, cmdstack * cmdstack, dict * vocab){
+void plus2(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 2+\n");
@@ -127,7 +127,7 @@ void add2(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void add3(stack * stack, cmdstack * cmdstack, dict * vocab){
+void plus3(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 3+\n");
@@ -138,7 +138,7 @@ void add3(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void add4(stack * stack, cmdstack * cmdstack, dict * vocab){
+void plus4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 4+\n");
@@ -149,7 +149,7 @@ void add4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void sub1(stack * stack, cmdstack * cmdstack, dict * vocab){
+void minus1(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 1-\n");
@@ -160,7 +160,7 @@ void sub1(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void sub2(stack * stack, cmdstack * cmdstack, dict * vocab){
+void minus2(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 2-\n");
@@ -171,7 +171,7 @@ void sub2(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void sub3(stack * stack, cmdstack * cmdstack, dict * vocab){
+void minus3(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 3-\n");
@@ -182,7 +182,7 @@ void sub3(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
-void sub4(stack * stack, cmdstack * cmdstack, dict * vocab){
+void minus4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 4-\n");
@@ -370,6 +370,23 @@ void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
 		cmdDrop(cmdstack);
 		cmdDrop(cmdstack);
 		cmdPush(cmdstack, branchCom);
+	}
+	return;
+}
+
+void equality(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top <= 0){
+		fprintf(stderr,"ERROR: Insufficient operands for =\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	int a = pop(stack);
+	int b = pop(stack);
+	if(a == b){
+		push(stack,1);
+	}else{
+		push(stack,0);
 	}
 	return;
 }
