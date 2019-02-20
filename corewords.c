@@ -601,14 +601,64 @@ void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+// TODO Confirm that this is the correct behavior
+// TODO Support multiple number bases
 void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
-	char * line = readline("");
-	if(line) push(stack, atoi(line));
+	if(stack->top > -1){ // Requires one operand
+		int len = pop(stack);
+		if(len < 0){
+			fprintf(stderr,"ERROR: TIN requires non-negative operant\n");
+			cmdClear(cmdstack);
+			return;
+		}
+		char * line = readline("");
+		if(line){
+			int maxlen = strlen(line);
+			if(len < maxlen){
+				push(stack, atoi(line + ((maxlen-len)*sizeof(char))));
+			}else{
+				push(stack, atoi(line));
+			}
+		}else{
+			fprintf(stderr,"ERROR: TIN could not read line\n");
+			cmdClear(cmdstack);
+			return;
+		}
+	}else{
+		fprintf(stderr,"ERROR: Insufficient operands for TIN\n");
+		cmdClear(cmdstack);
+		return;
+	}
 	return;
 }
 
+// TODO Confirm that this is the correct behavior
+// TODO Support multiple number bases
 void termOutNum(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top > -1) printf("%d",pop(stack));
+	if(stack->top > 0){ // Requires two operands
+		int len = pop(stack);
+		int num = pop(stack);
+		int maxlen = snprintf( NULL, 0, "%d", num );
+		char *toPrint = malloc( maxlen + 1 );
+		snprintf( toPrint, maxlen + 1, "%d", num );
+
+
+		if(maxlen > len){
+			for(int i=0; i < len; i++){
+				printf("%c",toPrint[(maxlen-len)+i]);
+			}
+		}else{
+			for(int i=0; i < maxlen; i++){
+				printf("%c",toPrint[i]);
+			}
+		}
+
+		free(toPrint);
+	}else{
+		fprintf(stderr,"ERROR: Insufficient operands for TON\n");
+		cmdClear(cmdstack);
+		return;
+	}
 	return;
 }
 
