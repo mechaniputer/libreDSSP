@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
 	vocab->grow = vocab->sub; // We will grow this dictionary by default
 
 	// Version
-	printf("\nlibreDSSP, version 0.0.1\n");
+	printf("\nlibreDSSP, version 0.5.0\n");
 
 	// Copyright notice
 	printf("Copyright (C) 2019  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
