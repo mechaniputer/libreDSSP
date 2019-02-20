@@ -47,6 +47,7 @@ void minus4(stack * stack, cmdstack * cmdstack, dict * vocab);
 void bye(stack * stack, cmdstack * cmdstack, dict * vocab);
 void showTop(stack * stack, cmdstack * cmdstack, dict * vocab);
 void showStack(stack * stack, cmdstack * cmdstack, dict * vocab);
+void base10(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Conditionals
 void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab);

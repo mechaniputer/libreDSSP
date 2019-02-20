@@ -56,6 +56,7 @@ int main(int argc, char *argv[]){
 	defCore("BYE", bye, vocab);
 	defCore(".", showTop, vocab);
 	defCore("..", showStack, vocab);
+	defCore("B10", base10, vocab);
 
 	// Conditionals
 	defCore("IF+", ifplus, vocab);

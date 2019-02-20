@@ -220,6 +220,11 @@ void showStack(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 
+// FIXME Placeholder because B10 is currently the only mode we support!
+void base10(stack * stack, cmdstack * cmdstack, dict * vocab){
+	return;
+}
+
 void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab){
 	if((cmdstack->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
