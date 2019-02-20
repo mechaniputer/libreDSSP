@@ -59,6 +59,8 @@ void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab);
 void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab);
 void branch(stack * stack, cmdstack * cmdstack, dict * vocab);
 void equality(stack * stack, cmdstack * cmdstack, dict * vocab);
+void greaterthan(stack * stack, cmdstack * cmdstack, dict * vocab);
+void lessthan(stack * stack, cmdstack * cmdstack, dict * vocab);
 
 // Looping
 void doloop(stack * stack, cmdstack * cmdstack, dict * vocab);

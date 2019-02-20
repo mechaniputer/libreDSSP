@@ -388,7 +388,41 @@ void equality(stack * stack, cmdstack * cmdstack, dict * vocab){
 	}
 	int a = pop(stack);
 	int b = pop(stack);
-	if(a == b){
+	if(b == a){
+		push(stack,1);
+	}else{
+		push(stack,0);
+	}
+	return;
+}
+
+void greaterthan(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top <= 0){
+		fprintf(stderr,"ERROR: Insufficient operands for >\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	int a = pop(stack);
+	int b = pop(stack);
+	if(b > a){
+		push(stack,1);
+	}else{
+		push(stack,0);
+	}
+	return;
+}
+
+void lessthan(stack * stack, cmdstack * cmdstack, dict * vocab){
+	// -1 indicates empty stack
+	if(stack->top <= 0){
+		fprintf(stderr,"ERROR: Insufficient operands for <\n");
+		cmdClear(cmdstack);
+		return;
+	}
+	int a = pop(stack);
+	int b = pop(stack);
+	if(b < a){
 		push(stack,1);
 	}else{
 		push(stack,0);
