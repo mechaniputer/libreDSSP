@@ -490,6 +490,11 @@ void exch4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 0){ // There need to be two elements or more
+		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
+		cmdClear(cmdstack);
+		return;
+	}
 	int depth = pop(stack);
 	if (depth == 1) return;
 	if(stack->top <= depth-2){
@@ -546,6 +551,11 @@ void copy4(stack * stack, cmdstack * cmdstack, dict * vocab){
 	return;
 }
 void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab){
+	if(stack->top <= 0){ // There need to be two elements or more
+		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
+		cmdClear(cmdstack);
+		return;
+	}
 	int depth = pop(stack);
 	if(stack->top <= depth-2){
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
