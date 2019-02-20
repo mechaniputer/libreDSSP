@@ -41,6 +41,7 @@ Also let us know if you are interested in setting up other resources such as an 
 	* [comments]
 	* GNU readline support
 	* Read from file at start
+	* B10 (as a placeholder since we currently only support base 10 I/O)
 
 ## What doesn't work yet
 	* <, >
@@ -55,7 +56,7 @@ Also let us know if you are interested in setting up other resources such as an 
 	* T0, T1
 	* TRB, TOB, BASE@
 	* TIB, TIS
-	* B2, B8, B10, B16
+	* B2, B8, B16
 	* SHL, SHR, other bitwise operations
 	* Everything unaccounted for in this README
 
