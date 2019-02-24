@@ -16,9 +16,10 @@
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
 CFLAGS = -I/usr/local/include -L/usr/local/lib -lreadline -Wall -ggdb
 all: dssp
-dssp: stack.o dict.o corewords.o util.o
-	cc $(CFLAGS) dssp.c -o dssp stack.o dict.o corewords.o util.o
+dssp: stack.o cmdbuf.o dict.o corewords.o util.o
+	cc $(CFLAGS) dssp.c -o dssp stack.o cmdbuf.o dict.o corewords.o util.o
 stack.o: stack.c stack.h
+cmdbuf.o: cmdbuf.c cmdbuf.h
 dict.o: dict.c dict.h
 corewords.o: corewords.c corewords.h
 util.o: util.c util.h

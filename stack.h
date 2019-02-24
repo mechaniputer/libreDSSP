@@ -28,8 +28,6 @@ typedef struct subdict subdict;
 typedef struct dict dict;
 
 typedef struct stack stack;
-typedef struct cmdstack cmdstack;
-typedef struct command command;
 
 struct stack
 {
@@ -38,44 +36,10 @@ struct stack
 	int * array;
 };
 
-struct cmdstack
-{
-	int capacity;
-	int top;
-	int unfinished_comment;
-	int unfinished_func;
-	elem * incomplete_tail;
-	command * array;
-};
-
-struct command
-{
-	// What to put here?
-	// Need to account for:
-	// * builtin function pointers
-	void (*func)(stack *, cmdstack *, dict *);
-	// * defined words
-	// * literals
-	// * strings ."hello"
-	// * anything that can be split by spaces
-	char * text;
-};
-
-
 stack * newStack();
 int top(stack * stack);
 int pop(stack * stack);
 void push(stack * stack, int value);
 void grow(stack * stack);
-
-cmdstack * newCmdStack();
-command * cmdTop(cmdstack * cmdstack);
-command * cmdPop(cmdstack * cmdstack);
-void cmdDrop(cmdstack * cmdstack);
-void cmdFree(command* to_free);
-void cmdClear(cmdstack * cmdstack);
-void cmdPush(cmdstack * cmdstack, command * cmd);
-void cmdGrow(cmdstack * cmdstack);
-void newCommand(command * oldcmd, command ** newcmd);
 
 #endif

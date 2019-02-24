@@ -33,10 +33,10 @@
 
 void textPrint(char * text);
 int isNum(char * foo);
-void run(stack * stack, cmdstack * cmdstack, dict * vocab);
-void stackInput(char * line, cmdstack * cmdstack);
-char * prompt();
+void next(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void commandParse(char * line, cmdbuffer * cmdbuf);
+char * prompt(int ready);
 // Searches dictionaries, runs a word if possible
-void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab);
+void wordRun(cmdbuffer * cmdbuf, stack * stack, dict * vocab);
 
 #endif

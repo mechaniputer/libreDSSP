@@ -23,6 +23,7 @@
 #include "dict.h"
 #include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
 #include "util.h"
 #include "corewords.h"
 
@@ -103,7 +104,8 @@ word * newWord(subdict * dict){
 }
 
 // Attempts to define a new word
-void defWord(cmdstack * cmdstack, dict * vocab){
+// TODO rewrite to produce list of pointers and store it the Forth way
+void defWord(cmdbuffer * cmdbuf, dict * vocab){
 	word * temp;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
@@ -111,63 +113,63 @@ void defWord(cmdstack * cmdstack, dict * vocab){
 	// Shouldn't just pick one that's open since we don't want to pollute a random dictionary
 	if(vocab->grow == NULL){
 		fprintf(stderr,"ERROR: Target dictionary not designated\n");
-		cmdClear(cmdstack);
+		cmdClear(cmdbuf);
 		return;
 	}
 
 	// Skip over ':'
-	if(cmdstack->top >= 2){
-		cmdDrop(cmdstack);
+	if(cmdbuf->top >= 2){
+		cmdDrop(cmdbuf);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
-		cmdClear(cmdstack);
+		cmdClear(cmdbuf);
 		return;
 	}
 
 	// Assign function name
-	if(cmdstack->top >= 1){
+	if(cmdbuf->top >= 1){
 
 		// See if it is a core word
-		if(coreSearch(cmdTop(cmdstack)->text, vocab)){
-			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdstack)->text);
-			cmdClear(cmdstack);
+		if(coreSearch(cmdTop(cmdbuf)->text, vocab)){
+			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdbuf)->text);
+			cmdClear(cmdbuf);
 			return;
 		}
 
 		// See if we already have this word, if we do then redefine
-		temp = wordSearch(cmdTop(cmdstack)->text, vocab);
+		temp = wordSearch(cmdTop(cmdbuf)->text, vocab);
 
 		if(temp == NULL){
 			// Append the new word
 			temp = newWord(vocab->grow);
-			command *to_free = cmdPop(cmdstack);
+			command *to_free = cmdPop(cmdbuf);
 			assert(to_free->text != NULL);
 			strcpy(temp->name, to_free->text);
 			free(to_free->text);
 		}else{
 			// Wipe old definition
 			temp->length = -1;
-			cmdDrop(cmdstack);
+			cmdDrop(cmdbuf);
 		}
 
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
-		cmdClear(cmdstack);
+		cmdClear(cmdbuf);
 		return;
 	}
 
-	while(strcmp(";", cmdTop(cmdstack)->text)){
+	while(strcmp(";", cmdTop(cmdbuf)->text)){
 		// TODO: This could be changed to improve threading
-		growWord(temp, cmdPop(cmdstack)->text, vocab); // Cannot free the text array because it will be used by the word definition hereafter
+		growWord(temp, cmdPop(cmdbuf)->text, vocab); // Cannot free the text array because it will be used by the word definition hereafter
 
-		if(cmdstack->top < 0){
+		if(cmdbuf->top < 0){
 			fprintf(stderr,"ERROR: Incomplete definition\n");
-			cmdClear(cmdstack);
+			cmdClear(cmdbuf);
 			return;
 		}
 	}
 	// Get rid of ";"
-	cmdDrop(cmdstack);
+	cmdDrop(cmdbuf);
 
 	// Successful definition, print name
 	printf("%s\n",temp->name);
@@ -192,7 +194,7 @@ void growWord(word * word, char * com, dict * vocab){
 	}
 }
 
-void defCore(char * name, void (*func)(stack *, cmdstack *, dict*), dict * vocab){
+void defCore(char * name, void (*func)(stack *, cmdbuffer *, dict*), dict * vocab){
 	coreword * temp = NULL;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));

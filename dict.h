@@ -21,6 +21,7 @@
 
 #include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
 #include "corewords.h"
 
 /*	DICTIONARY HIERARCHY:
@@ -65,7 +66,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	void (*func)(stack *, cmdstack *, dict *);
+	void (*func)(stack *, cmdbuffer *, dict *);
 };
 
 struct subdict
@@ -91,10 +92,10 @@ word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
 coreword * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
-void defWord(cmdstack * cmdstack, dict * vocab);
+void defWord(cmdbuffer * cmdbuf, dict * vocab);
 void growWord(word * word, char * com, dict * vocab);
 // Defines built-in functions
-void defCore(char * name, void (*func)(stack *, cmdstack *, dict *), dict * vocab);
+void defCore(char * name, void (*func)(stack *, cmdbuffer *, dict *), dict * vocab);
 subdict * newDict(dict * vocab, char * name);
 
 #endif

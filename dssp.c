@@ -22,12 +22,13 @@
 #include "dict.h"
 #include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
 #include "corewords.h"
 #include "util.h"
 
 int main(int argc, char *argv[]){
 	stack * workStack = newStack();
-	cmdstack * cmdstack = newCmdStack();
+	cmdbuffer * cmdbuf = newCmdBuffer();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->core = NULL;
@@ -124,8 +125,8 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				stackInput(bufptr, cmdstack);
-				run(workStack, cmdstack, vocab);
+				commandParse(bufptr, cmdbuf);
+				next(workStack, cmdbuf, vocab);
 				free(bufptr);
 				bufsize = 0;
 			}
@@ -135,8 +136,8 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		// Show prompt, get line of input
-		stackInput(prompt(cmdstack->unfinished_comment || cmdstack->unfinished_func), cmdstack);
-		run(workStack, cmdstack, vocab);
+		commandParse(prompt(cmdbuf->ready), cmdbuf);
+		next(workStack, cmdbuf, vocab);
 	}
 	return 0;
 }
