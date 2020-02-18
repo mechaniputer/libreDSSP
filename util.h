@@ -28,12 +28,13 @@
 
 #include "util.h"
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
 
 void textPrint(char * text);
 int isNum(char * foo);
-void next(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void word_next(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void word_enter(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void word_exit(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
 void commandParse(char * line, cmdbuffer * cmdbuf);
 char * prompt(int ready);
 // Searches dictionaries, runs a word if possible

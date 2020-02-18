@@ -19,7 +19,6 @@
 #include <string.h>
 #include <assert.h>
 #include "stack.h"
-#include "elem.h"
 
 stack * newStack() {
 	stack * new_stack = malloc(sizeof(stack));

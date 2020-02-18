@@ -19,7 +19,6 @@
 #include <string.h>
 #include <assert.h>
 #include "cmdbuf.h"
-#include "elem.h"
 #include "stack.h"
 
 cmdbuffer * newCmdBuffer(){
@@ -27,7 +26,7 @@ cmdbuffer * newCmdBuffer(){
 	new_cmdbuf->array = malloc(10*sizeof(command));
 	new_cmdbuf->capacity = 10;
 	new_cmdbuf->top = -1; // -1 indicates empty buffer
-	new_cmdbuf->ready = 1;
+	new_cmdbuf->status = 0;
 	return new_cmdbuf;
 }
 
@@ -57,7 +56,7 @@ void cmdFree(command * to_free){
 // Dumps all pending commands and returns
 void cmdClear(cmdbuffer * cmdbuf) {
 	cmdbuf->top = -1;
-	cmdbuf->ready = 1;
+	cmdbuf->status = 0;
 	return;
 }
 

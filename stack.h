@@ -19,8 +19,6 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "elem.h"
-
 typedef struct variable variable;
 typedef struct word word;
 typedef struct coreword coreword;

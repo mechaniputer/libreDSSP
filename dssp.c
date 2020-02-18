@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2020 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #include <malloc.h>
 
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
 #include "cmdbuf.h"
 #include "corewords.h"
@@ -110,7 +109,7 @@ int main(int argc, char *argv[]){
 	printf("\nlibreDSSP, version 0.5.0\n");
 
 	// Copyright notice
-	printf("Copyright (C) 2019  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	printf("Copyright (C) 2020  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
 
 	if(argc >= 2){
 		printf("Attempting to open %s... ",argv[1]);
@@ -126,7 +125,7 @@ int main(int argc, char *argv[]){
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
 				commandParse(bufptr, cmdbuf);
-				next(workStack, cmdbuf, vocab);
+				word_next(workStack, cmdbuf, vocab);
 				free(bufptr);
 				bufsize = 0;
 			}
@@ -136,8 +135,8 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		// Show prompt, get line of input
-		commandParse(prompt(cmdbuf->ready), cmdbuf);
-		next(workStack, cmdbuf, vocab);
+		commandParse(prompt(cmdbuf->status), cmdbuf);
+		word_next(workStack, cmdbuf, vocab);
 	}
 	return 0;
 }

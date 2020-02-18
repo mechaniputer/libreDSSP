@@ -24,7 +24,6 @@
 
 #include "corewords.h"
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
 #include "cmdbuf.h"
 
@@ -491,7 +490,7 @@ void exch4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 void exchdepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
-	if(stack->top <= 0){ // There need to be two elements or more
+	if(stack->top <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
 		cmdClear(cmdbuf);
 		return;
@@ -552,7 +551,7 @@ void copy4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 void copydepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
-	if(stack->top <= 0){ // There need to be two elements or more
+	if(stack->top <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
 		cmdClear(cmdbuf);
 		return;
@@ -821,3 +820,5 @@ void stackDepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	push(stack, (stack->top)+1);
 	return;
 }
+
+

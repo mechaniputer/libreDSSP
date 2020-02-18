@@ -19,7 +19,6 @@
 #ifndef DICT_H
 #define DICT_H
 
-#include "elem.h"
 #include "stack.h"
 #include "cmdbuf.h"
 #include "corewords.h"

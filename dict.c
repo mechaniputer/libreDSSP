@@ -21,7 +21,6 @@
 #include <assert.h>
 
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
 #include "cmdbuf.h"
 #include "util.h"

@@ -20,7 +20,6 @@
 #define COREWORDS_H
 
 #include <stdlib.h>
-#include "elem.h"
 #include "stack.h"
 #include "cmdbuf.h"
 
