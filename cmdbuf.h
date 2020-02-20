@@ -22,10 +22,11 @@
 #include "stack.h"
 
 // Interpreter status flags
-#define STAT_INC_COMMENT	0X1<<0
-#define STAT_INC_STRING		0X1<<1
-#define STAT_INC_PRINT		0X1<<2
-#define STAT_INC_COMPILE	0X1<<3
+#define STAT_INC_COMMENT   (1UL<<0)
+#define STAT_INC_STRING    (1UL<<1)
+#define STAT_INC_PRINT     (1UL<<2)
+#define STAT_INC_COMPILE   (1UL<<3)
+#define STAT_INC_ESCAPE    (1UL<<4)
 
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;

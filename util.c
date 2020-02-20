@@ -100,6 +100,7 @@ void commandParse(char * line, cmdbuffer * cmdbuf){
 	// This parser greedily emits code for each word as encountered (including during "compile" mode)
 	i=0;
 	do{
+printf("STATUS %d\n",cmdbuf->status);
 		ch = line[i++];
 		if(ch != '\0'){
 			printf("ch: %c \n",ch);
@@ -108,33 +109,41 @@ void commandParse(char * line, cmdbuffer * cmdbuf){
 		}
 		if (cmdbuf->status & STAT_INC_COMMENT){
 			// Comments are always filtered out
-			if(ch == ']'){
-				cmdbuf->status = (cmdbuf->status & (~STAT_INC_COMMENT));
+			if(cmdbuf->status & STAT_INC_ESCAPE){
+				cmdbuf->status &= (~STAT_INC_ESCAPE);
+			}else if(ch == ']'){
+				cmdbuf->status &= (~STAT_INC_COMMENT);
 				printf("Comment ended at index %d\n",i-1);
 			}else if(ch =='\\'){
-				// Escape char TODO ignore following bracket if any
+				// Escape char, set status
+				cmdbuf->status |= STAT_INC_ESCAPE;
 			}
 		}else if (cmdbuf->status & STAT_INC_STRING){
-			if(ch == '"'){
+			if(cmdbuf->status & STAT_INC_ESCAPE){
+				// TODO append char to ongoing text string
+				cmdbuf->status &= (~STAT_INC_ESCAPE);
+				printf("reset esc stat\n");
+			}else if(ch == '"'){
 				// TODO	Create a (nameless) word to push the addr/len of this literal
 				// TODO Emit the aforementioned word and then the generic string printing word if printing
-				cmdbuf->status = (cmdbuf->status & (~STAT_INC_STRING));
+				cmdbuf->status &= (~STAT_INC_STRING);
 				printf("String ended at index %d\n",i-1);
-				cmdbuf->status = (cmdbuf->status & (~STAT_INC_PRINT));
+				cmdbuf->status &= (~STAT_INC_PRINT);
 			}else if(ch == '\\'){
-				// Escape char TODO add next char to string even if it's a " or a '\'
+				// Escape char, set status
+				cmdbuf->status |= STAT_INC_ESCAPE;
 			}else{
-				// TODO append to ongoing text string
+				// TODO append char to ongoing text string
 				statement_len++;
 			}
 		}else if (ch == '[') { // Start of comment
-			cmdbuf->status = (cmdbuf->status | STAT_INC_COMMENT);
+			cmdbuf->status |= STAT_INC_COMMENT;
 			printf("Comment starting at index %d\n",i-1);
 		}else if (ch == '\"') {
-			cmdbuf->status = (cmdbuf->status | STAT_INC_STRING);
+			cmdbuf->status |= STAT_INC_STRING;
 			printf("String starting at index %d\n",i);
 			if((2<=i) && (line[i-2] == '.')){
-				cmdbuf->status = (cmdbuf->status | STAT_INC_PRINT);
+				cmdbuf->status |= STAT_INC_PRINT;
 				printf("Print flag set\n");
 			}
 			// TODO start populating literal string for data stack
@@ -158,7 +167,9 @@ void commandParse(char * line, cmdbuffer * cmdbuf){
 		}
 	}while(ch != '\0');
 
-	// FIXME Clever idea: BR statement operands can be literals (like constants, just push the value to the stack). BR can compare the values after executing each one in order and discarding the result. ELSE can be a pointer to the built-in C command, causing the BR equality check to always succeed.
+	// FIXME It might seem tempting to allow words as branch conditions but words can have side effects and constants cannot. It breaks the semantics.
+	// FIXME Instead, the BR word should use constants only. But we need to prevent ELSE symbol from colliding with any of the symbols.
+	// FIXME Should we record the number of conditional checks before ELSE?  eg, [BR 3 C1 P1 C2 P2 C3 P3 P4]
 
 	// Reached end of current line. Since we emit code greedily we don't need to keep any text.
 	if(cmdbuf->status & STAT_INC_PRINT){
