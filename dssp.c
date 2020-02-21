@@ -124,7 +124,7 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				commandParse(bufptr, cmdbuf);
+				commandParse(bufptr, cmdbuf, vocab);
 				word_next(workStack, cmdbuf, vocab);
 				free(bufptr);
 				bufsize = 0;
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		// Show prompt, get line of input
-		commandParse(prompt(cmdbuf->status), cmdbuf);
+		commandParse(prompt(cmdbuf->status), cmdbuf, vocab);
 		word_next(workStack, cmdbuf, vocab);
 	}
 	return 0;

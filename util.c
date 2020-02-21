@@ -28,6 +28,8 @@
 #include "stack.h"
 #include "cmdbuf.h"
 
+#define INIT_STATEMENT_CAP (8)
+
 // Deals with ."hello" print statements
 void textPrint(char * text){
 	assert(text != NULL);
@@ -85,28 +87,23 @@ void word_exit(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 
 // Populates the command buffer. Tracks completeness of current statement.
 // word_next() is called from elsewhere.
-void commandParse(char * line, cmdbuffer * cmdbuf){
+void commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 	printf("Parsing...\n");
 	int i;
 	char ch;
 
+	int statement_cap = INIT_STATEMENT_CAP;
+	int statement_len = 0;
 	char *statement = malloc(8*sizeof(char));
 	statement[0] = '\0';
-	int statement_cap = 0;
-	int statement_len = 0;
 
 	// If there's an incomplete statement then we need to keep adding to it until it becomes complete.
 	// In order to know when it's complete we will need to know what type of statement it is.
 	// This parser greedily emits code for each word as encountered (including during "compile" mode)
 	i=0;
 	do{
-printf("STATUS %d\n",cmdbuf->status);
 		ch = line[i++];
-		if(ch != '\0'){
-			printf("ch: %c \n",ch);
-		}else{
-			printf("ch: EOL \n");
-		}
+
 		if (cmdbuf->status & STAT_INC_COMMENT){
 			// Comments are always filtered out
 			if(cmdbuf->status & STAT_INC_ESCAPE){
@@ -120,20 +117,27 @@ printf("STATUS %d\n",cmdbuf->status);
 			}
 		}else if (cmdbuf->status & STAT_INC_STRING){
 			if(cmdbuf->status & STAT_INC_ESCAPE){
-				// TODO append char to ongoing text string
+				statement[statement_len] = ch; // FIXME check statement_cap
+				statement_len++;
 				cmdbuf->status &= (~STAT_INC_ESCAPE);
-				printf("reset esc stat\n");
 			}else if(ch == '"'){
-				// TODO	Create a (nameless) word to push the addr/len of this literal
-				// TODO Emit the aforementioned word and then the generic string printing word if printing
+				statement[statement_len] = '\0'; // FIXME check statement_cap
 				cmdbuf->status &= (~STAT_INC_STRING);
 				printf("String ended at index %d\n",i-1);
 				cmdbuf->status &= (~STAT_INC_PRINT);
+				// TODO Emit the string length and pointers and then the generic string printing word if printing
+
+				// Now that we have detached the old statement buffer we need a new one
+				statement_cap = INIT_STATEMENT_CAP;
+				statement_len = 0;
+				statement = malloc(8*sizeof(char));
+				statement[0] = '\0';
+
 			}else if(ch == '\\'){
 				// Escape char, set status
 				cmdbuf->status |= STAT_INC_ESCAPE;
 			}else{
-				// TODO append char to ongoing text string
+				statement[statement_len] = ch; // FIXME check statement_cap
 				statement_len++;
 			}
 		}else if (ch == '[') { // Start of comment
@@ -146,24 +150,34 @@ printf("STATUS %d\n",cmdbuf->status);
 				cmdbuf->status |= STAT_INC_PRINT;
 				printf("Print flag set\n");
 			}
-			// TODO start populating literal string for data stack
 		}else if ((ch != ' ') && (ch != '\t') && (ch != '\0')) {
 			// Normal contiguous characters
-			// TODO just add it to the current word
+			statement[statement_len] = ch; // FIXME check statement_cap
 			statement_len++;
+
 		}else if (((ch == '\0') || (ch == ' ') || (ch == '\t')) && (statement_len != 0)){ 	// Whitespace, deduplicated, including newlines
 			// TODO If we just saw {IF*, BR*, DO, :, ELSE, TRAP} then we set the appropriate incomplete status flag here so we can throw an error before execution if it isn't completed.
 
 			// TODO Check to see if last word completed a statement (branch/trap operands, VAR/VCTR assignments/declarations, semicolon) so we can clear flags
 
-			if(isNum(statement)){
-				printf("LITNUM\n");
-				// TODO literal: Create a (nameless) word that pushes it and put a pointer to that command into the buffer
-			}else{
-				printf("WORD\n");
-				// TODO word: look it up and put the pointer in the command queue (even if it's something like BR, ELSE, etc)
+			if(statement_len != 0){
+				statement[statement_len] = '\0';
+				if(isNum(statement)){
+					printf("LITNUM: %s\n",statement);
+					// TODO literal: Create a (nameless) word that pushes it and put a pointer to that command into the buffer
+				}else{
+					printf("WORD: %s\n",statement);
+					void * foo = (void*) coreSearch(statement, vocab);
+					if(NULL == foo) foo = (void*) wordSearch(statement, vocab);
+					if(NULL == foo){
+						printf("Word not found\n");
+					}else{
+						// TODO Emit the pointers
+						printf("Found\n");
+					}
+				}
 			}
-			statement_len = 0;
+			statement_len = 0; // No need to get a new buffer since we didn't detach it
 		}
 	}while(ch != '\0');
 
