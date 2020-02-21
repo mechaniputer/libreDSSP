@@ -226,7 +226,7 @@ void base10(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 }
 
 void ifplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
-	if((cmdbuf->top < 0) || (stack->top < 0)){
+/*	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
@@ -235,11 +235,12 @@ void ifplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	if(pop(stack) <= 0){
 		cmdDrop(cmdbuf);
 	}
+*/
 	return;
 }
 
 void ifzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
-	if((cmdbuf->top < 0) || (stack->top < 0)){
+/*	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		cmdClear(cmdbuf);
 		return;
@@ -248,11 +249,12 @@ void ifzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	if(pop(stack) != 0){
 		cmdDrop(cmdbuf);
 	}
+*/
 	return;
 }
 
 void ifminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
-	if((cmdbuf->top < 0) || (stack->top < 0)){
+/*	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
@@ -261,10 +263,12 @@ void ifminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	if(pop(stack) >= 0){
 		cmdDrop(cmdbuf);
 	}
+*/
 	return;
 }
 
 void branchminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
 		cmdClear(cmdbuf);
@@ -277,10 +281,12 @@ void branchminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	}else{ // Do the second thing
 		cmdDrop(cmdbuf);
 	}
+*/
 	return;
 }
 
 void branchzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
 		cmdClear(cmdbuf);
@@ -293,10 +299,12 @@ void branchzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	}else{ // Do the second thing
 		cmdDrop(cmdbuf);
 	}
+*/
 	return;
 }
 
 void branchplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
 		cmdClear(cmdbuf);
@@ -309,10 +317,12 @@ void branchplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	}else{ // Do the second thing
 		cmdDrop(cmdbuf);
 	}
+*/
 	return;
 }
 
 void branchsign(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
 		cmdClear(cmdbuf);
@@ -333,10 +343,12 @@ void branchsign(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 		cmdDrop(cmdbuf);
 	}
 	pop(stack);
+*/
 	return;
 }
 
 void branch(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	command *tempcmd;
 	command *branchCom = malloc(sizeof(command));
 	branchCom->text = malloc(3*sizeof(char));
@@ -376,6 +388,7 @@ void branch(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 		cmdDrop(cmdbuf);
 		cmdPush(cmdbuf, branchCom);
 	}
+*/
 	return;
 }
 
@@ -436,6 +449,7 @@ void lessthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 // FIXME However those problems seem to manifest here especially because it is one of the only core words where the stack is likely to grow a lot.
 // TODO There are definitely bugs present in this function which sometimes cause the interpreter to crash.
 void doloop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	int i;
 	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
@@ -452,6 +466,7 @@ void doloop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	for(i = 0; i < reps; i++){
 		cmdPush(cmdbuf, repeat);
 	}
+*/
 	return;
 }
 
@@ -588,6 +603,7 @@ void dropStack(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 
 // Attempts to define a new variable
 void defVar(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for !\n");
 		cmdClear(cmdbuf);
@@ -637,6 +653,7 @@ void defVar(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	}
 
 	temp->value = value;
+*/
 	return;
 }
 
@@ -663,6 +680,7 @@ void listDicts(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 }
 
 void growSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	subdict * tempSub = vocab->sub;
 
 	if(cmdbuf->top < 0){
@@ -697,10 +715,12 @@ void growSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	vocab->grow = tempSub;
 	tempSub->open = 1;
 	cmdDrop(cmdbuf);
+*/
 	return;
 }
 
 void shutSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	subdict * tempSub = vocab->sub;
 
 	if(cmdbuf->top < 0){
@@ -729,9 +749,11 @@ void shutSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	vocab->grow = NULL;
 	cmdDrop(cmdbuf);
 	return;
+*/
 }
 
 void openSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+/*
 	subdict * tempSub = vocab->sub;
 
 	if(cmdbuf->top < 0){
@@ -752,6 +774,7 @@ void openSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	}
 	tempSub->open = 1;
 	cmdDrop(cmdbuf);
+*/
 	return;
 }
 

@@ -78,11 +78,12 @@ coreword * coreSearch(char * name, dict * vocab){
 	return NULL;
 }
 
+// TODO Rewrite for new word definition style
 word * newWord(subdict * dict){
 	assert(dict != NULL);
 
+/*
 	word * temp; // Lets us find the next empty spot
-
 	if(dict->wordlist == NULL){ // First word in dictionary
 		dict->wordlist = malloc(sizeof(word));
 		temp = dict->wordlist;
@@ -100,12 +101,14 @@ word * newWord(subdict * dict){
 	temp->next = NULL;
 	// temp should now point to fresh word
 	return temp;
+*/
+	return malloc(sizeof(word));
 }
 
 // Attempts to define a new word
 // TODO rewrite to produce list of pointers and store it the Forth way
 void defWord(cmdbuffer * cmdbuf, dict * vocab){
-	word * temp;
+/*	word * temp;
 	assert(vocab != NULL);
 	assert(vocab->sub != NULL);
 
@@ -117,7 +120,7 @@ void defWord(cmdbuffer * cmdbuf, dict * vocab){
 	}
 
 	// Skip over ':'
-	if(cmdbuf->top >= 2){
+	if(cmdbuf->size >= 2){
 		cmdDrop(cmdbuf);
 	}else{
 		fprintf(stderr,"ERROR: Incomplete definition\n");
@@ -172,10 +175,14 @@ void defWord(cmdbuffer * cmdbuf, dict * vocab){
 
 	// Successful definition, print name
 	printf("%s\n",temp->name);
+*/
 	return;
 }
 
+// Grows the array defining a word
+// TODO rewrite
 void growWord(word * word, char * com, dict * vocab){
+/*
 	coreword * tempcore;
 	word->length++;
 	if(word->length >= word->capacity) {
@@ -191,6 +198,7 @@ void growWord(word * word, char * com, dict * vocab){
 	}else{
 		word->array[word->length].func = NULL;
 	}
+*/
 }
 
 void defCore(char * name, void (*func)(stack *, cmdbuffer *, dict*), dict * vocab){

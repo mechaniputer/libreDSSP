@@ -34,32 +34,14 @@ typedef struct command_struct command;
 struct cmdbuffer_struct
 {
 	int capacity;
-	int top;
+	int size;
 	int status; // Used by parser to note incomplete phrases
-	command * array;
-};
-
-struct command_struct
-{
-	// What to put here?
-	// Need to account for:
-	// * builtin function pointers
-	void (*func)(stack *, cmdbuffer *, dict *);
-	// * defined words
-	// * literals
-	// * strings ."hello"
-	// * anything that can be split by spaces
-	char * text;
+	void ** array;
 };
 
 cmdbuffer * newCmdBuffer();
-command * cmdTop(cmdbuffer * cmdbuf);
-command * cmdPop(cmdbuffer * cmdbuf);
-void cmdDrop(cmdbuffer * cmdbuf);
-void cmdFree(command* to_free);
 void cmdClear(cmdbuffer * cmdbuf);
-void cmdPush(cmdbuffer * cmdbuf, command * cmd);
+void cmdAppend(cmdbuffer * cmdbuf, void * cmd);
 void cmdGrow(cmdbuffer * cmdbuf);
-void newCommand(command * oldcmd, command ** newcmd);
 
 #endif
