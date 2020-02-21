@@ -124,10 +124,15 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				commandParse(bufptr, cmdbuf, vocab);
-				word_next(workStack, cmdbuf, vocab);
-				free(bufptr);
-				bufsize = 0;
+				if(!commandParse(bufptr, cmdbuf, vocab)){
+					word_next(workStack, cmdbuf, vocab);
+					free(bufptr);
+					bufsize = 0;
+				}else{
+					free(bufptr);
+					bufsize = 0;
+					// TODO error, clear command queue
+				}
 			}
 			fclose(file);
 		}
@@ -135,8 +140,14 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		// Show prompt, get line of input
-		commandParse(prompt(cmdbuf->status), cmdbuf, vocab);
-		word_next(workStack, cmdbuf, vocab);
+		char * line = prompt(cmdbuf->status);
+		if(!commandParse(line, cmdbuf, vocab)){
+			free(line);
+			word_next(workStack, cmdbuf, vocab);
+		}else{
+			free(line);
+			// TODO error, clear command queue
+		}
 	}
 	return 0;
 }

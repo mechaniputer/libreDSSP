@@ -30,6 +30,49 @@
 
 #define INIT_STATEMENT_CAP (8)
 
+#define ERR_FORB_SYM_IN_WORD \
+	printf("Error: forbidden symbol inside word\n"); \
+	free(statement); \
+	cmdbuf->status = 0; \
+	return 1;
+
+#define ERR_INC_PRINT \
+	printf("Error: Incomplete print statement\n"); \
+	cmdbuf->status = 0; \
+	free(statement); \
+	return 1;
+
+#define ERR_INC_STRING \
+	printf("Error: Incomplete string literal\n"); \
+	cmdbuf->status = 0; \
+	free(statement); \
+	return 1;
+
+#define ERR_INC_COMMENT \
+	printf("Error: Incomplete comment\n"); \
+	cmdbuf->status = 0; \
+	free(statement); \
+	return 1;
+
+#define ERR_NEST_COMMENT \
+	printf("Error: comments cannot be nested\n"); \
+	cmdbuf->status = 0; \
+	free(statement); \
+	return 1;
+
+#define GROW_BUFFER \
+	statement_cap += INIT_STATEMENT_CAP; \
+	char * newbuffer =  realloc(statement, statement_cap*sizeof(char)); \
+	assert(NULL != newbuffer); \
+	statement = newbuffer;
+
+#define NEW_BUFFER \
+	statement_len = 0; \
+	statement_cap = INIT_STATEMENT_CAP; \
+	statement =  malloc(statement_cap*sizeof(char)); \
+	assert(NULL != statement); \
+	statement[0] = '\0';
+
 // Deals with ."hello" print statements
 void textPrint(char * text){
 	assert(text != NULL);
@@ -87,94 +130,119 @@ void word_exit(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 
 // Populates the command buffer. Tracks completeness of current statement.
 // word_next() is called from elsewhere.
-void commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
-	printf("Parsing...\n");
-	int i;
-	char ch;
+// return 0 if ok, 1 if error
+int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
+	int line_ind;
+	char ch, prevch;
 
-	int statement_cap = INIT_STATEMENT_CAP;
-	int statement_len = 0;
-	char *statement = malloc(8*sizeof(char));
-	statement[0] = '\0';
+	char * statement;
+	int statement_len, statement_cap;
+	NEW_BUFFER // Allocates a new buffer and sets associated counters
 
 	// If there's an incomplete statement then we need to keep adding to it until it becomes complete.
 	// In order to know when it's complete we will need to know what type of statement it is.
 	// This parser greedily emits code for each word as encountered (including during "compile" mode)
-	i=0;
+	line_ind=0;
+	ch = '\0';
+	prevch = '\0';
 	do{
-		ch = line[i++];
+		prevch = ch;
+		ch = line[line_ind++];
 
+		// FIXME Do we want to enforce whitespace after strings and comments?
 		if (cmdbuf->status & STAT_INC_COMMENT){
 			// Comments are always filtered out
 			if(cmdbuf->status & STAT_INC_ESCAPE){
 				cmdbuf->status &= (~STAT_INC_ESCAPE);
+			}else if('[' == ch){
+				ERR_NEST_COMMENT
 			}else if(ch == ']'){
+				// End of comment
 				cmdbuf->status &= (~STAT_INC_COMMENT);
-				printf("Comment ended at index %d\n",i-1);
 			}else if(ch =='\\'){
 				// Escape char, set status
 				cmdbuf->status |= STAT_INC_ESCAPE;
 			}
 		}else if (cmdbuf->status & STAT_INC_STRING){
-			if(cmdbuf->status & STAT_INC_ESCAPE){
-				statement[statement_len] = ch; // FIXME check statement_cap
+			if(statement_len == (statement_cap - 1)){ // Resize buffer
+				GROW_BUFFER
+			}
+			if(cmdbuf->status & STAT_INC_ESCAPE){ // Character inside string was escaped
+				statement[statement_len] = ch;
 				statement_len++;
 				cmdbuf->status &= (~STAT_INC_ESCAPE);
-			}else if(ch == '"'){
-				statement[statement_len] = '\0'; // FIXME check statement_cap
+			}else if(ch == '"'){ // End string
+				statement[statement_len] = '\0';
 				cmdbuf->status &= (~STAT_INC_STRING);
-				printf("String ended at index %d\n",i-1);
 				cmdbuf->status &= (~STAT_INC_PRINT);
 				// TODO Emit the string length and pointers and then the generic string printing word if printing
+				printf("String complete: %s\n",statement);
+				free(statement); // TODO Temporary
 
 				// Now that we have detached the old statement buffer we need a new one
 				statement_cap = INIT_STATEMENT_CAP;
 				statement_len = 0;
-				statement = malloc(8*sizeof(char));
+				statement = malloc(statement_cap*sizeof(char));
 				statement[0] = '\0';
 
 			}else if(ch == '\\'){
 				// Escape char, set status
 				cmdbuf->status |= STAT_INC_ESCAPE;
 			}else{
-				statement[statement_len] = ch; // FIXME check statement_cap
+				statement[statement_len] = ch;
 				statement_len++;
 			}
-		}else if (ch == '[') { // Start of comment
+		}else if (ch == '[') { // Start of a comment
 			cmdbuf->status |= STAT_INC_COMMENT;
-			printf("Comment starting at index %d\n",i-1);
-		}else if (ch == '\"') {
+			if(statement_len>0){
+				ERR_FORB_SYM_IN_WORD
+			}
+		}else if (ch == '\"') { // Start of a string
 			cmdbuf->status |= STAT_INC_STRING;
-			printf("String starting at index %d\n",i);
-			if((2<=i) && (line[i-2] == '.')){
+			if(prevch == '.'){ // String should be printed
+				if(statement_len>1){
+					ERR_FORB_SYM_IN_WORD
+				}
 				cmdbuf->status |= STAT_INC_PRINT;
-				printf("Print flag set\n");
+			}else if(statement_len>0){
+				ERR_FORB_SYM_IN_WORD
+			}
+			statement_len = 0; // We may have already put the "." in it if it's a print statement so we should discard that
+			if(statement_cap > INIT_STATEMENT_CAP){ // Since this buffer will be detached and kept, it shouldn't be larger than needed
+				free(statement);
+				NEW_BUFFER
 			}
 		}else if ((ch != ' ') && (ch != '\t') && (ch != '\0')) {
+			if((ch == ']') || ((0 != statement_len) && (ch == '.'))){
+				ERR_FORB_SYM_IN_WORD
+			}
 			// Normal contiguous characters
-			statement[statement_len] = ch; // FIXME check statement_cap
+			if(statement_len == (statement_cap - 1)){ // Resize buffer
+				GROW_BUFFER
+			}
+			statement[statement_len] = ch;
 			statement_len++;
 
 		}else if (((ch == '\0') || (ch == ' ') || (ch == '\t')) && (statement_len != 0)){ 	// Whitespace, deduplicated, including newlines
 			// TODO If we just saw {IF*, BR*, DO, :, ELSE, TRAP} then we set the appropriate incomplete status flag here so we can throw an error before execution if it isn't completed.
 
-			// TODO Check to see if last word completed a statement (branch/trap operands, VAR/VCTR assignments/declarations, semicolon) so we can clear flags
+			// TODO Check to see if last word completed a sequence (branch/trap operands, VAR/VCTR assignments/declarations, semicolon) so we can clear flags
 
 			if(statement_len != 0){
 				statement[statement_len] = '\0';
 				if(isNum(statement)){
 					printf("LITNUM: %s\n",statement);
-					// TODO literal: Create a (nameless) word that pushes it and put a pointer to that command into the buffer
+					// TODO literal: Emit a pointer to a command to push the literal onto the stack
 				}else{
-					printf("WORD: %s\n",statement);
 					void * foo = (void*) coreSearch(statement, vocab);
 					if(NULL == foo) foo = (void*) wordSearch(statement, vocab);
 					if(NULL == foo){
-						printf("Word not found\n");
+						printf("%s not found\n",statement);
 					}else{
 						// TODO Emit the pointers
-						printf("Found\n");
+						printf("%s found\n",statement);
 					}
+					statement_len = 0; // No need to get a new buffer since we didn't detach it
 				}
 			}
 			statement_len = 0; // No need to get a new buffer since we didn't detach it
@@ -187,18 +255,15 @@ void commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 
 	// Reached end of current line. Since we emit code greedily we don't need to keep any text.
 	if(cmdbuf->status & STAT_INC_PRINT){
-		printf("Error: Incomplete print statement\n");
-		cmdbuf->status = (cmdbuf->status & (~STAT_INC_PRINT));
+		ERR_INC_PRINT
 	}else if(cmdbuf->status & STAT_INC_STRING){
-		printf("Error: Incomplete string literal\n");
-		cmdbuf->status = (cmdbuf->status & (~STAT_INC_STRING));
+		ERR_INC_STRING
 	}else if(cmdbuf->status & STAT_INC_COMMENT){
-		printf("Error: Incomplete comment\n");
-		cmdbuf->status = (cmdbuf->status & (~STAT_INC_COMMENT));
+		ERR_INC_COMMENT
 	}
 	free(statement);
 
-	return;
+	return 0;
 }
 
 char * prompt(int status){
@@ -211,7 +276,8 @@ char * prompt(int status){
 	//Check for EOF.
 	if (!line){
 		printf("\n");
-		return "BYE";
+		line = (char*) malloc(4*sizeof(char));
+		strcpy(line, "BYE");
 	}
 	if(strcmp(line, "")) add_history(line);
 	return line;
