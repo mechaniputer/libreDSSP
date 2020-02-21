@@ -27,10 +27,7 @@
 #include "stack.h"
 #include "cmdbuf.h"
 
-// In utils.h
-void run(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-
-void plus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void plus(stack * stack, cmdbuffer * cmdbuf){
 	int temp;
 	// -1 indicates empty stack
 	if(stack->top <= 0){
@@ -43,7 +40,7 @@ void plus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void multiply(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void multiply(stack * stack, cmdbuffer * cmdbuf){
 	int temp1;
 	int temp2;
 	if(stack->top <= 0){
@@ -57,7 +54,7 @@ void multiply(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void minus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void minus(stack * stack, cmdbuffer * cmdbuf){
 	int temp;
 	// -1 indicates empty stack
 	if(stack->top <= 0){
@@ -70,7 +67,7 @@ void minus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void divide(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void divide(stack * stack, cmdbuffer * cmdbuf){
 	int temp1;
 	int temp2;
 	if(stack->top <= 0){
@@ -84,7 +81,7 @@ void divide(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void negate(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void negate(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
 		cmdClear(cmdbuf);
@@ -94,7 +91,7 @@ void negate(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void absval(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void absval(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
 		cmdClear(cmdbuf);
@@ -105,7 +102,7 @@ void absval(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void plus1(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void plus1(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 1+\n");
@@ -116,7 +113,7 @@ void plus1(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void plus2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void plus2(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 2+\n");
@@ -127,7 +124,7 @@ void plus2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void plus3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void plus3(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 3+\n");
@@ -138,7 +135,7 @@ void plus3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void plus4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void plus4(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 4+\n");
@@ -149,7 +146,7 @@ void plus4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void minus1(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void minus1(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 1-\n");
@@ -160,7 +157,7 @@ void minus1(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void minus2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void minus2(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 2-\n");
@@ -171,7 +168,7 @@ void minus2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void minus3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void minus3(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 3-\n");
@@ -182,7 +179,7 @@ void minus3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void minus4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void minus4(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 4-\n");
@@ -193,19 +190,19 @@ void minus4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void bye(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void bye(stack * stack, cmdbuffer * cmdbuf){
 	printf("Exiting libreDSSP\n");
 	exit(0);
 }
 
 // TODO This will need to be modified to support multiple output modes
-// Current mode will be readable from a var in vocab
-void showTop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+// Current mode will be readable from a flag in cmdbuf?
+void showTop(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top > -1) printf("%d\n",top(stack));
 	return;
 }
 
-void showStack(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void showStack(stack * stack, cmdbuffer * cmdbuf){
 	int i;
 	if(stack->top < 0){
 		printf("[]\n");
@@ -221,11 +218,11 @@ void showStack(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 }
 
 // FIXME Placeholder because B10 is currently the only mode we support!
-void base10(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void base10(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void ifplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void ifplus(stack * stack, cmdbuffer * cmdbuf){
 /*	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
@@ -239,7 +236,7 @@ void ifplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void ifzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void ifzero(stack * stack, cmdbuffer * cmdbuf){
 /*	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		cmdClear(cmdbuf);
@@ -253,7 +250,7 @@ void ifzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void ifminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void ifminus(stack * stack, cmdbuffer * cmdbuf){
 /*	if((cmdbuf->top < 0) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
@@ -267,7 +264,7 @@ void ifminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void branchminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void branchminus(stack * stack, cmdbuffer * cmdbuf){
 /*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
@@ -285,7 +282,7 @@ void branchminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void branchzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void branchzero(stack * stack, cmdbuffer * cmdbuf){
 /*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
@@ -303,7 +300,7 @@ void branchzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void branchplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void branchplus(stack * stack, cmdbuffer * cmdbuf){
 /*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
@@ -321,7 +318,7 @@ void branchplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void branchsign(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void branchsign(stack * stack, cmdbuffer * cmdbuf){
 /*
 	if((cmdbuf->top < 1) || (stack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
@@ -347,7 +344,7 @@ void branchsign(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void branch(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void branch(stack * stack, cmdbuffer * cmdbuf){
 /*
 	command *tempcmd;
 	command *branchCom = malloc(sizeof(command));
@@ -392,7 +389,7 @@ void branch(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void equality(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void equality(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for =\n");
@@ -409,7 +406,7 @@ void equality(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void greaterthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void greaterthan(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for >\n");
@@ -426,7 +423,7 @@ void greaterthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void lessthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void lessthan(stack * stack, cmdbuffer * cmdbuf){
 	// -1 indicates empty stack
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for <\n");
@@ -448,7 +445,7 @@ void lessthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 // FIXME This problem could result in bugs literally anywhere in the interpreter!!!
 // FIXME However those problems seem to manifest here especially because it is one of the only core words where the stack is likely to grow a lot.
 // TODO There are definitely bugs present in this function which sometimes cause the interpreter to crash.
-void doloop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void doloop(stack * stack, cmdbuffer * cmdbuf){
 /*
 	int i;
 	if((cmdbuf->top < 0) || (stack->top < 0)){
@@ -471,7 +468,7 @@ void doloop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 }
 
 // Stack manipulation
-void exch2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void exch2(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for E2\n");
 		cmdClear(cmdbuf);
@@ -482,7 +479,7 @@ void exch2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	stack->array[stack->top - 1] = temp;
 	return;
 }
-void exch3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void exch3(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 1){
 		fprintf(stderr,"ERROR: Insufficient operands for E3\n");
 		cmdClear(cmdbuf);
@@ -493,7 +490,7 @@ void exch3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	stack->array[stack->top - 2] = temp;
 	return;
 }
-void exch4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void exch4(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 2){
 		fprintf(stderr,"ERROR: Insufficient operands for E4\n");
 		cmdClear(cmdbuf);
@@ -504,7 +501,7 @@ void exch4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	stack->array[stack->top - 3] = temp;
 	return;
 }
-void exchdepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void exchdepth(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
 		cmdClear(cmdbuf);
@@ -528,7 +525,7 @@ void exchdepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void copy(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void copy(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C\n");
 		cmdClear(cmdbuf);
@@ -538,7 +535,7 @@ void copy(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void copy2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void copy2(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C2\n");
 		cmdClear(cmdbuf);
@@ -547,7 +544,7 @@ void copy2(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	push(stack, stack->array[stack->top - 1]);
 	return;
 }
-void copy3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void copy3(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 1){
 		fprintf(stderr,"ERROR: Insufficient operands for C3\n");
 		cmdClear(cmdbuf);
@@ -556,7 +553,7 @@ void copy3(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	push(stack, stack->array[stack->top - 2]);
 	return;
 }
-void copy4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void copy4(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 2){
 		fprintf(stderr,"ERROR: Insufficient operands for C4\n");
 		cmdClear(cmdbuf);
@@ -565,7 +562,7 @@ void copy4(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	push(stack, stack->array[stack->top - 3]);
 	return;
 }
-void copydepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void copydepth(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
 		cmdClear(cmdbuf);
@@ -586,7 +583,7 @@ void copydepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void drop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void drop(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
 		cmdClear(cmdbuf);
@@ -596,13 +593,13 @@ void drop(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void dropStack(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void dropStack(stack * stack, cmdbuffer * cmdbuf){
 	stack->top = -1;
 	return;
 }
 
 // Attempts to define a new variable
-void defVar(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void defVar(stack * stack, cmdbuffer * cmdbuf){
 /*
 	if(stack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for !\n");
@@ -657,16 +654,17 @@ void defVar(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void printNewline(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void printNewline(stack * stack, cmdbuffer * cmdbuf){
 	printf("\n");
 	return;
 }
-void printSpace(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void printSpace(stack * stack, cmdbuffer * cmdbuf){
 	printf(" ");
 	return;
 }
 
-void listDicts(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void listDicts(stack * stack, cmdbuffer * cmdbuf){
+/*
 	assert(vocab != NULL);
 	subdict * tempSub = vocab->sub;
 	printf("$PRIME OPEN\n");
@@ -676,10 +674,11 @@ void listDicts(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 		else printf(" CLOSED\n");
 		tempSub = tempSub->next;
 	}
+*/
 	return;
 }
 
-void growSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void growSub(stack * stack, cmdbuffer * cmdbuf){
 /*
 	subdict * tempSub = vocab->sub;
 
@@ -719,7 +718,7 @@ void growSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void shutSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void shutSub(stack * stack, cmdbuffer * cmdbuf){
 /*
 	subdict * tempSub = vocab->sub;
 
@@ -752,7 +751,7 @@ void shutSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 */
 }
 
-void openSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void openSub(stack * stack, cmdbuffer * cmdbuf){
 /*
 	subdict * tempSub = vocab->sub;
 
@@ -780,7 +779,7 @@ void openSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 
 // TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
-void termInNum(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void termInNum(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top > -1){ // Requires one operand
 		int len = pop(stack);
 		if(len < 0){
@@ -811,7 +810,7 @@ void termInNum(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 
 // TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
-void termOutNum(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void termOutNum(stack * stack, cmdbuffer * cmdbuf){
 	if(stack->top > 0){ // Requires two operands
 		int len = pop(stack);
 		int num = pop(stack);
@@ -839,7 +838,7 @@ void termOutNum(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
 	return;
 }
 
-void stackDepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void stackDepth(stack * stack, cmdbuffer * cmdbuf){
 	push(stack, (stack->top)+1);
 	return;
 }

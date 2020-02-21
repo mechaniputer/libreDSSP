@@ -32,9 +32,9 @@
 
 void textPrint(char * text);
 int isNum(char * foo);
-void word_next(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void word_enter(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void word_exit(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void word_next(stack * stack, cmdbuffer * cmdbuf);
+void word_enter(stack * stack, cmdbuffer * cmdbuf);
+void word_exit(stack * stack, cmdbuffer * cmdbuf);
 int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab);
 char * prompt(int ready);
 // Searches dictionaries, runs a word if possible

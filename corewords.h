@@ -26,68 +26,68 @@
 typedef struct dict dict;
 
 // Arithmetic
-void plus(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void multiply(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void minus(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void divide(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void negate(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void absval(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void plus(stack * stack, cmdbuffer * cmdbuf);
+void multiply(stack * stack, cmdbuffer * cmdbuf);
+void minus(stack * stack, cmdbuffer * cmdbuf);
+void divide(stack * stack, cmdbuffer * cmdbuf);
+void negate(stack * stack, cmdbuffer * cmdbuf);
+void absval(stack * stack, cmdbuffer * cmdbuf);
 
-void plus1(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void plus2(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void plus3(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void plus4(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void plus1(stack * stack, cmdbuffer * cmdbuf);
+void plus2(stack * stack, cmdbuffer * cmdbuf);
+void plus3(stack * stack, cmdbuffer * cmdbuf);
+void plus4(stack * stack, cmdbuffer * cmdbuf);
 
-void minus1(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void minus2(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void minus3(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void minus4(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void minus1(stack * stack, cmdbuffer * cmdbuf);
+void minus2(stack * stack, cmdbuffer * cmdbuf);
+void minus3(stack * stack, cmdbuffer * cmdbuf);
+void minus4(stack * stack, cmdbuffer * cmdbuf);
 
 // Display and interpreter
-void bye(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void showTop(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void showStack(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void base10(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void bye(stack * stack, cmdbuffer * cmdbuf);
+void showTop(stack * stack, cmdbuffer * cmdbuf);
+void showStack(stack * stack, cmdbuffer * cmdbuf);
+void base10(stack * stack, cmdbuffer * cmdbuf);
 
 // Conditionals
-void ifplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void ifzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void ifminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void branchminus(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void branchzero(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void branchplus(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void branchsign(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void branch(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void equality(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void greaterthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void lessthan(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void ifplus(stack * stack, cmdbuffer * cmdbuf);
+void ifzero(stack * stack, cmdbuffer * cmdbuf);
+void ifminus(stack * stack, cmdbuffer * cmdbuf);
+void branchminus(stack * stack, cmdbuffer * cmdbuf);
+void branchzero(stack * stack, cmdbuffer * cmdbuf);
+void branchplus(stack * stack, cmdbuffer * cmdbuf);
+void branchsign(stack * stack, cmdbuffer * cmdbuf);
+void branch(stack * stack, cmdbuffer * cmdbuf);
+void equality(stack * stack, cmdbuffer * cmdbuf);
+void greaterthan(stack * stack, cmdbuffer * cmdbuf);
+void lessthan(stack * stack, cmdbuffer * cmdbuf);
 
 // Looping
-void doloop(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void doloop(stack * stack, cmdbuffer * cmdbuf);
 
 // Stack manipulation
-void exch2(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void exch3(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void exch4(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void exchdepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void copy(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void copy2(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void copy3(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void copy4(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void copydepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void drop(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void dropStack(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void exch2(stack * stack, cmdbuffer * cmdbuf);
+void exch3(stack * stack, cmdbuffer * cmdbuf);
+void exch4(stack * stack, cmdbuffer * cmdbuf);
+void exchdepth(stack * stack, cmdbuffer * cmdbuf);
+void copy(stack * stack, cmdbuffer * cmdbuf);
+void copy2(stack * stack, cmdbuffer * cmdbuf);
+void copy3(stack * stack, cmdbuffer * cmdbuf);
+void copy4(stack * stack, cmdbuffer * cmdbuf);
+void copydepth(stack * stack, cmdbuffer * cmdbuf);
+void drop(stack * stack, cmdbuffer * cmdbuf);
+void dropStack(stack * stack, cmdbuffer * cmdbuf);
 
 // Misc
-void defVar(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void printNewline(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void printSpace(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void listDicts(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void growSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void shutSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void openSub(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void termInNum(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void termOutNum(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
-void stackDepth(stack * stack, cmdbuffer * cmdbuf, dict * vocab);
+void defVar(stack * stack, cmdbuffer * cmdbuf);
+void printNewline(stack * stack, cmdbuffer * cmdbuf);
+void printSpace(stack * stack, cmdbuffer * cmdbuf);
+void listDicts(stack * stack, cmdbuffer * cmdbuf);
+void growSub(stack * stack, cmdbuffer * cmdbuf);
+void shutSub(stack * stack, cmdbuffer * cmdbuf);
+void openSub(stack * stack, cmdbuffer * cmdbuf);
+void termInNum(stack * stack, cmdbuffer * cmdbuf);
+void termOutNum(stack * stack, cmdbuffer * cmdbuf);
+void stackDepth(stack * stack, cmdbuffer * cmdbuf);
 
 #endif

@@ -125,7 +125,7 @@ int main(int argc, char *argv[]){
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
 				if(!commandParse(bufptr, cmdbuf, vocab)){
-					word_next(workStack, cmdbuf, vocab);
+					word_next(workStack, cmdbuf);
 					free(bufptr);
 					bufsize = 0;
 				}else{
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]){
 		char * line = prompt(cmdbuf->status);
 		if(!commandParse(line, cmdbuf, vocab)){
 			free(line);
-			word_next(workStack, cmdbuf, vocab);
+			word_next(workStack, cmdbuf);
 		}else{
 			free(line);
 			// TODO error, clear command queue

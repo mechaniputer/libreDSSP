@@ -201,7 +201,7 @@ void growWord(word * word, char * com, dict * vocab){
 */
 }
 
-void defCore(char * name, void (*func)(stack *, cmdbuffer *, dict*), dict * vocab){
+void defCore(char * name, void (*func)(stack *, cmdbuffer *), dict * vocab){
 	coreword * temp = NULL;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));

@@ -101,31 +101,33 @@ int isNum(char * foo){
 	return 1;
 }
 
-// FIXME Doesn't need the dictionary since no lookups, all pointers
-void word_next(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void word_next(stack * stack, cmdbuffer * cmdbuf){
 	// TODO
-	//   (IP) -> W   fetch memory pointed by IP into "W" register
-	//   IP+2 -> IP  advance IP (assuming 2-byte addresses)
-	//   JP (W)      jump to the address in the W register
+	//   (IP) -> W  fetch memory pointed by IP into "W" register
+	//               ...W now holds address of the Code Field
+	//   IP+2 -> IP advance IP, just like a program counter
+	//               (assuming 2-byte addresses in the thread)
+	//   (W) ->  X  fetch memory pointed by W into "X" register
+	//               ...X now holds address of the machine code
+	//   JP (X)     jump to the address in the X register
 	return;
 }
 
-// FIXME Doesn't need the dictionary since no lookups, all pointers
-void word_enter(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void word_enter(stack * stack, cmdbuffer * cmdbuf){
 	// TODO
-	//     PUSH IP     onto the "return address stack"
-	//     W+2 -> IP   W still points to the Code Field, so W+2 is 
-	//                 the address of the Body!  (Assuming a 2-byte
-	//                 address -- other Forths may be different.)
-	//     JUMP to interpreter ("NEXT")
+	//   PUSH IP     onto the "return address stack"
+	//   W+2 -> IP   W still points to the Code Field, so W+2 is
+	//               the address of the Body!  (Assuming a 2-byte
+	//               address -- other Forths may be different.)
+	//   JUMP to interpreter ("NEXT")
 	return;
 }
 
-// FIXME Doesn't need the dictionary since no lookups, all pointers
-void word_exit(stack * stack, cmdbuffer * cmdbuf, dict * vocab){
+void word_exit(stack * stack, cmdbuffer * cmdbuf){
 	// TODO
 	//   POP IP   from the "return address stack"
 	//   JUMP to interpreter
+	return;
 }
 
 // Populates the command buffer. Tracks completeness of current statement.

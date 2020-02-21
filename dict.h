@@ -65,7 +65,7 @@ struct coreword
 {
 	char name[8];
 	coreword * next;
-	void (*func)(stack *, cmdbuffer *, dict *);
+	void (*func)(stack *, cmdbuffer *);
 };
 
 struct subdict
@@ -94,7 +94,7 @@ coreword * coreSearch(char * name, dict * vocab);
 void defWord(cmdbuffer * cmdbuf, dict * vocab);
 void growWord(word * word, char * com, dict * vocab);
 // Defines built-in functions
-void defCore(char * name, void (*func)(stack *, cmdbuffer *, dict *), dict * vocab);
+void defCore(char * name, void (*func)(stack *, cmdbuffer *), dict * vocab);
 subdict * newDict(dict * vocab, char * name);
 
 #endif
