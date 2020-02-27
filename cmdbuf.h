@@ -37,11 +37,15 @@ struct cmdbuffer_struct
 	int size;
 	int status; // Used by parser to note incomplete phrases
 	void ** array;
+
+	int ip; // Current instruction pointer
+	stack * ipstack;
 };
 
 cmdbuffer * newCmdBuffer();
 void cmdClear(cmdbuffer * cmdbuf);
 void cmdAppend(cmdbuffer * cmdbuf, void * cmd);
 void cmdGrow(cmdbuffer * cmdbuf);
+
 
 #endif

@@ -27,6 +27,11 @@ cmdbuffer * newCmdBuffer(){
 	new_cmdbuf->capacity = 10;
 	new_cmdbuf->size = 0;
 	new_cmdbuf->status = 0;
+
+
+	new_cmdbuf->ip = 0;
+	new_cmdbuf->ipstack = newStack();
+
 	return new_cmdbuf;
 }
 

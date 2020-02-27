@@ -215,7 +215,7 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 				NEW_BUFFER
 			}
 		}else if ((ch != ' ') && (ch != '\t') && (ch != '\0')) {
-			if((ch == ']') || ((0 != statement_len) && (ch == '.') && (prevch != '.'))){
+			if((ch == ']') || (ch == '\\') || ((0 != statement_len) && (ch == '.') && (prevch != '.'))){
 				ERR_FORB_SYM_IN_WORD
 			}
 			// Normal contiguous characters
@@ -241,8 +241,8 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 					if(NULL == foo){
 						printf("%s not found\n",statement);
 					}else{
-						// TODO Emit the pointers
 						printf("%s found  %p\n",statement, foo);
+						cmdAppend(cmdbuf, foo); // Emit the pointer
 					}
 					statement_len = 0; // No need to get a new buffer since we didn't detach it
 				}
@@ -264,6 +264,13 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 		ERR_INC_COMMENT
 	}
 	free(statement);
+
+	cmdAppend(cmdbuf, 0);
+	printf("Printing cmdbuf->array\n");
+	for(int i=0; i<cmdbuf->size; i++){
+		printf("%d: %p\n",i, cmdbuf->array[i]);
+	}
+	cmdClear(cmdbuf);
 
 	return 0;
 }
