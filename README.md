@@ -7,6 +7,8 @@ To our knowledge this is the only maintained DSSP implementation, and the first 
 
 The ultimate goal of this project is not to merely replicate DSSP as it once existed, but to improve on it where possible without betraying the philosophy of the language.
 
+Effort is underway (in the dev branch) to rewrite libreDSSP as a traditional "indirect threaded" Forth-style environment.
+
 ## Getting started
 Run 'make' to build it. You may wish to use the included tutorial by running './dssp examples/TUTOR.DSP'.
 Vim source highlighting files are included in vim/.
@@ -62,5 +64,6 @@ Also let us know if you are interested in setting up other resources such as an 
 ## Possible future goals
 	* Full documentation
 	* Floating point math
-	* DSSP Compiler
-	* Multithreading support
+	* DSSP Standalone Compiler
+	* Portability improvements including embedded devices
+	* Multithreading support by spawning additional kernels?

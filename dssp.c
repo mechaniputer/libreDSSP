@@ -25,9 +25,14 @@
 #include "corewords.h"
 #include "util.h"
 
+cmdbuffer *cmdbuf;
+stack *dataStack;
+stack *returnStack;
+
 int main(int argc, char *argv[]){
-	stack * workStack = newStack();
-	cmdbuffer * cmdbuf = newCmdBuffer();
+	cmdbuf = newCmdBuffer();
+	dataStack = newStack();
+	returnStack = newStack();
 
 	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
 	vocab->core = NULL;
@@ -125,7 +130,8 @@ int main(int argc, char *argv[]){
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
 				if(!commandParse(bufptr, cmdbuf, vocab)){
-					word_next(workStack, cmdbuf);
+					// TODO set IP to start
+					word_next();
 					free(bufptr);
 					bufsize = 0;
 				}else{
@@ -143,7 +149,15 @@ int main(int argc, char *argv[]){
 		char * line = prompt(cmdbuf->status);
 		if(!commandParse(line, cmdbuf, vocab)){
 			free(line);
-			word_next(workStack, cmdbuf);
+			// TODO set IP to start
+			word_next();
+
+			printf("Printing cmdbuf->array\n");
+			for(int i=0; i<cmdbuf->size; i++){
+				printf("%d: %p\n",i, cmdbuf->array[i]);
+			}
+			cmdClear(cmdbuf);
+
 		}else{
 			free(line);
 			// TODO error, clear command queue

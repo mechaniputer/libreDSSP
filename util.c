@@ -101,8 +101,24 @@ int isNum(char * foo){
 	return 1;
 }
 
-void word_next(stack * stack, cmdbuffer * cmdbuf){
-	// TODO
+// TODO Need to allow use of undefined words via placeholder (DSSP thing)
+//		"introduce a table of undefined names and some procedure to support it"
+//		"table of addresses where this word is used"
+//		Does this mean we need a placeholder word that just prints "undefined word" and returns to the prompt?
+// TODO Need return address stack
+// TODO Error handling? What if there is an error such as an undefined word being executed?
+// TODO Might need consistent way to find dict entry name from pointer and vice-versa?
+// TODO Remove redundant args everywhere (cmdbuf, stack/dataStack)
+void word_next(){
+	// Prototype (doesn't use IP or call stack yet)
+	void (*func)();
+	for(int i=0; i<cmdbuf->size; i++){
+		func = (void*) *(cmdbuf->array[i]);
+		(*func)();
+	}
+
+	// TODO The cmdbuf should contain a word that returns to the prompt so we don't need a bounded loop in this function
+	// TODO Make this function as fast as possible
 	//   (IP) -> W  fetch memory pointed by IP into "W" register
 	//               ...W now holds address of the Code Field
 	//   IP+2 -> IP advance IP, just like a program counter
@@ -113,7 +129,9 @@ void word_next(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void word_enter(stack * stack, cmdbuffer * cmdbuf){
+// AKA DO_COLON
+// Not the same as COLON, which will be used to allocate and define a word
+void word_enter(){
 	// TODO
 	//   PUSH IP     onto the "return address stack"
 	//   W+2 -> IP   W still points to the Code Field, so W+2 is
@@ -123,7 +141,9 @@ void word_enter(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void word_exit(stack * stack, cmdbuffer * cmdbuf){
+// AKA ;S
+// Not the same as SEMICOLON, which will finalize a new word definition
+void word_exit(){
 	// TODO
 	//   POP IP   from the "return address stack"
 	//   JUMP to interpreter
@@ -242,7 +262,7 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 						printf("%s not found\n",statement);
 					}else{
 						printf("%s found  %p\n",statement, foo);
-						cmdAppend(cmdbuf, foo); // Emit the pointer
+						cmdAppend(cmdbuf, &(((coreword*)foo)->func)); // Emit the pointer to the function pointer
 					}
 					statement_len = 0; // No need to get a new buffer since we didn't detach it
 				}
@@ -255,7 +275,7 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 	// FIXME Instead, the BR word should use constants only. But we need to prevent ELSE symbol from colliding with any of the symbols.
 	// FIXME Should we record the number of conditional checks before ELSE?  eg, [BR 3 C1 P1 C2 P2 C3 P3 P4]
 
-	// Reached end of current line. Since we emit code greedily we don't need to keep any text.
+	// Reached end of current line. Since we emit code eagerly we don't need to keep any text.
 	if(cmdbuf->status & STAT_INC_PRINT){
 		ERR_INC_PRINT
 	}else if(cmdbuf->status & STAT_INC_STRING){
@@ -264,13 +284,6 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 		ERR_INC_COMMENT
 	}
 	free(statement);
-
-	cmdAppend(cmdbuf, 0);
-	printf("Printing cmdbuf->array\n");
-	for(int i=0; i<cmdbuf->size; i++){
-		printf("%d: %p\n",i, cmdbuf->array[i]);
-	}
-	cmdClear(cmdbuf);
 
 	return 0;
 }

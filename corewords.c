@@ -27,251 +27,251 @@
 #include "stack.h"
 #include "cmdbuf.h"
 
-void plus(stack * stack, cmdbuffer * cmdbuf){
+void plus(){
 	int temp;
-	// -1 indicates empty stack
-	if(stack->top <= 0){
+	// -1 indicates empty dataStack
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for +\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	temp = pop(stack);
-	stack->array[stack->top] += temp;
+	temp = pop(dataStack);
+	dataStack->array[dataStack->top] += temp;
 	return;
 }
 
-void multiply(stack * stack, cmdbuffer * cmdbuf){
+void multiply(){
 	int temp1;
 	int temp2;
-	if(stack->top <= 0){
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for *\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	temp1 = pop(stack);
-	temp2 = top(stack);
-	stack->array[stack->top] = temp1 * temp2;
+	temp1 = pop(dataStack);
+	temp2 = top(dataStack);
+	dataStack->array[dataStack->top] = temp1 * temp2;
 	return;
 }
 
-void minus(stack * stack, cmdbuffer * cmdbuf){
+void minus(){
 	int temp;
-	// -1 indicates empty stack
-	if(stack->top <= 0){
+	// -1 indicates empty dataStack
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for -\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	temp = pop(stack);
-	stack->array[stack->top] -= temp;
+	temp = pop(dataStack);
+	dataStack->array[dataStack->top] -= temp;
 	return;
 }
 
-void divide(stack * stack, cmdbuffer * cmdbuf){
+void divide(){
 	int temp1;
 	int temp2;
-	if(stack->top <= 0){
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for /\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	temp1 = pop(stack);
-	temp2 = top(stack);
-	stack->array[stack->top] = temp2 / temp1;
+	temp1 = pop(dataStack);
+	temp2 = top(dataStack);
+	dataStack->array[dataStack->top] = temp2 / temp1;
 	return;
 }
 
-void negate(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top < 0){
+void negate(){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] = -(stack->array[stack->top]);
+	dataStack->array[dataStack->top] = -(dataStack->array[dataStack->top]);
 	return;
 }
 
-void absval(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top < 0){
+void absval(){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
 		cmdClear(cmdbuf);
 		return;
-	} else if(top(stack) < 0) {
-		stack->array[stack->top] = -(stack->array[stack->top]);
+	} else if(top(dataStack) < 0) {
+		dataStack->array[dataStack->top] = -(dataStack->array[dataStack->top]);
 	}
 	return;
 }
 
-void plus1(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void plus1(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 1+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] += 1;
+	dataStack->array[dataStack->top] += 1;
 	return;
 }
 
-void plus2(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void plus2(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 2+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] += 2;
+	dataStack->array[dataStack->top] += 2;
 	return;
 }
 
-void plus3(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void plus3(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 3+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] += 3;
+	dataStack->array[dataStack->top] += 3;
 	return;
 }
 
-void plus4(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void plus4(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 4+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] += 4;
+	dataStack->array[dataStack->top] += 4;
 	return;
 }
 
-void minus1(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void minus1(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 1-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] -= 1;
+	dataStack->array[dataStack->top] -= 1;
 	return;
 }
 
-void minus2(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void minus2(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 2-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] -= 2;
+	dataStack->array[dataStack->top] -= 2;
 	return;
 }
 
-void minus3(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void minus3(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 3-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] -= 3;
+	dataStack->array[dataStack->top] -= 3;
 	return;
 }
 
-void minus4(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top == -1){
+void minus4(){
+	// -1 indicates empty dataStack
+	if(dataStack->top == -1){
 		fprintf(stderr,"ERROR: Insufficient operands for 4-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	stack->array[stack->top] -= 4;
+	dataStack->array[dataStack->top] -= 4;
 	return;
 }
 
-void bye(stack * stack, cmdbuffer * cmdbuf){
+void bye(){
 	printf("Exiting libreDSSP\n");
 	exit(0);
 }
 
 // TODO This will need to be modified to support multiple output modes
 // Current mode will be readable from a flag in cmdbuf?
-void showTop(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top > -1) printf("%d\n",top(stack));
+void showTop(){
+	if(dataStack->top > -1) printf("%d\n",top(dataStack));
 	return;
 }
 
-void showStack(stack * stack, cmdbuffer * cmdbuf){
+void showStack(){
 	int i;
-	if(stack->top < 0){
+	if(dataStack->top < 0){
 		printf("[]\n");
 		return;
 	}
 
 	printf("[");
-	for(i=0; i<=(stack->top); i++){
-		printf(" %d",stack->array[i]);
+	for(i=0; i<=(dataStack->top); i++){
+		printf(" %d",dataStack->array[i]);
 	}
 	printf("]\n");
 	return;
 }
 
 // FIXME Placeholder because B10 is currently the only mode we support!
-void base10(stack * stack, cmdbuffer * cmdbuf){
+void base10(){
 	return;
 }
 
-void ifplus(stack * stack, cmdbuffer * cmdbuf){
-/*	if((cmdbuf->top < 0) || (stack->top < 0)){
+void ifplus(){
+/*	if((cmdbuf->top < 0) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	if(pop(stack) <= 0){
+	if(pop(dataStack) <= 0){
 		cmdDrop(cmdbuf);
 	}
 */
 	return;
 }
 
-void ifzero(stack * stack, cmdbuffer * cmdbuf){
-/*	if((cmdbuf->top < 0) || (stack->top < 0)){
+void ifzero(){
+/*	if((cmdbuf->top < 0) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	if(pop(stack) != 0){
+	if(pop(dataStack) != 0){
 		cmdDrop(cmdbuf);
 	}
 */
 	return;
 }
 
-void ifminus(stack * stack, cmdbuffer * cmdbuf){
-/*	if((cmdbuf->top < 0) || (stack->top < 0)){
+void ifminus(){
+/*	if((cmdbuf->top < 0) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	if(pop(stack) >= 0){
+	if(pop(dataStack) >= 0){
 		cmdDrop(cmdbuf);
 	}
 */
 	return;
 }
 
-void branchminus(stack * stack, cmdbuffer * cmdbuf){
+void branchminus(){
 /*
-	if((cmdbuf->top < 1) || (stack->top < 0)){
+	if((cmdbuf->top < 1) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	if(pop(stack) < 0){ // Do the first thing
+	if(pop(dataStack) < 0){ // Do the first thing
 		command * temp = cmdPop(cmdbuf);
 		cmdDrop(cmdbuf);
 		cmdPush(cmdbuf, temp);
@@ -282,14 +282,14 @@ void branchminus(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void branchzero(stack * stack, cmdbuffer * cmdbuf){
+void branchzero(){
 /*
-	if((cmdbuf->top < 1) || (stack->top < 0)){
+	if((cmdbuf->top < 1) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	if(pop(stack) == 0){ // Do the first thing
+	if(pop(dataStack) == 0){ // Do the first thing
 		command * temp = cmdPop(cmdbuf);
 		cmdDrop(cmdbuf);
 		cmdPush(cmdbuf, temp);
@@ -300,14 +300,14 @@ void branchzero(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void branchplus(stack * stack, cmdbuffer * cmdbuf){
+void branchplus(){
 /*
-	if((cmdbuf->top < 1) || (stack->top < 0)){
+	if((cmdbuf->top < 1) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	if(pop(stack) > 0){ // Do the first thing
+	if(pop(dataStack) > 0){ // Do the first thing
 		command * temp = cmdPop(cmdbuf);
 		cmdDrop(cmdbuf);
 		cmdPush(cmdbuf, temp);
@@ -318,19 +318,19 @@ void branchplus(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void branchsign(stack * stack, cmdbuffer * cmdbuf){
+void branchsign(){
 /*
-	if((cmdbuf->top < 1) || (stack->top < 0)){
+	if((cmdbuf->top < 1) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	if(top(stack) < 0){ // Do the first thing
+	if(top(dataStack) < 0){ // Do the first thing
 		command * temp = cmdPop(cmdbuf);
 		cmdDrop(cmdbuf);
 		cmdDrop(cmdbuf);
 		cmdPush(cmdbuf, temp);
-	}else if(top(stack) == 0){ // Do the second thing
+	}else if(top(dataStack) == 0){ // Do the second thing
 		cmdDrop(cmdbuf);
 		command * temp = cmdPop(cmdbuf);
 		cmdDrop(cmdbuf);
@@ -339,12 +339,12 @@ void branchsign(stack * stack, cmdbuffer * cmdbuf){
 		cmdDrop(cmdbuf);
 		cmdDrop(cmdbuf);
 	}
-	pop(stack);
+	pop(dataStack);
 */
 	return;
 }
 
-void branch(stack * stack, cmdbuffer * cmdbuf){
+void branch(){
 /*
 	command *tempcmd;
 	command *branchCom = malloc(sizeof(command));
@@ -352,30 +352,30 @@ void branch(stack * stack, cmdbuffer * cmdbuf){
 	strcpy(branchCom->text, "BR");
 	branchCom->func = NULL; // TODO This can be made faster with threading
 
-	if((cmdbuf->top < 0) || (stack->top < 0)){
+	if((cmdbuf->top < 0) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int temp = top(stack);
+	int temp = top(dataStack);
 
 	if(!strcmp("ELSE", cmdTop(cmdbuf)->text)){
-		pop(stack);
+		pop(dataStack);
 		cmdDrop(cmdbuf);
 	}else if(temp == atoi(cmdTop(cmdbuf)->text)){
-		if((cmdbuf->top < 3) || (stack->top < 0)){
+		if((cmdbuf->top < 3) || (dataStack->top < 0)){
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 			cmdClear(cmdbuf);
 			return;
 		}
-		pop(stack);
+		pop(dataStack);
 		cmdDrop(cmdbuf);
 		tempcmd = cmdPop(cmdbuf);
 		while(strcmp("ELSE", cmdPop(cmdbuf)->text));
 		cmdPop(cmdbuf); // FIXME Why is it not safe to free this?
 		cmdPush(cmdbuf, tempcmd);
 	}else{
-		if((cmdbuf->top < 3) || (stack->top < 0)){
+		if((cmdbuf->top < 3) || (dataStack->top < 0)){
 			free(branchCom);
 			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
 			cmdClear(cmdbuf);
@@ -389,76 +389,76 @@ void branch(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void equality(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top <= 0){
+void equality(){
+	// -1 indicates empty dataStack
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for =\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int a = pop(stack);
-	int b = pop(stack);
+	int a = pop(dataStack);
+	int b = pop(dataStack);
 	if(b == a){
-		push(stack,1);
+		push(dataStack,1);
 	}else{
-		push(stack,0);
+		push(dataStack,0);
 	}
 	return;
 }
 
-void greaterthan(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top <= 0){
+void greaterthan(){
+	// -1 indicates empty dataStack
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for >\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int a = pop(stack);
-	int b = pop(stack);
+	int a = pop(dataStack);
+	int b = pop(dataStack);
 	if(b > a){
-		push(stack,1);
+		push(dataStack,1);
 	}else{
-		push(stack,0);
+		push(dataStack,0);
 	}
 	return;
 }
 
-void lessthan(stack * stack, cmdbuffer * cmdbuf){
-	// -1 indicates empty stack
-	if(stack->top <= 0){
+void lessthan(){
+	// -1 indicates empty dataStack
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for <\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int a = pop(stack);
-	int b = pop(stack);
+	int a = pop(dataStack);
+	int b = pop(dataStack);
 	if(b < a){
-		push(stack,1);
+		push(dataStack,1);
 	}else{
-		push(stack,0);
+		push(dataStack,0);
 	}
 	return;
 }
 
 // FIXME frees are tricky here.
-// FIXME If the stack grows then any prior references to commands on the stack become invalid.
+// FIXME If the dataStack grows then any prior references to commands on the dataStack become invalid.
 // FIXME This problem could result in bugs literally anywhere in the interpreter!!!
-// FIXME However those problems seem to manifest here especially because it is one of the only core words where the stack is likely to grow a lot.
+// FIXME However those problems seem to manifest here especially because it is one of the only core words where the dataStack is likely to grow a lot.
 // TODO There are definitely bugs present in this function which sometimes cause the interpreter to crash.
-void doloop(stack * stack, cmdbuffer * cmdbuf){
+void doloop(){
 /*
 	int i;
-	if((cmdbuf->top < 0) || (stack->top < 0)){
+	if((cmdbuf->top < 0) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	command *repeat; // This one will be the master copy
-	command *to_free = cmdPop(cmdbuf); // We must free this before the stack gets a chance to grow
+	command *to_free = cmdPop(cmdbuf); // We must free this before the dataStack gets a chance to grow
 	newCommand(to_free, &repeat); // This produces a local copy that can't get realloced away if the cmdbuffer decides to grow
 	cmdFree(to_free);
 
-	int reps = pop(stack);
+	int reps = pop(dataStack);
 
 	for(i = 0; i < reps; i++){
 		cmdPush(cmdbuf, repeat);
@@ -468,48 +468,48 @@ void doloop(stack * stack, cmdbuffer * cmdbuf){
 }
 
 // Stack manipulation
-void exch2(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 0){
+void exch2(){
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for E2\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - 1];
-	stack->array[stack->top - 1] = temp;
+	int temp = top(dataStack);
+	dataStack->array[dataStack->top] = dataStack->array[dataStack->top - 1];
+	dataStack->array[dataStack->top - 1] = temp;
 	return;
 }
-void exch3(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 1){
+void exch3(){
+	if(dataStack->top <= 1){
 		fprintf(stderr,"ERROR: Insufficient operands for E3\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - 2];
-	stack->array[stack->top - 2] = temp;
+	int temp = top(dataStack);
+	dataStack->array[dataStack->top] = dataStack->array[dataStack->top - 2];
+	dataStack->array[dataStack->top - 2] = temp;
 	return;
 }
-void exch4(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 2){
+void exch4(){
+	if(dataStack->top <= 2){
 		fprintf(stderr,"ERROR: Insufficient operands for E4\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - 3];
-	stack->array[stack->top - 3] = temp;
+	int temp = top(dataStack);
+	dataStack->array[dataStack->top] = dataStack->array[dataStack->top - 3];
+	dataStack->array[dataStack->top - 3] = temp;
 	return;
 }
-void exchdepth(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 0){ // There need to be two or more operands
+void exchdepth(){
+	if(dataStack->top <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int depth = pop(stack);
+	int depth = pop(dataStack);
 	if (depth == 1) return;
-	if(stack->top <= depth-2){
+	if(dataStack->top <= depth-2){
 		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
 		cmdClear(cmdbuf);
 		return;
@@ -519,57 +519,57 @@ void exchdepth(stack * stack, cmdbuffer * cmdbuf){
 		cmdClear(cmdbuf);
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - (depth - 1)];
-	stack->array[stack->top - (depth - 1)] = temp;
+	int temp = top(dataStack);
+	dataStack->array[dataStack->top] = dataStack->array[dataStack->top - (depth - 1)];
+	dataStack->array[dataStack->top - (depth - 1)] = temp;
 	return;
 }
 
-void copy(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top < 0){
+void copy(){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	push(stack,top(stack));
+	push(dataStack,top(dataStack));
 	return;
 }
 
-void copy2(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 0){
+void copy2(){
+	if(dataStack->top <= 0){
 		fprintf(stderr,"ERROR: Insufficient operands for C2\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	push(stack, stack->array[stack->top - 1]);
+	push(dataStack, dataStack->array[dataStack->top - 1]);
 	return;
 }
-void copy3(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 1){
+void copy3(){
+	if(dataStack->top <= 1){
 		fprintf(stderr,"ERROR: Insufficient operands for C3\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	push(stack, stack->array[stack->top - 2]);
+	push(dataStack, dataStack->array[dataStack->top - 2]);
 	return;
 }
-void copy4(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 2){
+void copy4(){
+	if(dataStack->top <= 2){
 		fprintf(stderr,"ERROR: Insufficient operands for C4\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	push(stack, stack->array[stack->top - 3]);
+	push(dataStack, dataStack->array[dataStack->top - 3]);
 	return;
 }
-void copydepth(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top <= 0){ // There need to be two or more operands
+void copydepth(){
+	if(dataStack->top <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	int depth = pop(stack);
-	if(stack->top <= depth-2){
+	int depth = pop(dataStack);
+	if(dataStack->top <= depth-2){
 		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
 		cmdClear(cmdbuf);
 		return;
@@ -579,29 +579,29 @@ void copydepth(stack * stack, cmdbuffer * cmdbuf){
 		cmdClear(cmdbuf);
 		return;
 	}
-	push(stack, stack->array[stack->top - (depth - 1)]);
+	push(dataStack, dataStack->array[dataStack->top - (depth - 1)]);
 	return;
 }
 
-void drop(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top < 0){
+void drop(){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for D\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	pop(stack);
+	pop(dataStack);
 	return;
 }
 
-void dropStack(stack * stack, cmdbuffer * cmdbuf){
-	stack->top = -1;
+void dropStack(){
+	dataStack->top = -1;
 	return;
 }
 
 // Attempts to define a new variable
-void defVar(stack * stack, cmdbuffer * cmdbuf){
+void defVar(){
 /*
-	if(stack->top < 0){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for !\n");
 		cmdClear(cmdbuf);
 		return;
@@ -614,7 +614,7 @@ void defVar(stack * stack, cmdbuffer * cmdbuf){
 	}
 
 	command * name = cmdPop(cmdbuf);
-	int value = pop(stack);
+	int value = pop(dataStack);
 	variable * temp;
 
 	assert(vocab != NULL);
@@ -654,16 +654,16 @@ void defVar(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void printNewline(stack * stack, cmdbuffer * cmdbuf){
+void printNewline(){
 	printf("\n");
 	return;
 }
-void printSpace(stack * stack, cmdbuffer * cmdbuf){
+void printSpace(){
 	printf(" ");
 	return;
 }
 
-void listDicts(stack * stack, cmdbuffer * cmdbuf){
+void listDicts(){
 /*
 	assert(vocab != NULL);
 	subdict * tempSub = vocab->sub;
@@ -678,7 +678,7 @@ void listDicts(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void growSub(stack * stack, cmdbuffer * cmdbuf){
+void growSub(){
 /*
 	subdict * tempSub = vocab->sub;
 
@@ -718,7 +718,7 @@ void growSub(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void shutSub(stack * stack, cmdbuffer * cmdbuf){
+void shutSub(){
 /*
 	subdict * tempSub = vocab->sub;
 
@@ -751,7 +751,7 @@ void shutSub(stack * stack, cmdbuffer * cmdbuf){
 */
 }
 
-void openSub(stack * stack, cmdbuffer * cmdbuf){
+void openSub(){
 /*
 	subdict * tempSub = vocab->sub;
 
@@ -779,9 +779,9 @@ void openSub(stack * stack, cmdbuffer * cmdbuf){
 
 // TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
-void termInNum(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top > -1){ // Requires one operand
-		int len = pop(stack);
+void termInNum(){
+	if(dataStack->top > -1){ // Requires one operand
+		int len = pop(dataStack);
 		if(len < 0){
 			fprintf(stderr,"ERROR: TIN requires non-negative operant\n");
 			cmdClear(cmdbuf);
@@ -791,9 +791,9 @@ void termInNum(stack * stack, cmdbuffer * cmdbuf){
 		if(line){
 			int maxlen = strlen(line);
 			if(len < maxlen){
-				push(stack, atoi(line + ((maxlen-len)*sizeof(char))));
+				push(dataStack, atoi(line + ((maxlen-len)*sizeof(char))));
 			}else{
-				push(stack, atoi(line));
+				push(dataStack, atoi(line));
 			}
 		}else{
 			fprintf(stderr,"ERROR: TIN could not read line\n");
@@ -810,10 +810,10 @@ void termInNum(stack * stack, cmdbuffer * cmdbuf){
 
 // TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
-void termOutNum(stack * stack, cmdbuffer * cmdbuf){
-	if(stack->top > 0){ // Requires two operands
-		int len = pop(stack);
-		int num = pop(stack);
+void termOutNum(){
+	if(dataStack->top > 0){ // Requires two operands
+		int len = pop(dataStack);
+		int num = pop(dataStack);
 		int maxlen = snprintf( NULL, 0, "%d", num );
 		char *toPrint = malloc( maxlen + 1 );
 		snprintf( toPrint, maxlen + 1, "%d", num );
@@ -838,8 +838,8 @@ void termOutNum(stack * stack, cmdbuffer * cmdbuf){
 	return;
 }
 
-void stackDepth(stack * stack, cmdbuffer * cmdbuf){
-	push(stack, (stack->top)+1);
+void stackDepth(){
+	push(dataStack, (dataStack->top)+1);
 	return;
 }
 

@@ -31,15 +31,15 @@
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;
 
+
 struct cmdbuffer_struct
 {
 	int capacity;
 	int size;
 	int status; // Used by parser to note incomplete phrases
-	void ** array;
+	void *** array;
 
 	int ip; // Current instruction pointer
-	stack * ipstack;
 };
 
 cmdbuffer * newCmdBuffer();
