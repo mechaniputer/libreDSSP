@@ -107,13 +107,14 @@ int isNum(char * foo){
 //		Does this mean we need a placeholder word that just prints "undefined word" and returns to the prompt?
 // TODO Need return address stack
 // TODO Error handling? What if there is an error such as an undefined word being executed?
-// TODO Might need consistent way to find dict entry name from pointer and vice-versa?
-// TODO Remove redundant args everywhere (cmdbuf, stack/dataStack)
+//		Currently an error clears the cmdstack which makes the loop check fail and return. This will not work for subroutines.
+//		Instead we might have to use a goto or something
+// TODO Might need consistent way to find dict entry name from pointer and vice-versa? If we do then maybe just add ptr search.
 void word_next(){
-	// Prototype (doesn't use IP or call stack yet)
+	// Prototype (doesn't use call stack yet)
 	void (*func)();
-	for(int i=0; i<cmdbuf->size; i++){
-		func = (void*) *(cmdbuf->array[i]);
+	for(cmdbuf->ip=0; cmdbuf->ip<cmdbuf->size; cmdbuf->ip++){
+		func = (void*) *(cmdbuf->array[cmdbuf->ip]);
 		(*func)();
 	}
 
@@ -153,7 +154,7 @@ void word_exit(){
 // Populates the command buffer. Tracks completeness of current statement.
 // word_next() is called from elsewhere.
 // return 0 if ok, 1 if error
-int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
+int commandParse(char * line, dict * vocab){
 	int line_ind;
 	char ch, prevch;
 
@@ -254,7 +255,19 @@ int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab){
 				statement[statement_len] = '\0';
 				if(isNum(statement)){
 					printf("LITNUM: %s\n",statement);
-					// TODO literal: Emit a pointer to a command to push the literal onto the stack
+					// Note: Some DSSP documents say that the correct way is to adhere
+					// to "one word of text, one command" and define a constant
+					// procedure for each literal. We will do it the Forth way though.
+					// TODO Searching each time is not efficient
+					void * foo = (void*) coreSearch("PUSHLIT", vocab);
+					if(NULL == foo){
+						printf("PUSHLIT not found in core dictionary\n");
+					}else{
+						cmdAppend(cmdbuf, &(((coreword*)foo)->func)); // Emit pointer to PUSHLIT/pushLit()
+						// TODO This will need to change for floating point support
+						cmdAppend(cmdbuf, (void*)atol(statement)); // Emit the literal
+						statement_len = 0; // No need to get a new buffer since we didn't detach it
+					}
 				}else{
 					void * foo = (void*) coreSearch(statement, vocab);
 					if(NULL == foo) foo = (void*) wordSearch(statement, vocab);

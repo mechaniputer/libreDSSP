@@ -91,6 +91,8 @@ int main(int argc, char *argv[]){
 	defCore("DS", dropStack, vocab);
 
 	// Misc
+	defCore("PUSHLIT", pushLiteral, vocab); // FIXME Not to be used directly
+	// TODO Also DOCOLON, ;S (not to be used directly)
 	defCore("!", defVar, vocab);
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
@@ -129,7 +131,7 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				if(!commandParse(bufptr, cmdbuf, vocab)){
+				if(!commandParse(bufptr, vocab)){
 					// TODO set IP to start
 					word_next();
 					free(bufptr);
@@ -147,7 +149,7 @@ int main(int argc, char *argv[]){
 	while(1){
 		// Show prompt, get line of input
 		char * line = prompt(cmdbuf->status);
-		if(!commandParse(line, cmdbuf, vocab)){
+		if(!commandParse(line, vocab)){
 			free(line);
 			// TODO set IP to start
 			word_next();

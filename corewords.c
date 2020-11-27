@@ -198,7 +198,7 @@ void bye(){
 // TODO This will need to be modified to support multiple output modes
 // Current mode will be readable from a flag in cmdbuf?
 void showTop(){
-	if(dataStack->top > -1) printf("%d\n",top(dataStack));
+	if(dataStack->top > -1) printf("%ld\n",top(dataStack));
 	return;
 }
 
@@ -211,7 +211,7 @@ void showStack(){
 
 	printf("[");
 	for(i=0; i<=(dataStack->top); i++){
-		printf(" %d",dataStack->array[i]);
+		printf(" %ld",dataStack->array[i]);
 	}
 	printf("]\n");
 	return;
@@ -595,6 +595,11 @@ void drop(){
 
 void dropStack(){
 	dataStack->top = -1;
+	return;
+}
+
+void pushLiteral(){
+	push(dataStack,(long)cmdbuf->array[++cmdbuf->ip]);
 	return;
 }
 

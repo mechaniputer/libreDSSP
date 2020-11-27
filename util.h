@@ -35,9 +35,7 @@ int isNum(char * foo);
 void word_next();
 void word_enter();
 void word_exit();
-int commandParse(char * line, cmdbuffer * cmdbuf, dict * vocab);
+int commandParse(char * line, dict * vocab);
 char * prompt(int ready);
-// Searches dictionaries, runs a word if possible
-void wordRun(cmdbuffer * cmdbuf, stack * stack, dict * vocab);
 
 #endif

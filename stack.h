@@ -31,13 +31,13 @@ struct stack
 {
 	int capacity;
 	int top;
-	int * array;
+	long * array;
 };
 
 stack * newStack();
-int top(stack * stack);
-int pop(stack * stack);
-void push(stack * stack, int value);
+long top(stack * stack);
+long pop(stack * stack);
+void push(stack * stack, long value);
 void grow(stack * stack);
 
 #endif

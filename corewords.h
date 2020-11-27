@@ -82,6 +82,7 @@ void drop();
 void dropStack();
 
 // Misc
+void pushLiteral();
 void defVar();
 void printNewline();
 void printSpace();

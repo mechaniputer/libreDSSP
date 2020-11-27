@@ -22,25 +22,25 @@
 
 stack * newStack() {
 	stack * new_stack = malloc(sizeof(stack));
-	new_stack->array = malloc(10*sizeof(int));
+	new_stack->array = malloc(10*sizeof(long));
 	new_stack->capacity = 10;
 	new_stack->top = -1; // -1 indicates empty stack
 	return new_stack;
 }
 
 // If stack is empty, do not use!
-int top(stack * workStack) {
-	assert(workStack->top > -1);
-	return (workStack->array[workStack->top]);
+long top(stack * stack) {
+	assert(stack->top > -1);
+	return (stack->array[stack->top]);
 }
 
 // If stack is empty, do not use!
-int pop(stack * stack) {
+long pop(stack * stack) {
 	assert(stack->top > -1);
 	return (stack->array[(stack->top)--]);
 }
 
-void push(stack * stack, int value) {
+void push(stack * stack, long value) {
 	(stack->top)++;
 	stack->array[stack->top] = value;
 	if((stack->capacity) == ((stack->top)+1)) grow(stack);
@@ -49,6 +49,6 @@ void push(stack * stack, int value) {
 
 void grow(stack * stack){
 	stack->capacity = 2 * (stack->capacity);
-	stack->array = realloc(stack->array, (stack->capacity)*sizeof(int));
+	stack->array = realloc(stack->array, (stack->capacity)*sizeof(long));
 }
 
