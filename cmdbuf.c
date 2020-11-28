@@ -33,7 +33,7 @@ cmdbuffer * newCmdBuffer(){
 	return new_cmdbuf;
 }
 
-// Dumps all pending commands and returns
+// Empties command buffer and resets all statuses
 void cmdClear(cmdbuffer * cmdbuf) {
 	cmdbuf->size = 0;
 	cmdbuf->status = 0;

@@ -28,24 +28,26 @@ Also let us know if you are interested in setting up other resources such as an 
 	* =, <, >
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
-	* IF+, IF0, IF-
-	* BR+, BR0, BR-, BRS, BR
-	* DO
 	* D (drop), C (copy), DS (drop entire stack)
 	* DEEP (push height of stack)
 	* ET, E2, E3, E4
 	* CT, C2, C3, C4
-	* Function declarations
-	* GROW, USE, SHUT, ?$
-	* Integer variables
-	* TIN, TON
-	* ."hello" printing, SP, CR
+	* TIN, TON (Not sure if correct behavior)
+	* SP, CR
 	* [comments]
 	* GNU readline support
-	* Read from file at start
 	* B10 (as a placeholder since we currently only support base 10 I/O)
 
 ## What doesn't work yet
+	* ."hello" printing
+	* Push address of string, TOS
+	* Function declarations
+	* DO
+	* IF+, IF0, IF-
+	* BR+, BR0, BR-, BRS, BR
+	* Integer variables
+	* GROW, USE, SHUT, ?$
+	* Read from file at start
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Variable addresses using '
@@ -59,11 +61,15 @@ Also let us know if you are interested in setting up other resources such as an 
 	* TIB, TIS
 	* B2, B8, B16
 	* SHL, SHR, other bitwise operations
+	* ' (push address of var)
+	* '' (push address of function)
+	* EXEC (execute function from address on stack)
+	* TEXEC (execute from external text interpreter)
 	* Everything unaccounted for in this README
 
 ## Possible future goals
 	* Full documentation
 	* Floating point math
-	* DSSP Standalone Compiler
+	* Inline assembler, self-hosting implementation
 	* Portability improvements including embedded devices
 	* Multithreading support by spawning additional kernels?

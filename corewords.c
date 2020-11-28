@@ -788,7 +788,7 @@ void termInNum(){
 	if(dataStack->top > -1){ // Requires one operand
 		int len = pop(dataStack);
 		if(len < 0){
-			fprintf(stderr,"ERROR: TIN requires non-negative operant\n");
+			fprintf(stderr,"ERROR: TIN requires non-negative operand\n");
 			cmdClear(cmdbuf);
 			return;
 		}

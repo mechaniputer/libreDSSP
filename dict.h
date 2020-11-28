@@ -51,13 +51,13 @@ struct variable
 	variable * next;
 };
 
-// TODO: array of commands
+// TODO Add flag for :: definition (immune to CLEAR $v command)
 struct word
 {
 	char name[16];
 	int length;
 	int capacity;
-	command * array; // TODO: Make dynamic
+	void *** array; // TODO make dynamic
 	word * next;
 };
 

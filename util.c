@@ -28,6 +28,14 @@
 #include "stack.h"
 #include "cmdbuf.h"
 
+// Globals to define word across potentially several parser invocations
+// TODO make length dynamic
+char *newWordName;
+char *newWordText;
+int newWordTextLen;
+void ***newWordCode;
+int newWordCodeLen;
+
 #define INIT_STATEMENT_CAP (8)
 
 #define ERR_FORB_SYM_IN_WORD \
@@ -48,14 +56,14 @@
 	free(statement); \
 	return 1;
 
-#define ERR_INC_COMMENT \
-	printf("Error: Incomplete comment\n"); \
+#define ERR_NEST_COMMENT \
+	printf("Error: comments cannot be nested\n"); \
 	cmdbuf->status = 0; \
 	free(statement); \
 	return 1;
 
-#define ERR_NEST_COMMENT \
-	printf("Error: comments cannot be nested\n"); \
+#define ERR_PUSHLIT \
+	printf("Error: PUSHLIT not found in core dictionary\n"); \
 	cmdbuf->status = 0; \
 	free(statement); \
 	return 1;
@@ -164,13 +172,21 @@ int commandParse(char * line, dict * vocab){
 
 	// If there's an incomplete statement then we need to keep adding to it until it becomes complete.
 	// In order to know when it's complete we will need to know what type of statement it is.
-	// This parser greedily emits code for each word as encountered (including during "compile" mode)
+	// This parser eagerly emits code for each word as encountered (including during "compile" mode)
 	line_ind=0;
 	ch = '\0';
 	prevch = '\0';
 	do{
 		prevch = ch;
 		ch = line[line_ind++];
+
+		// Save all text for word definition (in case we decide to save it to storage)
+		// TODO make dynamic
+		if(cmdbuf->status & STAT_INC_COMPILE){
+			if(newWordText != NULL){
+				newWordText[newWordTextLen++] = ch;
+			}
+		}
 
 		// FIXME Do we want to enforce whitespace after strings and comments?
 		if (cmdbuf->status & STAT_INC_COMMENT){
@@ -199,6 +215,7 @@ int commandParse(char * line, dict * vocab){
 				cmdbuf->status &= (~STAT_INC_STRING);
 				cmdbuf->status &= (~STAT_INC_PRINT);
 				// TODO Emit the string length and pointers and then the generic string printing word if printing
+				// FIXME Should we try to prevent memory leaks from strings that we lose the pointer to? (with a string/var registry and periodic GC?)
 				printf("String complete: %s\n",statement);
 				free(statement); // TODO Temporary
 
@@ -249,8 +266,7 @@ int commandParse(char * line, dict * vocab){
 		}else if (((ch == '\0') || (ch == ' ') || (ch == '\t')) && (statement_len != 0)){ 	// Whitespace, deduplicated, including newlines
 			// TODO If we just saw {IF*, BR*, DO, :, ELSE, TRAP} then we set the appropriate incomplete status flag here so we can throw an error before execution if it isn't completed.
 
-			// TODO Check to see if last word completed a sequence (branch/trap operands, VAR/VCTR assignments/declarations, semicolon) so we can clear flags
-
+			// TODO Check if last word completed a sequence (branch/trap operands, VAR/VCTR assignments/declarations, semicolon) so we can clear flags
 			if(statement_len != 0){
 				statement[statement_len] = '\0';
 				if(isNum(statement)){
@@ -261,22 +277,67 @@ int commandParse(char * line, dict * vocab){
 					// TODO Searching each time is not efficient
 					void * foo = (void*) coreSearch("PUSHLIT", vocab);
 					if(NULL == foo){
-						printf("PUSHLIT not found in core dictionary\n");
+						ERR_PUSHLIT
 					}else{
 						cmdAppend(cmdbuf, &(((coreword*)foo)->func)); // Emit pointer to PUSHLIT/pushLit()
 						// TODO This will need to change for floating point support
 						cmdAppend(cmdbuf, (void*)atol(statement)); // Emit the literal
 						statement_len = 0; // No need to get a new buffer since we didn't detach it
 					}
+				}else if(!strcmp(statement, ":")){ // Beginning of word declaration
+					// TODO check for other statuses and throw error. A declaration should not be inside anything else.
+					// TODO preserve text of word to save in file (including comments)
+					// TODO If no dictionary is selected to grow then error
+					printf("Entering compile mode\n");
+					cmdbuf->status |= STAT_INC_COMPILE;
+					// Prepare vars to build definition
+					if(newWordName != NULL) free(newWordName);
+					if(newWordText != NULL) free(newWordText);
+					if(newWordCode != NULL) free(newWordCode);
+					newWordName = NULL;
+					newWordText = NULL;
+					newWordCode = NULL;
+					newWordTextLen = 0;
+					newWordCodeLen = 0;
+				}else if(!strcmp(statement, ";")){// && (cmdbuf->status & STAT_INC_COMPILE)){
+					// Complete new definition
+					// TODO allocate new word in appropriate dictionary
+					cmdbuf->status &= (~STAT_INC_COMPILE);
+					printf("Definition complete\n");
+					newWordText[newWordTextLen] = '\0';
+					printf("%s\n",newWordText);
+				}else if(cmdbuf->status & STAT_INC_COMPILE){
+					if(newWordName == NULL){
+						// We just found a name for the new definition
+						// We can look it up to see if it is a redefinition at the very end if successful.
+						// Until then we will maintain the information in separate variables
+						newWordName = malloc((1+strlen(statement))*sizeof(char));
+						strcpy(newWordName, statement);
+						// TODO assign word name
+						// TODO make dynamic
+						newWordText = malloc(20*sizeof(char)); // allocate word text body
+						newWordCode = malloc(10*sizeof(void***)); // allocate word code body
+						// TODO populate first code element with DOCOLON
+						// Populate start of text entry
+printf("New word is named %s\n",newWordName);
+						strcpy(newWordText, ": ");
+						strcat(newWordText, newWordName);
+						strcat(newWordText, " ");
+						newWordTextLen = strlen(newWordText);
+					}else{
+						// Try to add to ongoing definition
+					}
 				}else{
 					void * foo = (void*) coreSearch(statement, vocab);
-					if(NULL == foo) foo = (void*) wordSearch(statement, vocab);
-					if(NULL == foo){
-						printf("%s not found\n",statement);
-					}else{
+					if(NULL != foo){ // Found in core dictionary
 						printf("%s found  %p\n",statement, foo);
 						cmdAppend(cmdbuf, &(((coreword*)foo)->func)); // Emit the pointer to the function pointer
+					}else{ // Not found in core dictionary
+						foo = (void*) wordSearch(statement, vocab);
+						// Emit the pointer to the first array element, which will point to DOCOLON
+						if(NULL != foo) cmdAppend(cmdbuf, &(((word*)foo)->array));
 					}
+					if(NULL == foo) printf("%s not found\n",statement);
 					statement_len = 0; // No need to get a new buffer since we didn't detach it
 				}
 			}
@@ -288,14 +349,14 @@ int commandParse(char * line, dict * vocab){
 	// FIXME Instead, the BR word should use constants only. But we need to prevent ELSE symbol from colliding with any of the symbols.
 	// FIXME Should we record the number of conditional checks before ELSE?  eg, [BR 3 C1 P1 C2 P2 C3 P3 P4]
 
-	// Reached end of current line. Since we emit code eagerly we don't need to keep any text.
+	// Reached end of current line. Since we emit code eagerly we don't need to keep any text (unless we are in compile mode)
 	if(cmdbuf->status & STAT_INC_PRINT){
 		ERR_INC_PRINT
 	}else if(cmdbuf->status & STAT_INC_STRING){
 		ERR_INC_STRING
-	}else if(cmdbuf->status & STAT_INC_COMMENT){
-		ERR_INC_COMMENT
 	}
+
+	printf("status: %d\n",cmdbuf->status);
 	free(statement);
 
 	return 0;

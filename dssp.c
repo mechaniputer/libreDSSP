@@ -158,7 +158,7 @@ int main(int argc, char *argv[]){
 			for(int i=0; i<cmdbuf->size; i++){
 				printf("%d: %p\n",i, cmdbuf->array[i]);
 			}
-			cmdClear(cmdbuf);
+			cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
 
 		}else{
 			free(line);
