@@ -50,7 +50,6 @@ Also let us know if you are interested in setting up other resources such as an 
 	* Read from file at start
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
-	* Variable addresses using '
 	* Arrays, fixed variables, etc
 	* RP
 	* SGN, NOT

@@ -44,6 +44,12 @@ int newWordCodeLen;
 	cmdbuf->status = 0; \
 	return 1;
 
+#define ERR_FORB_SEMICOLON \
+	printf("Error: forbidden use of semicolon\n"); \
+	free(statement); \
+	cmdbuf->status = 0; \
+	return 1;
+
 #define ERR_INC_PRINT \
 	printf("Error: Incomplete print statement\n"); \
 	cmdbuf->status = 0; \
@@ -58,6 +64,12 @@ int newWordCodeLen;
 
 #define ERR_NEST_COMMENT \
 	printf("Error: comments cannot be nested\n"); \
+	cmdbuf->status = 0; \
+	free(statement); \
+	return 1;
+
+#define ERR_NEST_DEF \
+	printf("Error: definitions cannot be nested\n"); \
 	cmdbuf->status = 0; \
 	free(statement); \
 	return 1;
@@ -182,6 +194,8 @@ int commandParse(char * line, dict * vocab){
 
 		// Save all text for word definition (in case we decide to save it to storage)
 		// TODO make dynamic
+		// TODO fix newline problem (truncates text)
+		// TODO comment between : and name are omitted. Do we care?
 		if(cmdbuf->status & STAT_INC_COMPILE){
 			if(newWordText != NULL){
 				newWordText[newWordTextLen++] = ch;
@@ -279,13 +293,16 @@ int commandParse(char * line, dict * vocab){
 					if(NULL == foo){
 						ERR_PUSHLIT
 					}else{
+						// TODO If we are in compiling mode, add it to the current word instead!
 						cmdAppend(cmdbuf, &(((coreword*)foo)->func)); // Emit pointer to PUSHLIT/pushLit()
 						// TODO This will need to change for floating point support
 						cmdAppend(cmdbuf, (void*)atol(statement)); // Emit the literal
 						statement_len = 0; // No need to get a new buffer since we didn't detach it
 					}
 				}else if(!strcmp(statement, ":")){ // Beginning of word declaration
-					// TODO check for other statuses and throw error. A declaration should not be inside anything else.
+					if(cmdbuf->status != 0){
+						ERR_NEST_DEF
+					}
 					// TODO preserve text of word to save in file (including comments)
 					// TODO If no dictionary is selected to grow then error
 					printf("Entering compile mode\n");
@@ -300,6 +317,10 @@ int commandParse(char * line, dict * vocab){
 					newWordTextLen = 0;
 					newWordCodeLen = 0;
 				}else if(!strcmp(statement, ";")){// && (cmdbuf->status & STAT_INC_COMPILE)){
+					if(!(cmdbuf->status & STAT_INC_COMPILE)){
+						ERR_FORB_SEMICOLON
+					}
+					// TODO check if we are actually in a defintion
 					// Complete new definition
 					// TODO allocate new word in appropriate dictionary
 					cmdbuf->status &= (~STAT_INC_COMPILE);
@@ -307,6 +328,7 @@ int commandParse(char * line, dict * vocab){
 					newWordText[newWordTextLen] = '\0';
 					printf("%s\n",newWordText);
 				}else if(cmdbuf->status & STAT_INC_COMPILE){
+printf("Ongoing def\n");
 					if(newWordName == NULL){
 						// We just found a name for the new definition
 						// We can look it up to see if it is a redefinition at the very end if successful.
@@ -326,6 +348,8 @@ printf("New word is named %s\n",newWordName);
 						newWordTextLen = strlen(newWordText);
 					}else{
 						// Try to add to ongoing definition
+						// TODO search core, dicts
+						// TODO If undef word is used, add it to the table and emit UNDEF ptr
 					}
 				}else{
 					void * foo = (void*) coreSearch(statement, vocab);
