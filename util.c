@@ -198,7 +198,11 @@ int commandParse(char * line, dict * vocab){
 		// TODO comment between : and name are omitted. Do we care?
 		if(cmdbuf->status & STAT_INC_COMPILE){
 			if(newWordText != NULL){
-				newWordText[newWordTextLen++] = ch;
+				if (ch == '\0'){
+					newWordText[newWordTextLen++] = '\n';
+				}else{
+					newWordText[newWordTextLen++] = ch;
+				}
 			}
 		}
 
@@ -316,19 +320,20 @@ int commandParse(char * line, dict * vocab){
 					newWordCode = NULL;
 					newWordTextLen = 0;
 					newWordCodeLen = 0;
-				}else if(!strcmp(statement, ";")){// && (cmdbuf->status & STAT_INC_COMPILE)){
+				}else if(!strcmp(statement, ";")){
 					if(!(cmdbuf->status & STAT_INC_COMPILE)){
 						ERR_FORB_SEMICOLON
 					}
-					// TODO check if we are actually in a defintion
-					// Complete new definition
-					// TODO allocate new word in appropriate dictionary
+					// TODO Populate last code element with EXIT/;S
+					// TODO allocate new word in appropriate dictionary, or find prior word to redefine
 					cmdbuf->status &= (~STAT_INC_COMPILE);
-					printf("Definition complete\n");
+					printf("Definition of %s complete\n",newWordName);
 					newWordText[newWordTextLen] = '\0';
 					printf("%s\n",newWordText);
+					for(int i=0; i<newWordCodeLen; i++){
+						printf("%d: %p\n",i, newWordCode[i]);
+					}
 				}else if(cmdbuf->status & STAT_INC_COMPILE){
-printf("Ongoing def\n");
 					if(newWordName == NULL){
 						// We just found a name for the new definition
 						// We can look it up to see if it is a redefinition at the very end if successful.
@@ -337,31 +342,42 @@ printf("Ongoing def\n");
 						strcpy(newWordName, statement);
 						// TODO assign word name
 						// TODO make dynamic
-						newWordText = malloc(20*sizeof(char)); // allocate word text body
-						newWordCode = malloc(10*sizeof(void***)); // allocate word code body
+						newWordText = malloc(20*sizeof(char)); // allocate definition text array
+						newWordCode = malloc(10*sizeof(void*)); // allocate code body
 						// TODO populate first code element with DOCOLON
 						// Populate start of text entry
-printf("New word is named %s\n",newWordName);
 						strcpy(newWordText, ": ");
 						strcat(newWordText, newWordName);
 						strcat(newWordText, " ");
 						newWordTextLen = strlen(newWordText);
 					}else{
-						// Try to add to ongoing definition
-						// TODO search core, dicts
-						// TODO If undef word is used, add it to the table and emit UNDEF ptr
+						// Add word to ongoing word definition
+						void * foo = (void*) coreSearch(statement, vocab);
+						if(NULL != foo){ // Found in core dictionary
+							// TODO emit ptr into newWordCode
+							newWordCode[newWordCodeLen++] = (void*) &(((coreword*)foo)->func);
+						}else{ // Not found in core dictionary
+							foo = (void*) wordSearch(statement, vocab);
+							// Emit the pointer to the first array element, which will point to DOCOLON
+							if(NULL != foo){
+								// TODO emit ptr into newWordCode
+							}
+						}
+						if(NULL == foo){
+							// TODO If undef word is used, add it to the table and emit UNDEF ptr
+						}
+						statement_len = 0; // No need to get a new buffer since we didn't detach it
 					}
 				}else{
 					void * foo = (void*) coreSearch(statement, vocab);
 					if(NULL != foo){ // Found in core dictionary
-						printf("%s found  %p\n",statement, foo);
 						cmdAppend(cmdbuf, &(((coreword*)foo)->func)); // Emit the pointer to the function pointer
 					}else{ // Not found in core dictionary
 						foo = (void*) wordSearch(statement, vocab);
 						// Emit the pointer to the first array element, which will point to DOCOLON
 						if(NULL != foo) cmdAppend(cmdbuf, &(((word*)foo)->array));
 					}
-					if(NULL == foo) printf("%s not found\n",statement);
+					if(NULL == foo) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
 					statement_len = 0; // No need to get a new buffer since we didn't detach it
 				}
 			}
