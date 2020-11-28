@@ -91,8 +91,10 @@ int main(int argc, char *argv[]){
 	defCore("DS", dropStack, vocab);
 
 	// Misc
+	// TODO for special functions we should just use references instead of the dictionary.
 	defCore("PUSHLIT", pushLiteral, vocab); // FIXME Not to be used directly
-	// TODO Also DOCOLON, ;S (not to be used directly)
+	defCore("DOCOLON", word_enter, vocab); // FIXME Not to be used directly
+	defCore(";S", word_exit, vocab); // FIXME Not to be used directly
 	defCore("!", defVar, vocab);
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
