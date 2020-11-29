@@ -320,7 +320,14 @@ int commandParse(char * line, dict * vocab){
 					for(int i=0; i<newWordCodeLen; i++){
 						printf("%d: %p\n",i, newWordCode[i]);
 					}
-					// TODO allocate new word in appropriate dictionary, or find prior word to redefine
+					// Allocate new word in appropriate dictionary, or find prior word to redefine
+					foo = (void*) wordDefine(newWordName, vocab);
+					// Populate the dictionary entry
+					((word*)foo)->code = newWordCode;
+					((word*)foo)->text = newWordText;
+					// Detatch
+					newWordCode = NULL;
+					newWordText = NULL;
 				}else if(cmdbuf->status & STAT_INC_COMPILE){
 					if(newWordName == NULL){
 						// We just found a name for the new definition

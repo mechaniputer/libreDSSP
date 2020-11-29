@@ -78,85 +78,57 @@ coreword * coreSearch(char * name, dict * vocab){
 	return NULL;
 }
 
-// Attempts to define a new word
-// TODO rewrite to produce list of pointers and store it the Forth way
-void defWord(dict * vocab){
-/*	word * temp;
-	assert(vocab != NULL);
-	assert(vocab->sub != NULL);
+// Searches selected dictionary for word to redefine, or adds a new blank one of the specified name
+word * wordDefine(char * name, dict * vocab){
+	word * tempWord;
+	word * lastWord;
 
-	// Shouldn't just pick one that's open since we don't want to pollute a random dictionary
-	if(vocab->grow == NULL){
-		fprintf(stderr,"ERROR: Target dictionary not designated\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	// Skip over ':'
-	if(cmdbuf->size >= 2){
-		cmdDrop(cmdbuf);
-	}else{
-		fprintf(stderr,"ERROR: Incomplete definition\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	// Assign function name
-	if(cmdbuf->top >= 1){
-
-		// See if it is a core word
-		if(coreSearch(cmdTop(cmdbuf)->text, vocab)){
-			fprintf(stderr,"ERROR: %s is in core dictionary\n",cmdTop(cmdbuf)->text);
-			cmdClear(cmdbuf);
-			return;
-		}
-
-		// See if we already have this word, if we do then redefine
-		temp = wordSearch(cmdTop(cmdbuf)->text, vocab);
-
-		if(temp == NULL){
-			// Append the new word
-			temp = newWord(vocab->grow);
-			command *to_free = cmdPop(cmdbuf);
-			assert(to_free->text != NULL);
-			strcpy(temp->name, to_free->text);
-			free(to_free->text);
+	// If there is at least one word already
+	if(vocab->grow->wordlist != NULL){
+		if(vocab->grow == NULL){
+			// This should have been caught in the parser
+			printf("Fatal Error: We are defining a word but no dictionary is selected\n");
+			assert(0);
 		}else{
-			// Wipe old definition
-			temp->length = -1;
-			cmdDrop(cmdbuf);
+			if((vocab->grow->open) && (vocab->grow->wordlist != NULL)){
+				tempWord = vocab->grow->wordlist;
+				while(tempWord != NULL){
+					if(!strcmp(tempWord->name, name)){
+						printf("Found old definition of %s\n",name);
+						return tempWord;
+					}
+					lastWord = tempWord;
+					tempWord = tempWord->next;
+				}
+			}
 		}
-
+		printf("First definition of %s\n",name);
+		// Didn't find the word
+		// We will allocate it and link it to the dictionary
+		lastWord->next = malloc(sizeof(word));
+		tempWord = lastWord->next;
 	}else{
-		fprintf(stderr,"ERROR: Incomplete definition\n");
-		cmdClear(cmdbuf);
-		return;
+		// This is the very first word in this dictionary
+		printf("Dictionary begins with %s\n",name);
+		vocab->grow->wordlist = malloc(sizeof(word));
+		tempWord = vocab->grow->wordlist;
 	}
-
-	while(strcmp(";", cmdTop(cmdbuf)->text)){
-		// TODO: This could be changed to improve threading
-		growWord(temp, cmdPop(cmdbuf)->text, vocab); // Cannot free the text array because it will be used by the word definition hereafter
-
-		if(cmdbuf->top < 0){
-			fprintf(stderr,"ERROR: Incomplete definition\n");
-			cmdClear(cmdbuf);
-			return;
-		}
-	}
-	// Get rid of ";"
-	cmdDrop(cmdbuf);
-
-	// Successful definition, print name
-	printf("%s\n",temp->name);
-*/
-	return;
+	strcpy(tempWord->name, name);
+	tempWord->next = NULL;
+	// Regardless of initial state, now the word is named and present in the dictionary.
+	// It's up to the caller to populate the word
+	return tempWord;
 }
 
 void defCore(char * name, void (*func)(), dict * vocab){
+	if(strlen(name) > CORE_NAME_LEN-1){
+		printf("Fatal Error: Core word name %s exceeds %d characters\n",name,CORE_NAME_LEN-1);
+		assert(0);
+	}
 	coreword * temp = NULL;
 	if(vocab->core == NULL){
 		temp = malloc(sizeof(coreword));
-		strcpy(temp->name, name); // FIXME core word names have fixed bound on length
+		strcpy(temp->name, name);
 		temp->func = (*func);
 		temp->next = NULL;
 		vocab->core = temp;

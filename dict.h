@@ -19,6 +19,8 @@
 #ifndef DICT_H
 #define DICT_H
 
+#define CORE_NAME_LEN 8
+
 #include "stack.h"
 #include "cmdbuf.h"
 #include "corewords.h"
@@ -44,6 +46,9 @@ typedef struct coreword coreword;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
+// TODO add table of undefined words
+// TODO add GC table
+
 struct variable
 {
 	char name[16];
@@ -54,17 +59,16 @@ struct variable
 // TODO Add flag for :: definition (immune to CLEAR $v command)
 struct word
 {
-	void *** code; // TODO make dynamic
+	void *** code;
 	word * next;
-	char name[16];
-	int length;
-	int capacity;
+	char name[16]; // FIXME enforce or make dynamic
+	char *text;
 };
 
 struct coreword
 {
 	void (*func)();
-	char name[8];
+	char name[CORE_NAME_LEN];
 	coreword * next;
 };
 
@@ -91,7 +95,7 @@ word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
 coreword * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
-void defWord(dict * vocab);
+word * wordDefine(char * name, dict * vocab);
 // Defines built-in functions
 void defCore(char * name, void (*func)(), dict * vocab);
 // Creates a new sub-dictionary
