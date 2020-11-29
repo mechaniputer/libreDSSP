@@ -74,6 +74,12 @@ int newWordCodeLen;
 	free(statement); \
 	return 1;
 
+#define ERR_EMPTY_DEF \
+	printf("Error: definitions must contain a name\n"); \
+	cmdbuf->status = 0; \
+	free(statement); \
+	return 1;
+
 #define ERR_PUSHLIT \
 	printf("Error: PUSHLIT not found in core dictionary\n"); \
 	cmdbuf->status = 0; \
@@ -340,6 +346,9 @@ int commandParse(char * line, dict * vocab){
 					if(!(cmdbuf->status & STAT_INC_COMPILE)){
 						ERR_FORB_SEMICOLON
 					}
+					if(newWordName == NULL){
+						ERR_EMPTY_DEF
+					}
 					// Populate last code element with EXIT/;S
 					void * foo = (void*) coreSearch(";S", vocab);
 					if(NULL == foo){
@@ -347,7 +356,6 @@ int commandParse(char * line, dict * vocab){
 					}else{
 						newWordCode[newWordCodeLen++] = (void*) &(((coreword*)foo)->func); // Note presence of &
 					}
-					// TODO allocate new word in appropriate dictionary, or find prior word to redefine
 					cmdbuf->status &= (~STAT_INC_COMPILE);
 					printf("Definition of %s complete\n",newWordName);
 					newWordText[newWordTextLen] = '\0';
@@ -355,6 +363,7 @@ int commandParse(char * line, dict * vocab){
 					for(int i=0; i<newWordCodeLen; i++){
 						printf("%d: %p\n",i, newWordCode[i]);
 					}
+					// TODO allocate new word in appropriate dictionary, or find prior word to redefine
 				}else if(cmdbuf->status & STAT_INC_COMPILE){
 					if(newWordName == NULL){
 						// We just found a name for the new definition
@@ -386,7 +395,7 @@ int commandParse(char * line, dict * vocab){
 							foo = (void*) wordSearch(statement, vocab);
 							// Emit the pointer to first element of found word code, which itself will be a pointer to the code body of DOCOLON
 							if(NULL != foo){
-								newWordCode[newWordCodeLen++] = (void*) (((word*)foo)->array); // Note lack of & compared to a core word
+								newWordCode[newWordCodeLen++] = (void*) (((word*)foo)->code); // Note lack of & compared to a core word
 							}
 						}
 						if(NULL == foo){
@@ -401,7 +410,7 @@ int commandParse(char * line, dict * vocab){
 					}else{ // Not found in core dictionary
 						foo = (void*) wordSearch(statement, vocab);
 						// Emit the pointer to the first array element, which will point to DOCOLON
-						if(NULL != foo) cmdAppend(cmdbuf, (((word*)foo)->array)); // Note lack of & compared to a core word
+						if(NULL != foo) cmdAppend(cmdbuf, (((word*)foo)->code)); // Note lack of & compared to a core word
 					}
 					if(NULL == foo) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
 					statement_len = 0; // No need to get a new buffer since we didn't detach it

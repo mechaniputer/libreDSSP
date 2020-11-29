@@ -54,26 +54,26 @@ struct variable
 // TODO Add flag for :: definition (immune to CLEAR $v command)
 struct word
 {
+	void *** code; // TODO make dynamic
+	word * next;
 	char name[16];
 	int length;
 	int capacity;
-	void *** array; // TODO make dynamic
-	word * next;
 };
 
 struct coreword
 {
+	void (*func)();
 	char name[8];
 	coreword * next;
-	void (*func)(stack *, cmdbuffer *);
 };
 
 struct subdict
 {
 	char * name;
+	subdict * next;
 	int open;
 	word * wordlist;
-	subdict * next;
 };
 
 struct dict
@@ -91,10 +91,10 @@ word * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
 coreword * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
-void defWord(cmdbuffer * cmdbuf, dict * vocab);
-void growWord(word * word, char * com, dict * vocab);
+void defWord(dict * vocab);
 // Defines built-in functions
-void defCore(char * name, void (*func)(stack *, cmdbuffer *), dict * vocab);
+void defCore(char * name, void (*func)(), dict * vocab);
+// Creates a new sub-dictionary
 subdict * newDict(dict * vocab, char * name);
 
 #endif
