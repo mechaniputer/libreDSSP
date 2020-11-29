@@ -38,65 +38,19 @@ int newWordCodeLen;
 
 #define INIT_STATEMENT_CAP (8)
 
-#define ERR_FORB_SYM_IN_WORD \
-	printf("Error: forbidden symbol inside word\n"); \
-	free(statement); \
-	cmdbuf->status = 0; \
-	return 1;
+#define ERR_RETURN 	free(statement); cmdbuf->status = 0; return 1;
 
-#define ERR_FORB_SEMICOLON \
-	printf("Error: forbidden use of semicolon\n"); \
-	free(statement); \
-	cmdbuf->status = 0; \
-	return 1;
-
-#define ERR_INC_PRINT \
-	printf("Error: Incomplete print statement\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_INC_STRING \
-	printf("Error: Incomplete string literal\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_NEST_COMMENT \
-	printf("Error: comments cannot be nested\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_NEST_DEF \
-	printf("Error: definitions cannot be nested\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_EMPTY_DEF \
-	printf("Error: definitions must contain a name\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_PUSHLIT \
-	printf("Error: PUSHLIT not found in core dictionary\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_DOCOLON \
-	printf("Error: DOCOLON not found in core dictionary\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
-
-#define ERR_EXIT \
-	printf("Error: ;S not found in core dictionary\n"); \
-	cmdbuf->status = 0; \
-	free(statement); \
-	return 1;
+#define ERR_FORB_SYM_IN_WORD printf("Error: forbidden symbol inside word\n"); ERR_RETURN
+#define ERR_FORB_SEMICOLON   printf("Error: forbidden use of semicolon\n"); ERR_RETURN
+#define ERR_INC_PRINT        printf("Error: Incomplete print statement\n"); ERR_RETURN
+#define ERR_INC_STRING       printf("Error: Incomplete string literal\n"); ERR_RETURN
+#define ERR_NEST_COMMENT     printf("Error: comments cannot be nested\n"); ERR_RETURN
+#define ERR_NEST_DEF         printf("Error: definitions cannot be nested\n"); ERR_RETURN
+#define ERR_EMPTY_DEF        printf("Error: definitions must contain a name\n"); ERR_RETURN
+#define ERR_PUSHLIT          printf("Error: PUSHLIT not found in core dictionary\n"); ERR_RETURN
+#define ERR_DOCOLON          printf("Error: DOCOLON not found in core dictionary\n"); ERR_RETURN
+#define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_RETURN
+#define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_RETURN
 
 #define GROW_BUFFER \
 	statement_cap += INIT_STATEMENT_CAP; \
@@ -330,7 +284,10 @@ int commandParse(char * line, dict * vocab){
 					if(cmdbuf->status != 0){
 						ERR_NEST_DEF
 					}
-					// TODO If no dictionary is selected to grow then error
+					// Make sure a destination dictionary is selected
+					if (vocab->grow == NULL){
+						ERR_NO_DICT
+					}
 					printf("Entering compile mode\n");
 					cmdbuf->status |= STAT_INC_COMPILE;
 					// Prepare vars to build definition
