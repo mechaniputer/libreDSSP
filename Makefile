@@ -14,10 +14,11 @@
 
 #	You should have received a copy of the GNU General Public License \
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
-CFLAGS = -I/usr/local/include -L/usr/local/lib -lreadline -Wall -ggdb
+CFLAGS = -I/usr/local/include -L/usr/local/lib -Wall -ggdb
+LDLIBS = -lreadline
 all: dssp
 dssp: stack.o cmdbuf.o dict.o corewords.o util.o
-	cc $(CFLAGS) dssp.c -o dssp stack.o cmdbuf.o dict.o corewords.o util.o
+	cc $(CFLAGS) dssp.c -o dssp stack.o cmdbuf.o dict.o corewords.o util.o $(LDLIBS)
 stack.o: stack.c stack.h
 cmdbuf.o: cmdbuf.c cmdbuf.h
 dict.o: dict.c dict.h
