@@ -33,10 +33,14 @@
 char *newWordName;
 char *newWordText;
 int newWordTextLen;
+int newWordTextCap;
 void ***newWordCode;
 int newWordCodeLen;
+int newWordCodeCap;
 
 #define INIT_STATEMENT_CAP (8)
+#define INIT_WORDCODE_CAP (32)
+#define INIT_WORDTEXT_CAP (32)
 
 #define ERR_RETURN 	free(statement); cmdbuf->status = 0; return 1;
 
@@ -64,6 +68,23 @@ int newWordCodeLen;
 	statement =  malloc(statement_cap*sizeof(char)); \
 	assert(NULL != statement); \
 	statement[0] = '\0';
+
+// Makes sure we can add another cell to a word
+#define CHECK_CAP_CODE                                                        \
+	if (newWordCodeLen >= newWordCodeCap)                                     \
+	{                                                                         \
+		newWordCodeCap *= 2;                                                  \
+		newWordCode = realloc(newWordCode, newWordCodeCap * sizeof(void **)); \
+	}
+
+// This takes a size param since we aren't just adding one char at a time and
+// must preallocate a known size.
+#define CHECK_CAP_TEXT(SZ)                                                 \
+	if (newWordTextLen + (SZ) >= newWordTextCap)                           \
+	{                                                                      \
+		newWordTextCap += (SZ);                                            \
+		newWordText = realloc(newWordText, newWordTextCap * sizeof(char)); \
+	}
 
 // Deals with ."hello" print statements
 void textPrint(char * text){
@@ -166,11 +187,11 @@ int commandParse(char * line, dict * vocab){
 		prevch = ch;
 		ch = line[line_ind++];
 
-		// Save all text for word definition (in case we decide to save it to storage)
-		// TODO make dynamic
+		// Save all text for word definition
 		// TODO comments and newlines between : and name are omitted. Do we care?
 		if(cmdbuf->status & STAT_INC_COMPILE){
 			if(newWordText != NULL){
+				CHECK_CAP_TEXT(1)
 				if (ch == '\0'){
 					newWordText[newWordTextLen++] = '\n';
 				}else{
@@ -271,6 +292,7 @@ int commandParse(char * line, dict * vocab){
 					}else{
 						if(cmdbuf->status & STAT_INC_COMPILE){
 							// We are in compiling mode so we emit to the current word
+							CHECK_CAP_CODE
 							newWordCode[newWordCodeLen++] = (void*) &(((coreword*)foo)->func); // Emit pointer to PUSHLIT/pushLit()
 							newWordCode[newWordCodeLen++] = (void*) atol(statement); // Emit the literal
 						}else{
@@ -294,9 +316,11 @@ int commandParse(char * line, dict * vocab){
 					if(newWordName != NULL) free(newWordName);
 					if(newWordText != NULL) free(newWordText);
 					if(newWordCode != NULL) free(newWordCode);
+					newWordCode = malloc(INIT_WORDCODE_CAP * sizeof(void**));
+					newWordCodeCap = INIT_WORDCODE_CAP;
 					newWordName = NULL;
-					newWordText = NULL;
-					newWordCode = NULL;
+					newWordText = malloc(INIT_WORDTEXT_CAP * sizeof(char)); // allocate definition text array
+					newWordTextCap = INIT_WORDTEXT_CAP;
 					newWordTextLen = 0;
 					newWordCodeLen = 0;
 				}else if(!strcmp(statement, ";")){
@@ -307,6 +331,7 @@ int commandParse(char * line, dict * vocab){
 						ERR_EMPTY_DEF
 					}
 					// Populate last code element with EXIT/;S
+					CHECK_CAP_CODE
 					void * foo = (void*) coreSearch(";S", vocab);
 					if(NULL == foo){
 						ERR_EXIT
@@ -315,6 +340,7 @@ int commandParse(char * line, dict * vocab){
 					}
 					cmdbuf->status &= (~STAT_INC_COMPILE);
 					printf("Definition of %s complete\n",newWordName);
+					CHECK_CAP_TEXT(1)
 					newWordText[newWordTextLen] = '\0';
 					printf("%s\n",newWordText);
 					for(int i=0; i<newWordCodeLen; i++){
@@ -335,38 +361,41 @@ int commandParse(char * line, dict * vocab){
 						// Until then we will maintain the information in separate variables
 						newWordName = malloc((1+strlen(statement))*sizeof(char));
 						strcpy(newWordName, statement);
-						// TODO make dynamic
-						newWordText = malloc(20*sizeof(char)); // allocate definition text array
-						newWordCode = malloc(10*sizeof(void*)); // allocate code body
+						// newWordCode already allocated in compile mode setup
 						// populate first code element with DOCOLON
+						CHECK_CAP_CODE
 						void * foo = (void*) coreSearch("DOCOLON", vocab);
 						if(NULL == foo){
 							ERR_DOCOLON
 						}else{
+							CHECK_CAP_CODE
 							newWordCode[newWordCodeLen++] = (void*) (((coreword*)foo)->func); // Note lack of &
 							// Populate start of text entry
+							CHECK_CAP_TEXT(strlen(newWordName)+3)
 							strcpy(newWordText, ": ");
 							strcat(newWordText, newWordName);
 							strcat(newWordText, " ");
 							newWordTextLen = strlen(newWordText);
 						}
-					}else{
-						// Add word to ongoing word definition
-						void * foo = (void*) coreSearch(statement, vocab);
-						if(NULL != foo){ // Found in core dictionary
-							newWordCode[newWordCodeLen++] = (void*) &(((coreword*)foo)->func);
-						}else{ // Not found in core dictionary
-							foo = (void*) wordSearch(statement, vocab);
-							// Emit the pointer to first element of found word code, which itself will be a pointer to the code body of DOCOLON
-							if(NULL != foo){
-								newWordCode[newWordCodeLen++] = (void*) (((word*)foo)->code); // Note lack of & compared to a core word
-							}
+}else{
+					// Add word to ongoing word definition
+					void * foo = (void*) coreSearch(statement, vocab);
+					if(NULL != foo){ // Found in core dictionary
+						CHECK_CAP_CODE
+						newWordCode[newWordCodeLen++] = (void*) &(((coreword*)foo)->func);
+					}else{ // Not found in core dictionary
+						foo = (void*) wordSearch(statement, vocab);
+						// Emit the pointer to first element of found word code, which itself will be a pointer to the code body of DOCOLON
+						if(NULL != foo){
+							CHECK_CAP_CODE
+							newWordCode[newWordCodeLen++] = (void*) (((word*)foo)->code); // Note lack of & compared to a core word
 						}
-						if(NULL == foo){
-							// TODO If undef word is used, add it to the table and emit UNDEF ptr
-						}
-						statement_len = 0; // No need to get a new buffer since we didn't detach it
 					}
+					if(NULL == foo){
+						// TODO If undef word is used, add it to the table and emit UNDEF ptr
+					}
+					statement_len = 0; // No need to get a new buffer since we didn't detach it
+				}
 				}else{
 					void * foo = (void*) coreSearch(statement, vocab);
 					if(NULL != foo){ // Found in core dictionary
