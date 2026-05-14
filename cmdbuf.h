@@ -19,6 +19,8 @@
 #ifndef CMDBUF_H
 #define CMDBUF_H
 
+#include <stdint.h>
+
 #include "stack.h"
 
 // Interpreter status flags
@@ -27,6 +29,15 @@
 #define STAT_INC_PRINT     (1UL<<2)
 #define STAT_INC_COMPILE   (1UL<<3)
 #define STAT_INC_ESCAPE    (1UL<<4)
+
+
+// Codeword structure for indirect threading
+// Each executable unit (core word, user word, literal) is represented as a codeword
+typedef struct {
+    void (*xt)();        // Execution token (a function pointer)
+    intptr_t data;       // Data payload: literal, pointer, or 0
+    const char *name;    // Word name
+} codeword_t;
 
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;
