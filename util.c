@@ -29,7 +29,6 @@
 #include "cmdbuf.h"
 
 // Globals to define word across potentially several parser invocations
-// TODO make length dynamic
 char *newWordName;
 char *newWordText;
 int newWordTextLen;
@@ -56,13 +55,13 @@ int newWordCodeCap;
 #define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_RETURN
 #define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_RETURN
 
-#define GROW_BUFFER \
+#define GROW_PARSE_BUFFER \
 	statement_cap += INIT_STATEMENT_CAP; \
 	char * newbuffer =  realloc(statement, statement_cap*sizeof(char)); \
 	assert(NULL != newbuffer); \
 	statement = newbuffer;
 
-#define NEW_BUFFER \
+#define NEW_PARSE_BUFFER \
 	statement_len = 0; \
 	statement_cap = INIT_STATEMENT_CAP; \
 	statement =  malloc(statement_cap*sizeof(char)); \
@@ -175,7 +174,7 @@ int commandParse(char * line, dict * vocab){
 
 	char * statement;
 	int statement_len, statement_cap;
-	NEW_BUFFER // Allocates a new buffer and sets associated counters
+	NEW_PARSE_BUFFER
 
 	// If there's an incomplete statement then we need to keep adding to it until it becomes complete.
 	// In order to know when it's complete we will need to know what type of statement it is.
@@ -216,7 +215,7 @@ int commandParse(char * line, dict * vocab){
 			}
 		}else if (cmdbuf->status & STAT_INC_STRING){
 			if(statement_len == (statement_cap - 1)){ // Resize buffer
-				GROW_BUFFER
+				GROW_PARSE_BUFFER
 			}
 			if(cmdbuf->status & STAT_INC_ESCAPE){ // Character inside string was escaped
 				statement[statement_len] = ch;
@@ -262,7 +261,7 @@ int commandParse(char * line, dict * vocab){
 			statement_len = 0; // We may have already put the "." in it if it's a print statement so we should discard that
 			if(statement_cap > INIT_STATEMENT_CAP){ // Since this buffer will be detached and kept, it shouldn't be larger than needed
 				free(statement);
-				NEW_BUFFER
+				NEW_PARSE_BUFFER
 			}
 		}else if ((ch != ' ') && (ch != '\t') && (ch != '\0')) {
 			if((ch == ']') || (ch == '\\') || ((0 != statement_len) && (ch == '.') && (prevch != '.'))){
@@ -270,7 +269,7 @@ int commandParse(char * line, dict * vocab){
 			}
 			// Normal contiguous characters
 			if(statement_len == (statement_cap - 1)){ // Resize buffer
-				GROW_BUFFER
+				GROW_PARSE_BUFFER
 			}
 			statement[statement_len] = ch;
 			statement_len++;
