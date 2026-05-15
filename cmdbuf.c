@@ -55,7 +55,7 @@ void cmdAppend(cmdbuffer * cmdbuf, codeword_t * cw) {
 
 void cmdGrow(cmdbuffer * cmdbuf){
 	cmdbuf->capacity = 2 * (cmdbuf->capacity);
-	cmdbuf->array = realloc(cmdbuf->array, (cmdbuf->capacity)*sizeof(void*));
+	cmdbuf->array = realloc(cmdbuf->array, (cmdbuf->capacity)*sizeof(codeword_t*));
 	return;
 }
 

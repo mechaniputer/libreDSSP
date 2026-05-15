@@ -20,8 +20,6 @@
 #define STACK_H
 
 typedef struct variable variable;
-//typedef struct word word;
-//typedef struct coreword coreword;
 typedef struct subdict subdict;
 typedef struct dict dict;
 

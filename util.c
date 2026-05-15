@@ -77,11 +77,11 @@ extern stack *returnStack;
 	statement[0] = '\0';
 
 // Makes sure we can add another cell to a word
-#define CHECK_CAP_CODE                                                        \
-	if (newWordCodeLen >= newWordCodeCap)                                     \
-	{                                                                         \
-		newWordCodeCap *= 2;                                                  \
-		newWordCode = realloc(newWordCode, newWordCodeCap * sizeof(void **)); \
+#define CHECK_CAP_CODE                                                             \
+	if (newWordCodeLen >= newWordCodeCap)                                          \
+	{                                                                              \
+		newWordCodeCap *= 2;                                                       \
+		newWordCode = realloc(newWordCode, newWordCodeCap * sizeof(codeword_t *)); \
 	}
 
 // This takes a size param since we aren't just adding one char at a time and
@@ -92,19 +92,6 @@ extern stack *returnStack;
 		newWordTextCap += (SZ);                                            \
 		newWordText = realloc(newWordText, newWordTextCap * sizeof(char)); \
 	}
-
-
-// Execution context for managing nested word execution
-// Each context represents one level of word execution
-typedef struct {
-    void **code;    // Pointer to code array being executed (word->code or cmdbuf->array)
-    int ip;          // Instruction pointer within this code array
-} exec_context_t;
-
-
-// Current execution context (code array and IP)
-exec_context_t *current_context = NULL;
-
 
 // Deals with ."hello" print statements
 void textPrint(char * text){
@@ -138,11 +125,9 @@ int isNum(char * st){
 //		"introduce a table of undefined names and some procedure to support it"
 //		"table of addresses where this word is used"
 //		Does this mean we need a placeholder word that just prints "undefined word" and returns to the prompt?
-// TODO Need return address stack
 // TODO Error handling? What if there is an error such as an undefined word being executed?
 //		Currently an error clears the cmdstack which makes the loop check fail and return. This will not work for subroutines.
 //		Instead we might have to use a goto or something
-// TODO Might need consistent way to find dict entry name from pointer and vice-versa? If we do then maybe just add ptr search.
 void word_next(){
 	// Note: As a possible future optimization, in keeping with traditional
 	// FORTH techniques, the cmdbuf could instead contain an EXIT word that
@@ -349,13 +334,14 @@ int commandParse(char * line, dict * vocab){
 					ERR_EMPTY_DEF
 				}
 				// Populate last code element with EXIT/;S
-				CHECK_CAP_CODE
 				codeword_t * dict_entry = coreSearch(";S", vocab);
 				if(NULL == dict_entry){
 					ERR_EXIT
 				}else{
 					CHECK_CAP_CODE
 					newWordCode[newWordCodeLen++] = dict_entry;
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = NULL;  // Add NULL sentinel
 				}
 				cmdbuf->status &= (~STAT_INC_COMPILE);
 				printf("Definition of %s complete\n",newWordName);

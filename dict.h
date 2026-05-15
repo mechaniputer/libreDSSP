@@ -45,8 +45,6 @@
 
 typedef struct codeword codeword_t;
 typedef struct variable variable;
-//typedef struct word word;
-//typedef struct coreword coreword;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
@@ -59,15 +57,6 @@ struct variable
 	int value;
 	variable * next;
 };
-
-
-
-//struct coreword
-//{
-//	void (*func)();
-//	char name[CORE_NAME_LEN];
-//	coreword * next;
-//};
 
 struct subdict
 {

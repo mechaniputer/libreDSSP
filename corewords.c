@@ -602,7 +602,7 @@ void dropStack(){
 }
 
 void pushLiteral(){
-	push(dataStack,(long)(current_codeword->data));
+	push(dataStack, current_codeword->data);
 	return;
 }
 
