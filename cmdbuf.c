@@ -20,15 +20,18 @@
 #include <assert.h>
 #include "cmdbuf.h"
 #include "stack.h"
+#include "corewords.h"
 
 cmdbuffer * newCmdBuffer(){
 	cmdbuffer * new_cmdbuf = malloc(sizeof(cmdbuffer));
-	new_cmdbuf->array = malloc(10*sizeof(void*));
+	new_cmdbuf->array = malloc(10*sizeof(codeword_t*));
 	new_cmdbuf->capacity = 10;
 	new_cmdbuf->size = 0;
 	new_cmdbuf->status = 0;
-
 	new_cmdbuf->ip = 0;
+
+	// NULL sentinel to end codeword array
+	new_cmdbuf->array[0] = NULL;
 
 	return new_cmdbuf;
 }
@@ -37,14 +40,16 @@ cmdbuffer * newCmdBuffer(){
 void cmdClear(cmdbuffer * cmdbuf) {
 	cmdbuf->size = 0;
 	cmdbuf->status = 0;
+	// NULL sentinel at index 0 will cleanly do nothing
+	if(cmdbuf->capacity > 0) cmdbuf->array[0] = NULL;
 	return;
 }
 
 // As we add things to struct command, this needs to be expanded
-void cmdAppend(cmdbuffer * cmdbuf, void * cmd) {
-	if((cmdbuf->capacity) == (cmdbuf->size)) cmdGrow(cmdbuf);
-	(cmdbuf->size)++;
-	cmdbuf->array[cmdbuf->size-1] = cmd;
+void cmdAppend(cmdbuffer * cmdbuf, codeword_t * cw) {
+	if((cmdbuf->capacity) == (cmdbuf->size+1)) cmdGrow(cmdbuf);
+	cmdbuf->array[cmdbuf->size++] = cw;
+    cmdbuf->array[cmdbuf->size] = NULL;  // Maintain NULL sentinel
 	return;
 }
 
@@ -52,4 +57,14 @@ void cmdGrow(cmdbuffer * cmdbuf){
 	cmdbuf->capacity = 2 * (cmdbuf->capacity);
 	cmdbuf->array = realloc(cmdbuf->array, (cmdbuf->capacity)*sizeof(void*));
 	return;
+}
+
+codeword_t * newLiteral(intptr_t value) {
+    codeword_t *cw = malloc(sizeof(codeword_t));
+    cw->xt = pushLiteral;
+    cw->data = value;
+    cw->name = "(literal)";
+    cw->text = NULL;
+    cw->next = NULL;
+    return cw;
 }

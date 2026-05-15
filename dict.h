@@ -26,23 +26,27 @@
 #include "corewords.h"
 
 /*	DICTIONARY HIERARCHY:
-
-        dict --- variable --- variable --- variable
-       /    \
-      /     subdict --- subdict --- subdict
-  coreword     |           |           |
-     |        word        word        word
-  coreword     |           |           |
-     |        word        word        word
-  coreword     |           |           |
-     |        word        word        word
-  coreword
+	Core words are stored in a linked list in the dict struct. They are always present.
+	User words are stored in subdicts, which are linked together in a linked list in the dict struct.
+	Individual subdicts can be open or closed.
+	
+         dict --- variable --- variable --- variable
+        /    \
+       /       subdict --- subdict --- subdict
+  codeword_t      |           |           |
+      |       codeword_t  codeword_t  codeword_t
+  codeword_t      |           |           |
+      |       codeword_t  codeword_t  codeword_t
+  codeword_t      |           |           |
+      |       codeword_t  codeword_t  codeword_t
+  codeword_t
 
 */
 
+typedef struct codeword codeword_t;
 typedef struct variable variable;
-typedef struct word word;
-typedef struct coreword coreword;
+//typedef struct word word;
+//typedef struct coreword coreword;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
@@ -56,33 +60,26 @@ struct variable
 	variable * next;
 };
 
-// TODO Add flag for :: definition (immune to CLEAR $v command)
-struct word
-{
-	void *** code;
-	word * next;
-	char name[16]; // FIXME enforce or make dynamic
-	char *text;
-};
 
-struct coreword
-{
-	void (*func)();
-	char name[CORE_NAME_LEN];
-	coreword * next;
-};
+
+//struct coreword
+//{
+//	void (*func)();
+//	char name[CORE_NAME_LEN];
+//	coreword * next;
+//};
 
 struct subdict
 {
 	char * name;
 	subdict * next;
 	int open;
-	word * wordlist;
+	codeword_t * wordlist;
 };
 
 struct dict
 {
-	coreword * core;
+	codeword_t * core;
 	subdict * sub;
 	subdict * grow;
 	variable * var;
@@ -91,11 +88,11 @@ struct dict
 // Looks for defined variables
 variable * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined
-word * wordSearch(char * name, dict * vocab);
+codeword_t * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
-coreword * coreSearch(char * name, dict * vocab);
+codeword_t * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
-word * wordDefine(char * name, dict * vocab);
+codeword_t * wordDefine(char * name, dict * vocab);
 // Defines built-in functions
 void defCore(char * name, void (*func)(), dict * vocab);
 // Creates a new sub-dictionary

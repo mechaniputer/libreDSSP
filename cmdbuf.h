@@ -33,30 +33,42 @@
 
 // Codeword structure for indirect threading
 // Each executable unit (core word, user word, literal) is represented as a codeword
-typedef struct {
-    void (*xt)();        // Execution token (a function pointer)
-    intptr_t data;       // Data payload: literal, pointer, or 0
-    const char *name;    // Word name
-} codeword_t;
+//typedef struct {
+//    void (*xt)();        // Execution token (a function pointer)
+//    intptr_t data;       // Data payload: literal, pointer, or 0
+//    const char *name;    // Word name
+//} codeword_t;
 
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;
+typedef struct codeword codeword_t;
 
+// This really belongs in dict.h but things were broken... TODO refactor
+// TODO Add flag for :: definition (immune to CLEAR $v command)
+struct codeword
+{
+	void (*xt)();        // Execution token (a function pointer)
+    intptr_t data;       // Data payload: literal, pointer, or 0
+    const char *name;    // Word name
+	char *text;
+	codeword_t * next;
+};
 
 struct cmdbuffer_struct
 {
 	int capacity;
 	int size;
 	int status; // Used by parser to note incomplete phrases
-	void *** array;
+	codeword_t ** array;
 
 	int ip; // Current instruction pointer
 };
 
 cmdbuffer * newCmdBuffer();
 void cmdClear(cmdbuffer * cmdbuf);
-void cmdAppend(cmdbuffer * cmdbuf, void * cmd);
+void cmdAppend(cmdbuffer * cmdbuf, codeword_t * cw);
 void cmdGrow(cmdbuffer * cmdbuf);
+codeword_t * newLiteral(intptr_t value);
 
 
 #endif

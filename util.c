@@ -34,9 +34,16 @@ char *newWordName;
 char *newWordText;
 int newWordTextLen;
 int newWordTextCap;
-void ***newWordCode;
+codeword_t **newWordCode;
 int newWordCodeLen;
 int newWordCodeCap;
+
+// Global for the codeword currently being executed
+codeword_t *current_codeword = NULL;
+
+// Global return stack for nested word execution
+// (defined in dssp.c, used by word_enter() and word_exit())
+extern stack *returnStack;
 
 #define INIT_STATEMENT_CAP (8)
 #define INIT_WORDCODE_CAP (32)
@@ -137,22 +144,17 @@ int isNum(char * st){
 //		Instead we might have to use a goto or something
 // TODO Might need consistent way to find dict entry name from pointer and vice-versa? If we do then maybe just add ptr search.
 void word_next(){
-	// Prototype (doesn't use call stack yet)
-	void (*func)();
-	for(cmdbuf->ip=0; cmdbuf->ip<cmdbuf->size; cmdbuf->ip++){
-		func = (void*) *(cmdbuf->array[cmdbuf->ip]);
-		(*func)();
-	}
+	// Note: As a possible future optimization, in keeping with traditional
+	// FORTH techniques, the cmdbuf could instead contain an EXIT word that
+	// returns to the prompt so we don't need a conditional branch.
 
-	// TODO The cmdbuf should contain a word that returns to the prompt so we don't need a bounded loop in this function
-	// TODO Make this function as fast as possible
-	//   (IP) -> W  fetch memory pointed by IP into "W" register
-	//               ...W now holds address of the Code Field
-	//   IP+2 -> IP advance IP, just like a program counter
-	//               (assuming 2-byte addresses in the thread)
-	//   (W) ->  X  fetch memory pointed by W into "X" register
-	//               ...X now holds address of the machine code
-	//   JP (X)     jump to the address in the X register
+    // Execute code in cmdbuf->array until we hit a NULL sentinel codeword
+    // Each element is a codeword_t struct with an execution token (xt)
+
+    for(cmdbuf->ip = 0; cmdbuf->array[cmdbuf->ip] != NULL; cmdbuf->ip++){
+        current_codeword = cmdbuf->array[cmdbuf->ip];
+        (*current_codeword->xt)();
+    }
 	return;
 }
 
@@ -160,13 +162,20 @@ void word_next(){
 // Not the same as COLON, which will be used to allocate and define a word
 void word_enter(){
 	printf("Hello from word_enter AKA DOCOLON\n");
-	// TODO
 	//   PUSH IP     onto the "return address stack"
+	//   Ours has two parts: the current code array and the current IP
+	push(returnStack, (intptr_t) cmdbuf->ip);
+	push(returnStack, (intptr_t) cmdbuf->array);
+
 	//   W+2 -> IP   W still points to the Code Field, so W+2 is
 	//               the address of the Body!  (Assuming a 2-byte
 	//               address -- other Forths may be different.)
+	// Again, same two parts must be initialized for the new context
+	cmdbuf->array = (codeword_t **) (current_codeword->data);
+	cmdbuf->ip = 0;
+
 	//   JUMP to interpreter ("NEXT")
-	return;
+	return; // to word_next()
 }
 
 // AKA ;S
@@ -175,8 +184,12 @@ void word_exit(){
 	printf("Hello from word_exit AKA ;S\n");
 	// TODO
 	//   POP IP   from the "return address stack"
+	// Pop array first (was pushed second by word_enter)
+    cmdbuf->array = (codeword_t **) pop(returnStack);
+	cmdbuf->ip = (int) pop(returnStack);
+
 	//   JUMP to interpreter
-	return;
+	return; // to word_next()
 }
 
 // Populates the command buffer. Tracks completeness of current statement.
@@ -297,25 +310,15 @@ int commandParse(char * line, dict * vocab){
 			// TODO Check if last word completed a sequence (branch/trap operands, VAR/VCTR assignments/declarations) so we can clear flags
 			statement[statement_len] = '\0';
 			if(isNum(statement)){
-				printf("LITNUM: %s\n",statement);
-				// Note: Some DSSP documents say that the correct way is to adhere
-				// to "one word of text, one command" and define a constant
-				// procedure for each literal. We will do it the Forth way though.
-				void * dict_entry = (void*) coreSearch("PUSHLIT", vocab);
-				if(NULL == dict_entry){
-					ERR_PUSHLIT
+				codeword_t *lit_cw = newLiteral(atol(statement));
+
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					// Add literal codeword to word definition
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = lit_cw;
 				}else{
-					if(cmdbuf->status & STAT_INC_COMPILE){
-						// We are in compiling mode so we emit to the current word
-						CHECK_CAP_CODE
-						newWordCode[newWordCodeLen++] = (void*) &(((coreword*)dict_entry)->func); // Emit pointer to PUSHLIT/pushLit()
-						CHECK_CAP_CODE
-						newWordCode[newWordCodeLen++] = (void*) atol(statement); // Emit the literal
-					}else{
-						// We are not in compiling mode so we emit to the cmdbuf
-						cmdAppend(cmdbuf, &(((coreword*)dict_entry)->func)); // Emit pointer to PUSHLIT/pushLit()
-						cmdAppend(cmdbuf, (void*)atol(statement)); // Emit the literal
-					}
+					// Add literal codeword to command buffer
+					cmdAppend(cmdbuf, lit_cw);
 				}
 			}else if(!strcmp(statement, ":")){ // Beginning of word declaration
 				if(cmdbuf->status != 0){
@@ -331,7 +334,7 @@ int commandParse(char * line, dict * vocab){
 				if(newWordName != NULL) free(newWordName);
 				if(newWordText != NULL) free(newWordText);
 				if(newWordCode != NULL) free(newWordCode);
-				newWordCode = malloc(INIT_WORDCODE_CAP * sizeof(void**));
+				newWordCode = malloc(INIT_WORDCODE_CAP * sizeof(codeword_t*));
 				newWordCodeCap = INIT_WORDCODE_CAP;
 				newWordName = NULL;
 				newWordText = malloc(INIT_WORDTEXT_CAP * sizeof(char)); // allocate definition text array
@@ -347,12 +350,12 @@ int commandParse(char * line, dict * vocab){
 				}
 				// Populate last code element with EXIT/;S
 				CHECK_CAP_CODE
-				void * dict_entry = (void*) coreSearch(";S", vocab);
+				codeword_t * dict_entry = coreSearch(";S", vocab);
 				if(NULL == dict_entry){
 					ERR_EXIT
 				}else{
 					CHECK_CAP_CODE
-					newWordCode[newWordCodeLen++] = (void*) &(((coreword*)dict_entry)->func); // Note presence of &
+					newWordCode[newWordCodeLen++] = dict_entry;
 				}
 				cmdbuf->status &= (~STAT_INC_COMPILE);
 				printf("Definition of %s complete\n",newWordName);
@@ -363,10 +366,10 @@ int commandParse(char * line, dict * vocab){
 					printf("%d: %p\n",i, newWordCode[i]);
 				}
 				// Allocate new word in appropriate dictionary, or find prior word to redefine
-				dict_entry = (void*) wordDefine(newWordName, vocab);
+				dict_entry = wordDefine(newWordName, vocab);
 				// Populate the dictionary entry
-				((word*)dict_entry)->code = newWordCode;
-				((word*)dict_entry)->text = newWordText;
+				dict_entry->data = (intptr_t) newWordCode;  // Set code array pointer
+				dict_entry->text = newWordText;
 				// Detach
 				newWordCode = NULL;
 				newWordText = NULL;
@@ -379,12 +382,12 @@ int commandParse(char * line, dict * vocab){
 					strcpy(newWordName, statement);
 					// newWordCode already allocated in compile mode setup
 					// populate first code element with DOCOLON
-					void * dict_entry = (void*) coreSearch("DOCOLON", vocab);
+					codeword_t * dict_entry = coreSearch("DOCOLON", vocab);
 					if(NULL == dict_entry){
 						ERR_DOCOLON
 					}else{
 						CHECK_CAP_CODE
-						newWordCode[newWordCodeLen++] = (void*) (((coreword*)dict_entry)->func); // Note lack of &
+						newWordCode[newWordCodeLen++] = dict_entry;
 						// Populate start of text entry
 						CHECK_CAP_TEXT(strlen(newWordName)+3)
 						strcpy(newWordText, ": ");
@@ -394,31 +397,32 @@ int commandParse(char * line, dict * vocab){
 					}
 				}else{
 					// Add word to ongoing word definition
-					void * dict_entry = (void*) coreSearch(statement, vocab);
+					codeword_t *dict_entry = coreSearch(statement, vocab);
 					if(NULL != dict_entry){ // Found in core dictionary
 						CHECK_CAP_CODE
-						newWordCode[newWordCodeLen++] = (void*) &(((coreword*)dict_entry)->func);
+						newWordCode[newWordCodeLen++] = dict_entry;
 					}else{ // Not found in core dictionary
-						dict_entry = (void*) wordSearch(statement, vocab);
+						dict_entry = wordSearch(statement, vocab);
 						// Emit the pointer to first element of found word code, which itself will be a pointer to the code body of DOCOLON
 						if(NULL != dict_entry){
 							CHECK_CAP_CODE
-							newWordCode[newWordCodeLen++] = (void*) (((word*)dict_entry)->code); // Note lack of & compared to a core word
-						}else{
+							newWordCode[newWordCodeLen++] = dict_entry;
 							// TODO If undef word is used, add it to the table and emit UNDEF ptr
 						}
 					}
 				}
 			}else{
-				void * dict_entry = (void*) coreSearch(statement, vocab);
-				if(NULL != dict_entry){ // Found in core dictionary
-					cmdAppend(cmdbuf, &(((coreword*)dict_entry)->func)); // Emit the pointer to the function pointer
-				}else{ // Not found in core dictionary
-					dict_entry = (void*) wordSearch(statement, vocab);
-					// Emit the pointer to the first array element, which will point to DOCOLON
-					if(NULL != dict_entry) cmdAppend(cmdbuf, (((word*)dict_entry)->code)); // Note lack of & compared to a core word
+				// Normal execution mode - emit word to cmdbuf
+    			codeword_t *dict_entry = coreSearch(statement, vocab);
+    			if(NULL != dict_entry){
+        			cmdAppend(cmdbuf, dict_entry);
+    			}else{
+        			dict_entry = wordSearch(statement, vocab);
+        			if(NULL != dict_entry){
+            			cmdAppend(cmdbuf, dict_entry);
+    				}
 				}
-				if(NULL == dict_entry) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
+    			if(NULL == dict_entry) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
 			}
 			statement_len = 0; // No need to get a new buffer since we didn't detach it
 		}

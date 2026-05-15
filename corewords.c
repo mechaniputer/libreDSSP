@@ -26,6 +26,9 @@
 #include "dict.h"
 #include "stack.h"
 #include "cmdbuf.h"
+#include "util.h"
+
+extern codeword_t * current_codeword;
 
 void plus(){
 	int temp;
@@ -599,7 +602,7 @@ void dropStack(){
 }
 
 void pushLiteral(){
-	push(dataStack,(long)cmdbuf->array[++cmdbuf->ip]);
+	push(dataStack,(long)(current_codeword->data));
 	return;
 }
 

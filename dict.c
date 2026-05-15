@@ -42,9 +42,9 @@ variable * varSearch(char * name, dict * vocab){
 	return NULL;
 }
 
-// Searches non-core dictionaries, returns word if it exists
-word * wordSearch(char * name, dict * vocab){
-	word * tempWord;
+// Searches non-core dictionaries, returns codeword_t if it exists
+codeword_t * wordSearch(char * name, dict * vocab){
+	codeword_t * tempWord;
 	subdict * tempSub;
 
 	// Function must have a name greater than 1 char
@@ -67,9 +67,9 @@ word * wordSearch(char * name, dict * vocab){
 	return NULL;
 }
 
-// Searches core dictionary, returns coreword if it exists
-coreword * coreSearch(char * name, dict * vocab){
-	coreword * tempCore = vocab->core;
+// Searches core dictionary, returns codeword_t if it exists
+codeword_t * coreSearch(char * name, dict * vocab){
+	codeword_t * tempCore = vocab->core;
 
 	while(tempCore != NULL){
 		if (!strcmp(tempCore->name, name)) return tempCore;
@@ -79,9 +79,9 @@ coreword * coreSearch(char * name, dict * vocab){
 }
 
 // Searches selected dictionary for word to redefine, or adds a new blank one of the specified name
-word * wordDefine(char * name, dict * vocab){
-	word * tempWord;
-	word * lastWord;
+codeword_t * wordDefine(char * name, dict * vocab){
+	codeword_t * tempWord;
+	codeword_t * lastWord;
 
 	// If there is at least one word already
 	if(vocab->grow->wordlist != NULL){
@@ -105,16 +105,19 @@ word * wordDefine(char * name, dict * vocab){
 		printf("First definition of %s\n",name);
 		// Didn't find the word
 		// We will allocate it and link it to the dictionary
-		lastWord->next = malloc(sizeof(word));
+		lastWord->next = malloc(sizeof(codeword_t));
 		tempWord = lastWord->next;
 	}else{
 		// This is the very first word in this dictionary
 		printf("Dictionary begins with %s\n",name);
-		vocab->grow->wordlist = malloc(sizeof(word));
+		vocab->grow->wordlist = malloc(sizeof(codeword_t));
 		tempWord = vocab->grow->wordlist;
 	}
-	strcpy(tempWord->name, name);
-	tempWord->next = NULL;
+	tempWord->name = name;
+	tempWord->xt = word_enter;           // User words always call word_enter
+    tempWord->data = 0;                  // Will be set to code array pointer later
+    tempWord->text = NULL;               // Will be set by parser
+    tempWord->next = NULL;
 	// Regardless of initial state, now the word is named and present in the dictionary.
 	// It's up to the caller to populate the word
 	return tempWord;
@@ -125,24 +128,20 @@ void defCore(char * name, void (*func)(), dict * vocab){
 		printf("Fatal Error: Core word name %s exceeds %d characters\n",name,CORE_NAME_LEN-1);
 		assert(0);
 	}
-	coreword * temp = NULL;
+	codeword_t * temp = malloc(sizeof(codeword_t));
+	temp->xt = func;
+    temp->data = 0;                      // Core words don't use data field
+    temp->name = name;
+    temp->text = NULL;                   // Core words don't have source text
+    temp->next = NULL;
+
 	if(vocab->core == NULL){
-		temp = malloc(sizeof(coreword));
-		strcpy(temp->name, name);
-		temp->func = (*func);
-		temp->next = NULL;
 		vocab->core = temp;
 		return;
 	}else{
-		temp = vocab->core;
-		// Find last defined func
-		while(temp->next != NULL){
-			temp = temp->next;
-		}
-		temp->next = malloc(sizeof(coreword));
-		strcpy(temp->next->name, name);
-		temp->next->func = (*func);
-		temp->next->next = NULL;
+        codeword_t *traverse = vocab->core;
+        while(traverse->next != NULL) traverse = traverse->next;
+        traverse->next = temp;
 		return;
 	}
 }
