@@ -118,7 +118,7 @@ int main(int argc, char *argv[]){
 	printf("\nlibreDSSP, version 0.6.0-dev\n");
 
 	// Copyright notice
-	printf("Copyright (C) 2020  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	printf("Copyright (C) 2026  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
 
 	if(argc >= 2){
 		printf("Attempting to open %s... ",argv[1]);
@@ -134,7 +134,6 @@ int main(int argc, char *argv[]){
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
 				if(!commandParse(bufptr, vocab)){
-					// TODO set IP to start
 					word_next();
 					free(bufptr);
 					bufsize = 0;
@@ -153,7 +152,6 @@ int main(int argc, char *argv[]){
 		char * line = prompt(cmdbuf->status);
 		if(!commandParse(line, vocab)){
 			free(line);
-			// TODO set IP to start
 			word_next();
 
 			printf("Printing cmdbuf->array\n");

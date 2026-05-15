@@ -206,14 +206,8 @@ void showTop(){
 }
 
 void showStack(){
-	int i;
-	if(dataStack->top < 0){
-		printf("[]\n");
-		return;
-	}
-
 	printf("[");
-	for(i=0; i<=(dataStack->top); i++){
+	for(int i=0; i<=(dataStack->top); i++){
 		printf(" %ld",dataStack->array[i]);
 	}
 	printf("]\n");
@@ -226,44 +220,44 @@ void base10(){
 }
 
 void ifplus(){
-/*	if((cmdbuf->top < 0) || (dataStack->top < 0)){
+	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(pop(dataStack) <= 0){
-		cmdDrop(cmdbuf);
+		cmdbuf->ip += 1; // Skip the first thing
 	}
-*/
+
 	return;
 }
 
 void ifzero(){
-/*	if((cmdbuf->top < 0) || (dataStack->top < 0)){
+	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(pop(dataStack) != 0){
-		cmdDrop(cmdbuf);
+		cmdbuf->ip += 1; // Skip the first thing
 	}
-*/
+
 	return;
 }
 
 void ifminus(){
-/*	if((cmdbuf->top < 0) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
+	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
+		fprintf(stderr,"ERROR: Insufficient operands for IF-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(pop(dataStack) >= 0){
-		cmdDrop(cmdbuf);
+		cmdbuf->ip += 1; // Skip the first thing
 	}
-*/
+
 	return;
 }
 
