@@ -41,7 +41,7 @@ struct codeword
 {
 	void (*xt)();        // Execution token (a function pointer)
     intptr_t data;       // Data payload: literal, pointer, or 0
-    const char *name;    // Word name
+    char *name;    // Word name
 	char *text;
 	codeword_t * next;
 };

@@ -113,7 +113,8 @@ codeword_t * wordDefine(char * name, dict * vocab){
 		vocab->grow->wordlist = malloc(sizeof(codeword_t));
 		tempWord = vocab->grow->wordlist;
 	}
-	tempWord->name = name;
+	tempWord->name = malloc((1+strlen(name))*sizeof(char));
+	strcpy(tempWord->name, name);
 	tempWord->xt = word_enter;           // User words always call word_enter
     tempWord->data = 0;                  // Will be set to code array pointer later
     tempWord->text = NULL;               // Will be set by parser

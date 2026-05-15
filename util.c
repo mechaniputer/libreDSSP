@@ -136,9 +136,11 @@ void word_next(){
     // Execute code in cmdbuf->array until we hit a NULL sentinel codeword
     // Each element is a codeword_t struct with an execution token (xt)
 
-    for(cmdbuf->ip = 0; cmdbuf->array[cmdbuf->ip] != NULL; cmdbuf->ip++){
+	cmdbuf->ip = 0;
+    while(cmdbuf->array[cmdbuf->ip] != NULL){
         current_codeword = cmdbuf->array[cmdbuf->ip];
         (*current_codeword->xt)();
+		cmdbuf->ip++;
     }
 	return;
 }
@@ -157,7 +159,7 @@ void word_enter(){
 	//               address -- other Forths may be different.)
 	// Again, same two parts must be initialized for the new context
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
-	cmdbuf->ip = 0;
+	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
 
 	//   JUMP to interpreter ("NEXT")
 	return; // to word_next()
@@ -341,7 +343,7 @@ int commandParse(char * line, dict * vocab){
 					CHECK_CAP_CODE
 					newWordCode[newWordCodeLen++] = dict_entry;
 					CHECK_CAP_CODE
-					newWordCode[newWordCodeLen++] = NULL;  // Add NULL sentinel
+					newWordCode[newWordCodeLen] = NULL;  // Restore NULL sentinel at end of code array now that we know the final length
 				}
 				cmdbuf->status &= (~STAT_INC_COMPILE);
 				printf("Definition of %s complete\n",newWordName);
@@ -356,6 +358,7 @@ int commandParse(char * line, dict * vocab){
 				// Populate the dictionary entry
 				dict_entry->data = (intptr_t) newWordCode;  // Set code array pointer
 				dict_entry->text = newWordText;
+
 				// Detach
 				newWordCode = NULL;
 				newWordText = NULL;
@@ -367,20 +370,12 @@ int commandParse(char * line, dict * vocab){
 					newWordName = malloc((1+strlen(statement))*sizeof(char));
 					strcpy(newWordName, statement);
 					// newWordCode already allocated in compile mode setup
-					// populate first code element with DOCOLON
-					codeword_t * dict_entry = coreSearch("DOCOLON", vocab);
-					if(NULL == dict_entry){
-						ERR_DOCOLON
-					}else{
-						CHECK_CAP_CODE
-						newWordCode[newWordCodeLen++] = dict_entry;
-						// Populate start of text entry
-						CHECK_CAP_TEXT(strlen(newWordName)+3)
-						strcpy(newWordText, ": ");
-						strcat(newWordText, newWordName);
-						strcat(newWordText, " ");
-						newWordTextLen = strlen(newWordText);
-					}
+					// Populate start of text entry
+					CHECK_CAP_TEXT(strlen(newWordName)+3)
+					strcpy(newWordText, ": ");
+					strcat(newWordText, newWordName);
+					strcat(newWordText, " ");
+					newWordTextLen = strlen(newWordText);
 				}else{
 					// Add word to ongoing word definition
 					codeword_t *dict_entry = coreSearch(statement, vocab);
