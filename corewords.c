@@ -29,6 +29,7 @@
 #include "util.h"
 
 extern codeword_t * current_codeword;
+extern stack *returnStack;
 
 void plus(){
 	int temp;
@@ -262,21 +263,30 @@ void ifminus(){
 }
 
 void branchminus(){
-/*
-	if((cmdbuf->top < 1) || (dataStack->top < 0)){
+	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
 		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
+
+	codeword_t *word_a = cmdbuf->array[cmdbuf->ip+1];
+	codeword_t *word_b = cmdbuf->array[cmdbuf->ip+2];
+
 	if(pop(dataStack) < 0){ // Do the first thing
-		command * temp = cmdPop(cmdbuf);
-		cmdDrop(cmdbuf);
-		cmdPush(cmdbuf, temp);
+		// Push old ip
+		push(returnStack, (intptr_t) (cmdbuf->ip+3));
+		push(returnStack, (intptr_t) cmdbuf->array);
+		// Set new ip
+		cmdbuf->array = (codeword_t **) (word_a->data);
+		cmdbuf->ip = 1; // This should skip DOCOLON
 	}else{ // Do the second thing
-		cmdDrop(cmdbuf);
+		push(returnStack, (intptr_t) (cmdbuf->ip)+3);
+		push(returnStack, (intptr_t) cmdbuf->array);
+		// Set new ip
+		cmdbuf->array = (codeword_t **) (word_b->data);
+		cmdbuf->ip = 1; // This should skip DOCOLON
 	}
-*/
-	return;
+	return; // to word_next(), which will run the correct branch word
 }
 
 void branchzero(){
