@@ -40,8 +40,9 @@ typedef struct codeword codeword_t;
 struct codeword
 {
 	void (*xt)();        // Execution token (a function pointer)
-    intptr_t data;       // Data payload: literal, pointer, or 0
-    char *name;    // Word name
+	intptr_t data;       // Data payload: literal, pointer, or 0
+	int size;      // Number of words in this word
+	char *name;    // Word name
 	char *text;
 	codeword_t * next;
 };

@@ -49,7 +49,7 @@ void cmdClear(cmdbuffer * cmdbuf) {
 void cmdAppend(cmdbuffer * cmdbuf, codeword_t * cw) {
 	if((cmdbuf->capacity) == (cmdbuf->size+1)) cmdGrow(cmdbuf);
 	cmdbuf->array[cmdbuf->size++] = cw;
-    cmdbuf->array[cmdbuf->size] = NULL;  // Maintain NULL sentinel
+	cmdbuf->array[cmdbuf->size] = NULL;  // Maintain NULL sentinel
 	return;
 }
 
@@ -60,11 +60,11 @@ void cmdGrow(cmdbuffer * cmdbuf){
 }
 
 codeword_t * newLiteral(intptr_t value) {
-    codeword_t *cw = malloc(sizeof(codeword_t));
-    cw->xt = pushLiteral;
-    cw->data = value;
-    cw->name = "(literal)";
-    cw->text = NULL;
-    cw->next = NULL;
-    return cw;
+	codeword_t *cw = malloc(sizeof(codeword_t));
+	cw->xt = pushLiteral;
+	cw->data = value;
+	cw->name = "(literal)";
+	cw->text = NULL;
+	cw->next = NULL;
+	return cw;
 }

@@ -133,22 +133,24 @@ void word_next(){
 	// FORTH techniques, the cmdbuf could instead contain an EXIT word that
 	// returns to the prompt so we don't need a conditional branch.
 
-    // Execute code in cmdbuf->array until we hit a NULL sentinel codeword
-    // Each element is a codeword_t struct with an execution token (xt)
+	// Execute code in cmdbuf->array until we hit a NULL sentinel codeword
+	// Each element is a codeword_t struct with an execution token (xt)
 
 	cmdbuf->ip = 0;
-    while(cmdbuf->array[cmdbuf->ip] != NULL){
-        current_codeword = cmdbuf->array[cmdbuf->ip];
-        (*current_codeword->xt)();
+	while(cmdbuf->array[cmdbuf->ip] != NULL){
+		//printf("Next ip: %d\n",cmdbuf->ip);
+		current_codeword = cmdbuf->array[cmdbuf->ip];
+		(*current_codeword->xt)();
 		cmdbuf->ip++;
-    }
+	}
 	return;
 }
 
 // AKA DO_COLON
 // Not the same as COLON, which will be used to allocate and define a word
 void word_enter(){
-	printf("Hello from word_enter AKA DOCOLON\n");
+	//printf("DOCOLON entering %s\n", (cmdbuf->array[cmdbuf->ip] == NULL ? "Unknown":cmdbuf->array[cmdbuf->ip]->name));
+
 	//   PUSH IP     onto the "return address stack"
 	//   Ours has two parts: the current code array and the current IP
 	push(returnStack, (intptr_t) cmdbuf->ip);
@@ -159,7 +161,9 @@ void word_enter(){
 	//               address -- other Forths may be different.)
 	// Again, same two parts must be initialized for the new context
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
+	cmdbuf->size = current_codeword->size;
 	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
+	//printf("This word has size %d\n",cmdbuf->size);
 
 	//   JUMP to interpreter ("NEXT")
 	return; // to word_next()
@@ -168,11 +172,10 @@ void word_enter(){
 // AKA ;S
 // Not the same as SEMICOLON, which will finalize a new word definition
 void word_exit(){
-	printf("Hello from word_exit AKA ;S\n");
-	// TODO
+	//printf("Hello from word_exit AKA ;S\n");
 	//   POP IP   from the "return address stack"
 	// Pop array first (was pushed second by word_enter)
-    cmdbuf->array = (codeword_t **) pop(returnStack);
+	cmdbuf->array = (codeword_t **) pop(returnStack);
 	cmdbuf->ip = (int) pop(returnStack);
 
 	//   JUMP to interpreter
@@ -357,6 +360,7 @@ int commandParse(char * line, dict * vocab){
 				dict_entry = wordDefine(newWordName, vocab);
 				// Populate the dictionary entry
 				dict_entry->data = (intptr_t) newWordCode;  // Set code array pointer
+				dict_entry->size = newWordCodeLen;
 				dict_entry->text = newWordText;
 
 				// Detach
@@ -394,16 +398,16 @@ int commandParse(char * line, dict * vocab){
 				}
 			}else{
 				// Normal execution mode - emit word to cmdbuf
-    			codeword_t *dict_entry = coreSearch(statement, vocab);
-    			if(NULL != dict_entry){
-        			cmdAppend(cmdbuf, dict_entry);
-    			}else{
-        			dict_entry = wordSearch(statement, vocab);
-        			if(NULL != dict_entry){
-            			cmdAppend(cmdbuf, dict_entry);
-    				}
+				codeword_t *dict_entry = coreSearch(statement, vocab);
+				if(NULL != dict_entry){
+					cmdAppend(cmdbuf, dict_entry);
+				}else{
+					dict_entry = wordSearch(statement, vocab);
+					if(NULL != dict_entry){
+						cmdAppend(cmdbuf, dict_entry);
+					}
 				}
-    			if(NULL == dict_entry) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
+				if(NULL == dict_entry) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
 			}
 			statement_len = 0; // No need to get a new buffer since we didn't detach it
 		}
@@ -420,7 +424,7 @@ int commandParse(char * line, dict * vocab){
 		ERR_INC_STRING
 	}
 
-	printf("status: %d\n",cmdbuf->status);
+	//printf("status: %d\n",cmdbuf->status);
 	free(statement);
 
 	return 0;
