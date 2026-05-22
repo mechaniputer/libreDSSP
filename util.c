@@ -97,6 +97,7 @@ extern stack *returnStack;
 void debug(){
 	printf("*** DEBUG INFO ***\n");
 	for(int i=0; i<= cmdbuf->size; i++){
+		printf("%p: ", (void*)cmdbuf->array[i]);
 		if(cmdbuf->array[i] != NULL){
 			printf(" %s", cmdbuf->array[i]->name);
 		}

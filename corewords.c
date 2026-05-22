@@ -277,40 +277,29 @@ void branchminus(){
 		return;
 	}
 
-	codeword_t *word_a = cmdbuf->array[cmdbuf->ip+1];
-	codeword_t *word_b = cmdbuf->array[cmdbuf->ip+2];
-
+	codeword_t *outcome;
 	if(pop(dataStack) < 0){ // Do the first thing
 		printf("Doing first thing\n");
-		if(word_a->user == 1){
-			printf("User word\n");
-			// Push old ip
-			push(returnStack, (intptr_t) (cmdbuf->ip+2));
-			push(returnStack, (intptr_t) cmdbuf->array);
-			// Set new ip
-			cmdbuf->array = (codeword_t **) (word_a->data);
-			cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
-		}else{ // Literal, print, or core
-			printf("Not a user word\n");
-			(*word_a->xt)();
-			cmdbuf->ip += 2;
-		}
-	}else{ // Do the second thing
+		outcome = cmdbuf->array[(cmdbuf->ip)+1];
+	}else{
 		printf("Doing second thing\n");
-		if(word_a->user == 1){
-			printf("User word\n");
-			push(returnStack, (intptr_t) (cmdbuf->ip)+2);
-			push(returnStack, (intptr_t) cmdbuf->array);
-			// Set new ip
-			cmdbuf->array = (codeword_t **) (word_b->data);
-			cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
-		}else{
-			printf("Not a user word\n");
-			(*word_b->xt)();
-			cmdbuf->ip += 2;
-		}
+		outcome = cmdbuf->array[(cmdbuf->ip)+2];
 	}
-	return; // to word_next(), which will run the correct branch word
+	if(outcome->user == 1){
+		printf("User word\n");
+		// Push IP to return to after branch completes
+		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
+		push(returnStack, (intptr_t) cmdbuf->array);
+		// Set branch IP
+		cmdbuf->array = (codeword_t **) (outcome->data);
+		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+	}else{ // Literal, print, or core
+		printf("Not a user word\n");
+		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
+		(*outcome->xt)();
+		cmdbuf->ip += 2;
+	}
+	return; // to word_next()
 }
 
 void branchzero(){
