@@ -25,6 +25,8 @@
 
 extern stack *dataStack;
 extern cmdbuffer *cmdbuf;
+extern stack *returnStack;
+extern codeword_t *current_codeword;
 
 typedef struct dict dict;
 

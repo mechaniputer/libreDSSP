@@ -28,6 +28,8 @@
 #include "cmdbuf.h"
 #include "util.h"
 
+extern void debug();
+
 extern codeword_t * current_codeword;
 extern stack *returnStack;
 
@@ -202,7 +204,11 @@ void bye(){
 // TODO This will need to be modified to support multiple output modes
 // Current mode will be readable from a flag in cmdbuf?
 void showTop(){
-	if(dataStack->top > -1) printf("%ld\n",top(dataStack));
+	if(dataStack->top > -1){
+		printf("%ld\n",top(dataStack));
+	}else{
+		printf("(NIL)\n");
+	}
 	return;
 }
 
@@ -262,6 +268,22 @@ void ifminus(){
 	return;
 }
 
+// This helper replaces common code in BR-, BR0, and BR+ to reduce code duplication and make it easier to maintain.
+static inline void branch_helper(codeword_t *outcome){
+	if(outcome->user == 1){
+		// Push IP to return to after branch completes
+		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
+		push(returnStack, (intptr_t) cmdbuf->array);
+		// Set branch IP
+		cmdbuf->array = (codeword_t **) (outcome->data);
+		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+	}else{ // Literal, print, or core
+		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
+		(*outcome->xt)();
+		cmdbuf->ip += 2;
+	}
+}
+
 void branchminus(){
 	printf("In branchminus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
@@ -277,84 +299,67 @@ void branchminus(){
 		return;
 	}
 
-	codeword_t *outcome;
 	if(pop(dataStack) < 0){ // Do the first thing
 		printf("Doing first thing\n");
-		outcome = cmdbuf->array[(cmdbuf->ip)+1];
+		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
 	}else{
 		printf("Doing second thing\n");
-		outcome = cmdbuf->array[(cmdbuf->ip)+2];
+		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
-	if(outcome->user == 1){
-		printf("User word\n");
-		// Push IP to return to after branch completes
-		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set branch IP
-		cmdbuf->array = (codeword_t **) (outcome->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
-	}else{ // Literal, print, or core
-		printf("Not a user word\n");
-		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
-		(*outcome->xt)();
-		cmdbuf->ip += 2;
-	}
+
 	return; // to word_next()
 }
 
 void branchzero(){
-	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
+	printf("In branchzero()\n");
+	if((cmdbuf->size - cmdbuf->ip) < 2){
+		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR0\n");
+		debug();
+		cmdClear(cmdbuf);
+		return;
+	}
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient data operands for BR0\n");
+		debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	codeword_t *word_a = cmdbuf->array[cmdbuf->ip+1];
-	codeword_t *word_b = cmdbuf->array[cmdbuf->ip+2];
-
 	if(pop(dataStack) == 0){ // Do the first thing
-		// Push old ip
-		push(returnStack, (intptr_t) (cmdbuf->ip+2));
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set new ip
-		cmdbuf->array = (codeword_t **) (word_a->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
-	}else{ // Do the second thing
-		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set new ip
-		cmdbuf->array = (codeword_t **) (word_b->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
+		printf("Doing first thing\n");
+		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
+	}else{
+		printf("Doing second thing\n");
+		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
-	return; // to word_next(), which will run the correct branch word
+
+	return; // to word_next()
 }
 
 void branchplus(){
-	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
+	printf("In branchplus()\n");
+	if((cmdbuf->size - cmdbuf->ip) < 2){
+		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR+\n");
+		debug();
+		cmdClear(cmdbuf);
+		return;
+	}
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient data operands for BR+\n");
+		debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	codeword_t *word_a = cmdbuf->array[cmdbuf->ip+1];
-	codeword_t *word_b = cmdbuf->array[cmdbuf->ip+2];
-
 	if(pop(dataStack) > 0){ // Do the first thing
-		// Push old ip
-		push(returnStack, (intptr_t) (cmdbuf->ip+2));
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set new ip
-		cmdbuf->array = (codeword_t **) (word_a->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
-	}else{ // Do the second thing
-		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set new ip
-		cmdbuf->array = (codeword_t **) (word_b->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
+		printf("Doing first thing\n");
+		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
+	}else{
+		printf("Doing second thing\n");
+		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
-	return; // to word_next(), which will run the correct branch word
+	return; // to word_next()
 }
 
 void branchsign(){

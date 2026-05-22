@@ -156,12 +156,9 @@ void word_next(){
 	cmdbuf->ip = 0;
 	// For literals (and corewords), there is no array?
 	while(cmdbuf->array[cmdbuf->ip] != NULL){
-		//printf("Next ip: %d\n",cmdbuf->ip);
 		current_codeword = cmdbuf->array[cmdbuf->ip];
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
-		printf("foo?\n");
-		debug();
 	}
 	return;
 }
