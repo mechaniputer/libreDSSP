@@ -39,10 +39,11 @@ typedef struct codeword codeword_t;
 // TODO Add flag for :: definition (immune to CLEAR $v command)
 struct codeword
 {
-	void (*xt)();        // Execution token (a function pointer)
-	intptr_t data;       // Data payload: literal, pointer, or 0
+	void (*xt)();  // Execution token (a function pointer)
+	intptr_t data; // Data payload: literal, pointer, or 0
 	int size;      // Number of words in this word
 	char *name;    // Word name
+	int user;      // 1 if user-defined, 0 if not.
 	char *text;
 	codeword_t * next;
 };

@@ -150,6 +150,7 @@ int main(int argc, char *argv[]){
 	}
 
 	while(1){
+		assert(-1 == returnStack->top); // Ensure we have an empty return stack
 		// Show prompt, get line of input
 		char * line = prompt(cmdbuf->status);
 		if(!commandParse(line, vocab)){

@@ -115,11 +115,12 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	}
 	tempWord->name = malloc((1+strlen(name))*sizeof(char));
 	strcpy(tempWord->name, name);
-	tempWord->xt = word_enter;		   // User words always call word_enter
-	tempWord->data = 0;				  // Will be set to code array pointer later
-	tempWord->size = 0;				  // Should correspond to number of elements in data[]
-	tempWord->text = NULL;			   // Will be set by parser
+	tempWord->xt = word_enter; // User words always call word_enter
+	tempWord->data = 0;        // Will be set to code array pointer later
+	tempWord->size = 0;        // Should correspond to number of elements in data[]
+	tempWord->text = NULL;     // Will be set by parser
 	tempWord->next = NULL;
+	tempWord->user = 1;        // Is user-defined
 	// Regardless of initial state, now the word is named and present in the dictionary.
 	// It's up to the caller to populate the word
 	return tempWord;
@@ -132,11 +133,12 @@ void defCore(char * name, void (*func)(), dict * vocab){
 	}
 	codeword_t * temp = malloc(sizeof(codeword_t));
 	temp->xt = func;
-	temp->data = 0;					  // Core words don't use data field
+	temp->data = 0;      // Core words don't use data field
 	temp->size = 0;
 	temp->name = name;
-	temp->text = NULL;				   // Core words don't have source text
+	temp->text = NULL;   // Core words don't have source text
 	temp->next = NULL;
+	temp->user = 0;      // Not user-defined
 
 	if(vocab->core == NULL){
 		vocab->core = temp;

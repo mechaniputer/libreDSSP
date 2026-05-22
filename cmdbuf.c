@@ -66,5 +66,6 @@ codeword_t * newLiteral(intptr_t value) {
 	cw->name = "(literal)";
 	cw->text = NULL;
 	cw->next = NULL;
+	cw->user = 0; // Not user-defined word
 	return cw;
 }

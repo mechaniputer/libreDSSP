@@ -93,6 +93,22 @@ extern stack *returnStack;
 		newWordText = realloc(newWordText, newWordTextCap * sizeof(char)); \
 	}
 
+// Shows current cmdbuf, ip, and stack contents
+void debug(){
+	printf("*** DEBUG INFO ***\n");
+	for(int i=0; i<= cmdbuf->size; i++){
+		if(cmdbuf->array[i] != NULL){
+			printf(" %s", cmdbuf->array[i]->name);
+		}
+		if(i== cmdbuf->ip){
+			printf(" <IP>");
+		}
+		printf("\n");
+	}
+	showStack();
+	printf("*** END ***\n");
+}
+
 // Deals with ."hello" print statements
 void textPrint(char * text){
 	assert(text != NULL);
@@ -137,11 +153,14 @@ void word_next(){
 	// Each element is a codeword_t struct with an execution token (xt)
 
 	cmdbuf->ip = 0;
+	// For literals (and corewords), there is no array?
 	while(cmdbuf->array[cmdbuf->ip] != NULL){
 		//printf("Next ip: %d\n",cmdbuf->ip);
 		current_codeword = cmdbuf->array[cmdbuf->ip];
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
+		printf("foo?\n");
+		debug();
 	}
 	return;
 }
@@ -149,7 +168,7 @@ void word_next(){
 // AKA DO_COLON
 // Not the same as COLON, which will be used to allocate and define a word
 void word_enter(){
-	//printf("DOCOLON entering %s\n", (cmdbuf->array[cmdbuf->ip] == NULL ? "Unknown":cmdbuf->array[cmdbuf->ip]->name));
+	printf("DOCOLON entering %s\n", (cmdbuf->array[cmdbuf->ip] == NULL ? "Unknown":cmdbuf->array[cmdbuf->ip]->name));
 
 	//   PUSH IP     onto the "return address stack"
 	//   Ours has two parts: the current code array and the current IP
@@ -163,7 +182,7 @@ void word_enter(){
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
 	cmdbuf->size = current_codeword->size;
 	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
-	//printf("This word has size %d\n",cmdbuf->size);
+	printf("This word has size %d\n",cmdbuf->size);
 
 	//   JUMP to interpreter ("NEXT")
 	return; // to word_next()
@@ -172,7 +191,7 @@ void word_enter(){
 // AKA ;S
 // Not the same as SEMICOLON, which will finalize a new word definition
 void word_exit(){
-	//printf("Hello from word_exit AKA ;S\n");
+	printf("Hello from word_exit AKA ;S\n");
 	//   POP IP   from the "return address stack"
 	// Pop array first (was pushed second by word_enter)
 	cmdbuf->array = (codeword_t **) pop(returnStack);

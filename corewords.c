@@ -263,8 +263,16 @@ void ifminus(){
 }
 
 void branchminus(){
-	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
+	printf("In branchminus()\n");
+	if((cmdbuf->size - cmdbuf->ip) < 2){
+		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR-\n");
+		debug();
+		cmdClear(cmdbuf);
+		return;
+	}
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient data operands for BR-\n");
+		debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -273,18 +281,34 @@ void branchminus(){
 	codeword_t *word_b = cmdbuf->array[cmdbuf->ip+2];
 
 	if(pop(dataStack) < 0){ // Do the first thing
-		// Push old ip
-		push(returnStack, (intptr_t) (cmdbuf->ip+2));
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set new ip
-		cmdbuf->array = (codeword_t **) (word_a->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
+		printf("Doing first thing\n");
+		if(word_a->user == 1){
+			printf("User word\n");
+			// Push old ip
+			push(returnStack, (intptr_t) (cmdbuf->ip+2));
+			push(returnStack, (intptr_t) cmdbuf->array);
+			// Set new ip
+			cmdbuf->array = (codeword_t **) (word_a->data);
+			cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+		}else{ // Literal, print, or core
+			printf("Not a user word\n");
+			(*word_a->xt)();
+			cmdbuf->ip += 2;
+		}
 	}else{ // Do the second thing
-		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		// Set new ip
-		cmdbuf->array = (codeword_t **) (word_b->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
+		printf("Doing second thing\n");
+		if(word_a->user == 1){
+			printf("User word\n");
+			push(returnStack, (intptr_t) (cmdbuf->ip)+2);
+			push(returnStack, (intptr_t) cmdbuf->array);
+			// Set new ip
+			cmdbuf->array = (codeword_t **) (word_b->data);
+			cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+		}else{
+			printf("Not a user word\n");
+			(*word_b->xt)();
+			cmdbuf->ip += 2;
+		}
 	}
 	return; // to word_next(), which will run the correct branch word
 }
@@ -625,6 +649,7 @@ void dropStack(){
 }
 
 void pushLiteral(){
+	printf("Pushing %ld\n",current_codeword->data);
 	push(dataStack, current_codeword->data);
 	return;
 }
