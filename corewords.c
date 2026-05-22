@@ -888,6 +888,23 @@ void termOutNum(){
 	return;
 }
 
+void termOutString(){
+	// Requires two operands. The top of the stack is a count and below that is a pointer to the string.
+	if(dataStack->top < 1){
+		fprintf(stderr,"ERROR: Insufficient stack operands for TOS\n");
+		cmdClear(cmdbuf);
+		return;
+	}
+	// Pop the count and pointer from the stack
+	int len = pop(dataStack);
+	char * str = (char *) pop(dataStack);
+	// Print exactly the specified number of characters from the string
+	for(int i=0; i<len; i++){
+		printf("%c", str[i]);
+	}
+	return;
+}
+
 void stackDepth(){
 	push(dataStack, (dataStack->top)+1);
 	return;

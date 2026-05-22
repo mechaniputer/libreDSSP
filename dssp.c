@@ -104,6 +104,7 @@ int main(int argc, char *argv[]){
 	defCore("USE", openSub, vocab);
 	defCore("TIN", termInNum, vocab);
 	defCore("TON", termOutNum, vocab);
+	defCore("TOS", termOutString, vocab);
 	defCore("DEEP", stackDepth, vocab);
 
 	// Sub-Dictionaries

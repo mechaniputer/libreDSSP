@@ -94,6 +94,7 @@ void shutSub();
 void openSub();
 void termInNum();
 void termOutNum();
+void termOutString();
 void stackDepth();
 
 #endif

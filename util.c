@@ -262,12 +262,37 @@ int commandParse(char * line, dict * vocab){
 			}else if(ch == '"'){ // End string
 				statement[statement_len] = '\0';
 				cmdbuf->status &= (~STAT_INC_STRING);
-				cmdbuf->status &= (~STAT_INC_PRINT);
-				// TODO Emit the string length and pointers and then the generic string printing word if printing
 				// FIXME Should we try to prevent memory leaks from strings that we lose the pointer to? (with a string/var registry and periodic GC?)
 				printf("String complete: %s\n",statement);
-				free(statement); // TODO Temporary
 
+				if(cmdbuf->status & STAT_INC_PRINT){
+					printf("Emitting print codewords for string\n");
+					cmdbuf->status &= (~STAT_INC_PRINT);
+					// Emit a codeword that pushes the string pointer
+					codeword_t * push_ptr = newLiteral((intptr_t) statement);
+					codeword_t * push_len = newLiteral((intptr_t) strlen(statement));
+					codeword_t * print_st = coreSearch("TOS", vocab);
+					if(print_st == NULL){
+						ERR_EXIT
+					}
+					if(cmdbuf->status & STAT_INC_COMPILE){
+						// Add codewords to word definition
+						CHECK_CAP_CODE
+						newWordCode[newWordCodeLen++] = push_ptr;
+						CHECK_CAP_CODE
+						newWordCode[newWordCodeLen++] = push_len;
+						CHECK_CAP_CODE
+						newWordCode[newWordCodeLen++] = print_st;
+					}else{
+						// Add codewords to command buffer
+						cmdAppend(cmdbuf, push_ptr);
+						cmdAppend(cmdbuf, push_len);
+						cmdAppend(cmdbuf, print_st);
+					}
+				}else{
+					// TODO: Handle the case where the string is not marked for printing
+					free(statement); // TODO Temporary
+				}
 				// Now that we have detached the old statement buffer we need a new one
 				statement_cap = INIT_STATEMENT_CAP;
 				statement_len = 0;
@@ -293,6 +318,9 @@ int commandParse(char * line, dict * vocab){
 					ERR_FORB_SYM_IN_WORD
 				}
 				cmdbuf->status |= STAT_INC_PRINT;
+				// Remove the '.' from the statement buffer since it is not part of the string
+				statement_len--;
+				statement[statement_len] = '\0';
 			}else if(statement_len>0){
 				ERR_FORB_SYM_IN_WORD
 			}
