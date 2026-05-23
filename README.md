@@ -65,12 +65,12 @@ Also let us know if you are interested in setting up other resources such as an 
 	* ' (push address of var)
 	* '' (push address of function)
 	* EXEC (execute function from address on stack)
-	* TEXEC (execute from external text interpreter)
+	* TEXEC (execute text)
 	* Everything unaccounted for in this README
 
 ## Possible future goals
-	* Full documentation
+	* Full documentation and in-shell interactive tutorial
 	* Floating point math
-	* Inline assembler, self-hosting implementation
+	* External libraries for special or platform-specific uses
 	* Portability improvements including embedded devices
 	* Multithreading support by spawning additional kernels?
