@@ -29,7 +29,7 @@ Also let us know if you are interested in setting up other resources such as an 
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
 	* IF+, IF0, IF-
-	* BR+, BR0, BR-
+	* BR+, BR0, BR-, BRS
 	* D (drop), C (copy), DS (drop entire stack)
 	* DEEP (push height of stack)
 	* ET, E2, E3, E4
@@ -41,15 +41,15 @@ Also let us know if you are interested in setting up other resources such as an 
 	* ."hello" printing
 	* [comments]
 	* GNU readline support
+	* Load and run code from file at startup
 	* B10 (as a placeholder since we currently only support base 10 I/O)
 
 ## What doesn't work yet
 	* Push address of string
 	* DO
-	* BRS, BR
+	* BR
 	* Integer variables
 	* GROW, USE, SHUT, ?$
-	* Read from file at start
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Arrays, fixed variables, etc

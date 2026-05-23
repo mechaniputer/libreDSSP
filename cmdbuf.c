@@ -37,6 +37,8 @@ cmdbuffer * newCmdBuffer(){
 }
 
 // Empties command buffer and resets all statuses
+// FIXME changing the contents of the cmdbuf is incorrect because it may be a reference to a user word's definition.
+//       In addition, if we are reading a code file, we should halt and go to the prompt on an error.
 void cmdClear(cmdbuffer * cmdbuf) {
 	cmdbuf->size = 0;
 	cmdbuf->status = 0;

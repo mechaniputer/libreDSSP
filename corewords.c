@@ -81,9 +81,15 @@ void divide(){
 		cmdClear(cmdbuf);
 		return;
 	}
-	temp1 = pop(dataStack);
-	temp2 = top(dataStack);
-	dataStack->array[dataStack->top] = temp2 / temp1;
+	if(top(dataStack) == 0){
+		fprintf(stderr,"ERROR: Division by zero\n");
+		cmdClear(cmdbuf);
+	}else{
+		temp1 = dataStack->array[dataStack->top];
+		temp2 = dataStack->array[dataStack->top-1];
+		dataStack->array[dataStack->top-1] = temp2 / temp1;
+		dataStack->array[dataStack->top] = temp2 % temp1;
+	}
 	return;
 }
 
