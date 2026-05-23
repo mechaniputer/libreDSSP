@@ -745,6 +745,7 @@ void listDicts(){
 	subdict * tempSub = vocab->sub;
 	if(vocab->grow == NULL || vocab->grow->open == 0){
 		printf("Warning: no dictionary selected for expansion\n");
+		printf("%s CLOSED\n",vocab->grow->name);
 	}else{
 		printf("%s OPEN\n",vocab->grow->name);
 	}
@@ -776,7 +777,8 @@ void growSub(){
 		return;
 	}
 
-	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open. If it doesn't exist, we need to create it and open it.
+	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open.
+	// If it doesn't exist, we need to create it and open it.
 	subdict * tempSub = findDict(vocab, current_codeword->text);
 
 	if(tempSub == NULL){ // We are making a new subdict
@@ -792,63 +794,51 @@ void growSub(){
 // If the subdict doesn't exist, an error is printed. If the subdict is already closed, nothing happens.
 // If the subdict is currently selected for growth, it will be deselected.
 void shutSub(){
-/*
-	subdict * tempSub = vocab->sub;
-
-	if(cmdbuf->top < 0){
-		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
+	// The dictionary name is in the text field of the current codeword.
+	// The subdict must begin with a $ character, and it cannot be $PRIME.
+	if(strncmp(current_codeword->text,"$",1)){
+		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-
-	if(!strcmp(cmdTop(cmdbuf)->text,"$PRIME")){
+	if(!strcmp(current_codeword->text,"$PRIME")){
 		fprintf(stderr,"ERROR: cannot shut $PRIME subvocabulary\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	while(tempSub != NULL){
-		if(!strcmp(tempSub->name, cmdTop(cmdbuf)->text)) break;
-		tempSub = tempSub->next;
-	}
-
+	subdict * tempSub = findDict(vocab, current_codeword->text);
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdTop(cmdbuf)->text);
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",current_codeword->text);
 		cmdClear(cmdbuf);
 		return;
 	}
 	tempSub->open = 0;
-	vocab->grow = NULL;
-	cmdDrop(cmdbuf);
 	return;
-*/
 }
 
 // As with GROW, the OPEN command will use the data field of the current codeword to locate the subdict to open.
 // If the subdict doesn't exist, an error is printed. If the subdict is already open, nothing happens.
 void openSub(){
-/*
-	subdict * tempSub = vocab->sub;
-
-	if(cmdbuf->top < 0){
-		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
+	// The dictionary name is in the text field of the current codeword.
+	// The subdict must begin with a $ character, and it cannot be $PRIME.
+	if(strncmp(current_codeword->text,"$",1)){
+		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-
-	while(tempSub != NULL){
-		if(!strcmp(tempSub->name, cmdTop(cmdbuf)->text)) break;
-		tempSub = tempSub->next;
+	if(!strcmp(current_codeword->text,"$PRIME")){
+		printf("Warning: $PRIME is always open\n");
+		return;
 	}
 
+	subdict * tempSub = findDict(vocab, current_codeword->text);
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdTop(cmdbuf)->text);
+		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",current_codeword->text);
 		cmdClear(cmdbuf);
 		return;
 	}
 	tempSub->open = 1;
-	cmdDrop(cmdbuf);
-*/
 	return;
 }
 

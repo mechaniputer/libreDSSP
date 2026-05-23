@@ -81,43 +81,42 @@ codeword_t * coreSearch(char * name, dict * vocab){
 // Searches selected dictionary for word to redefine, or adds a new blank one of the specified name
 codeword_t * wordDefine(char * name, dict * vocab){
 	codeword_t * tempWord;
-	codeword_t * lastWord;
 
 	if(vocab->grow == NULL){
 		// TODO This should be handled gracefully (free resources, return NULL, print error).
 		printf("Fatal Error: We are defining a word but no dictionary is selected\n");
 		assert(0);
 	}
+	if(vocab->grow->open == 0){
+		// TODO This should be handled gracefully (free resources, return NULL, print error).
+		printf("Fatal Error: We are defining a word in a closed dictionary\n");
+		assert(0);
+	}
 	// If there is at least one word already
 	if(vocab->grow->wordlist != NULL){
-		if((vocab->grow->open) && (vocab->grow->wordlist != NULL)){
+		if(vocab->grow->wordlist != NULL){
 			tempWord = vocab->grow->wordlist;
 			while(tempWord != NULL){
 				if(!strcmp(tempWord->name, name)){
 					printf("Replacing old definition of %s in %s\n",name, vocab->grow->name);
 					return tempWord;
 				}
-				lastWord = tempWord;
 				tempWord = tempWord->next;
 			}
 		}
-
-		// Didn't find the word
-		// We will allocate it and link it to the dictionary
-		lastWord->next = malloc(sizeof(codeword_t));
-		tempWord = lastWord->next;
-	}else{
-		// This is the very first word in this dictionary
-		vocab->grow->wordlist = malloc(sizeof(codeword_t));
-		tempWord = vocab->grow->wordlist;
 	}
+	// Didn't find the word
+	// We will allocate it and prepend it to the dictionary
+	tempWord= malloc(sizeof(codeword_t));
+	tempWord->next = vocab->grow->wordlist; // Might be NULL
+	vocab->grow->wordlist = tempWord;
+
 	tempWord->name = malloc((1+strlen(name))*sizeof(char));
 	strcpy(tempWord->name, name);
 	tempWord->xt = word_enter; // User words always call word_enter
 	tempWord->data = 0;        // Will be set to code array pointer later
 	tempWord->size = 0;        // Should correspond to number of elements in data[]
 	tempWord->text = NULL;     // Will be set by parser
-	tempWord->next = NULL;
 	tempWord->user = 1;        // Is user-defined
 	// Regardless of initial state, now the word is named and present in the dictionary.
 	// It's up to the caller to populate the word

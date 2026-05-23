@@ -49,6 +49,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 	* GNU readline support
 	* Load and run code from file at startup
 	* B10 (as a placeholder since we currently only support base 10 I/O)
+	* GROW, USE, SHUT, ?$
 	* WORDS (This is a FORTH loanword. Currently unsure if DSSP had an equivalent.)
 
 
@@ -57,7 +58,6 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 	* DO
 	* BR
 	* Integer variables
-	* GROW, USE, SHUT, ?$
 	* Top-down programming (reference undefined words when defining words)
 	* UNDEF (list undefined words)
 	* SAVE, LOAD
