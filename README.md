@@ -22,6 +22,12 @@ The libreDSSP tutor (TUTOR.DSP) does not yet cover all of the implemented langua
 
 Also let us know if you are interested in setting up other resources such as an irc channel or a website. We don't currently have the time to manage anything officially, but if someone sets one up, we can link to it here.
 
+## What is different from earlier DSSP dialects?
+The $PRIME subdictionary contains core words and cannot be modified. Instead, a $DEFAULT subdictionary exists for user-defined words, and more subdictionaries can be added.
+
+In addition, WORDS lists an inventory of all user-defined words in open subdictionaries. This is a loanword from FORTH that may or may not have had an equivalent in past dialects of DSSP.
+
+
 ## What works
 	* Basic math operations (+,*,-,/)
 	* 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
@@ -43,9 +49,8 @@ Also let us know if you are interested in setting up other resources such as an 
 	* GNU readline support
 	* Load and run code from file at startup
 	* B10 (as a placeholder since we currently only support base 10 I/O)
+	* WORDS (This is a FORTH loanword. Currently unsure if DSSP had an equivalent.)
 
-## What is different from earlier DSSP dialects
-	* The $PRIME subdictionary contains core words and cannot be modified. Instead, a $DEFAULT subdictionary exists for user-defined words, and more subdictionaries can be added.
 
 ## What doesn't work yet
 	* Push address of string
@@ -75,6 +80,7 @@ Also let us know if you are interested in setting up other resources such as an 
 	* LPSP, LPCR, LPS, LPT, LPFF
 	* INT, TRAP, ON, EON
 	* Everything unaccounted for in this README
+
 
 ## Possible future goals
 	* Full documentation and in-shell interactive tutorial
