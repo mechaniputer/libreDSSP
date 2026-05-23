@@ -284,6 +284,22 @@ static inline void branch_helper(codeword_t *outcome){
 	}
 }
 
+// Similar to branch_helper but for the three-way branch in BRS. Main difference is that the IP increment is 3 instead of 2.
+static inline void brs_helper(codeword_t *outcome){
+	if(outcome->user == 1){
+		// Push IP to return to after branch completes
+		push(returnStack, (intptr_t) (cmdbuf->ip)+3);
+		push(returnStack, (intptr_t) cmdbuf->array);
+		// Set branch IP
+		cmdbuf->array = (codeword_t **) (outcome->data);
+		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+	}else{ // Literal, print, or core
+		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
+		(*outcome->xt)();
+		cmdbuf->ip += 3;
+	}
+}
+
 void branchminus(){
 	printf("In branchminus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
@@ -363,29 +379,32 @@ void branchplus(){
 }
 
 void branchsign(){
-/*
-	if((cmdbuf->top < 1) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
+	printf("In branchsign()\n");
+	if((cmdbuf->size - cmdbuf->ip) < 3){
+		fprintf(stderr,"ERROR: Insufficient branch outcomes for BRS\n");
+		debug();
 		cmdClear(cmdbuf);
 		return;
 	}
-	if(top(dataStack) < 0){ // Do the first thing
-		command * temp = cmdPop(cmdbuf);
-		cmdDrop(cmdbuf);
-		cmdDrop(cmdbuf);
-		cmdPush(cmdbuf, temp);
-	}else if(top(dataStack) == 0){ // Do the second thing
-		cmdDrop(cmdbuf);
-		command * temp = cmdPop(cmdbuf);
-		cmdDrop(cmdbuf);
-		cmdPush(cmdbuf, temp);
-	}else{ // Do the third thing
-		cmdDrop(cmdbuf);
-		cmdDrop(cmdbuf);
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient data operands for BRS\n");
+		debug();
+		cmdClear(cmdbuf);
+		return;
 	}
-	pop(dataStack);
-*/
-	return;
+	showStack();
+	intptr_t temp = pop(dataStack);
+	if(temp < 0){ // Do the first thing
+		printf("Doing first thing\n");
+		brs_helper(cmdbuf->array[(cmdbuf->ip)+1]);
+	}else if(temp == 0){ // Do the second thing
+		printf("Doing second thing\n");
+		brs_helper(cmdbuf->array[(cmdbuf->ip)+2]);
+	}else{ // Do the third thing
+		printf("Doing third thing\n");
+		brs_helper(cmdbuf->array[(cmdbuf->ip)+3]);
+	}
+	return; // to word_next()
 }
 
 void branch(){

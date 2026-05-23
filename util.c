@@ -189,7 +189,7 @@ void word_enter(){
 // AKA ;S
 // Not the same as SEMICOLON, which will finalize a new word definition
 void word_exit(){
-	printf("Hello from word_exit AKA ;S\n");
+	//printf("Hello from word_exit AKA ;S\n");
 	//   POP IP   from the "return address stack"
 	// Pop array first (was pushed second by word_enter)
 	cmdbuf->array = (codeword_t **) pop(returnStack);
