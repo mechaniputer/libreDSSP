@@ -96,5 +96,6 @@ void termInNum();
 void termOutNum();
 void termOutString();
 void stackDepth();
+void inventoryWords();
 
 #endif

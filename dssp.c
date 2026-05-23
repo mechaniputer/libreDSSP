@@ -28,13 +28,14 @@
 cmdbuffer *cmdbuf;
 stack *dataStack;
 stack *returnStack;
+dict * vocab; // Contains all recognized words, including core and user defined
 
 int main(int argc, char *argv[]){
 	cmdbuf = newCmdBuffer();
 	dataStack = newStack();
 	returnStack = newStack();
 
-	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
+	vocab = malloc(sizeof(dict));
 	vocab->core = NULL;
 	vocab->grow = NULL;
 	vocab->var = NULL;
@@ -106,6 +107,7 @@ int main(int argc, char *argv[]){
 	defCore("TON", termOutNum, vocab);
 	defCore("TOS", termOutString, vocab);
 	defCore("DEEP", stackDepth, vocab);
+	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
 
 	// Sub-Dictionaries
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later

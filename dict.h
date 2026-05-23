@@ -86,5 +86,7 @@ codeword_t * wordDefine(char * name, dict * vocab);
 void defCore(char * name, void (*func)(), dict * vocab);
 // Creates a new sub-dictionary
 subdict * newDict(dict * vocab, char * name);
+// Finds a sub-dictionary by name, returns NULL if not found
+subdict * findDict(dict * vocab, char * name);
 
 #endif

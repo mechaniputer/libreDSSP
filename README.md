@@ -1,26 +1,26 @@
 # libreDSSP
 ## A GPLv3 Licensed DSSP Interpreter
 
-libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was designed for the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. This implementation is not yet complete, but it is complete enough to experiment with. Work has resumed after a long delay but it will continue to be sporadic due to my busy schedule.
+libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was designed for the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.
 
-To our knowledge this is the only maintained DSSP implementation, and the first to be free software. It is lacking in many areas but progress is being made to add features and make it faster.
+To our knowledge this is the only maintained DSSP implementation, and the first to be free software (GPLv3 license).
 
-The ultimate goal of this project is not to merely replicate DSSP as it once existed, but to improve on it where possible without betraying the philosophy of the language.
-
-Effort is underway (in the dev branch) to rewrite libreDSSP as a traditional "indirect threaded" Forth-style environment.
+libreDSSP uses an indirect threaded design and avoids any inline assembly for maximum portability. DSSP provides a somewhat larger set of core words than most FORTH-style languages. We consider this a strength, because memory is abundant on modern platforms (at least relative to our needs). Having more complex core words also eases development and improves performance by leveraging compiler optimizations.
 
 ## Getting started
 Run 'make' to build it. You may wish to use the included tutorial by running './dssp examples/TUTOR.DSP'.
 Vim source highlighting files are included in vim/.
 
 ## Contributing
-Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue. You may want to search for documents about prior implementations of DSSP. Most of them are in Russian which makes it difficult to get a full understanding of the language, and there have also been several dialects of DSSP. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them.
+Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue with instructions to reproduce it.
+
+Before contributing you may want to search for documents about prior implementations of DSSP. Documentation is scarce, is often fragmentary, and is usually written in Russian. To add confusion, there have also been several dialects of DSSP with (seemingly minor) differences. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them.
+
+Contributions should preserve DSSP syntax, behavior, and approach, rather than simply following what is usually done in FORTH (although an understanding of FORTH can help fill gaps in information about DSSP)
 
 The libreDSSP tutor (TUTOR.DSP) does not yet cover all of the implemented language features. Pull requests to add or improve training steps are appreciated.
 
-One of our greatest challenges is finding unambiguous information about this obscure language. If you have anything that might help with that, let us know.
-
-Also let us know if you are interested in setting up other resources such as an irc channel or a website. I don't currently have the time to manage anything like that.
+Also let us know if you are interested in setting up other resources such as an irc channel or a website. We don't currently have the time to manage anything officially, but if someone sets one up, we can link to it here.
 
 ## What works
 	* Basic math operations (+,*,-,/)
@@ -44,12 +44,17 @@ Also let us know if you are interested in setting up other resources such as an 
 	* Load and run code from file at startup
 	* B10 (as a placeholder since we currently only support base 10 I/O)
 
+## What is different from earlier DSSP dialects
+	* The $PRIME subdictionary contains core words and cannot be modified. Instead, a $DEFAULT subdictionary exists for user-defined words, and more subdictionaries can be added.
+
 ## What doesn't work yet
 	* Push address of string
 	* DO
 	* BR
 	* Integer variables
 	* GROW, USE, SHUT, ?$
+	* Top-down programming (reference undefined words when defining words)
+	* UNDEF (list undefined words)
 	* SAVE, LOAD
 	* ONLY, CANCEL, FORGET, CLEAR
 	* Arrays, fixed variables, etc
@@ -66,6 +71,9 @@ Also let us know if you are interested in setting up other resources such as an 
 	* '' (push address of function)
 	* EXEC (execute function from address on stack)
 	* TEXEC (execute text)
+	* BELL
+	* LPSP, LPCR, LPS, LPT, LPFF
+	* INT, TRAP, ON, EON
 	* Everything unaccounted for in this README
 
 ## Possible future goals

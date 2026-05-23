@@ -32,6 +32,7 @@ extern void debug();
 
 extern codeword_t * current_codeword;
 extern stack *returnStack;
+extern dict * vocab;
 
 void plus(){
 	int temp;
@@ -674,16 +675,17 @@ void pushLiteral(){
 }
 
 // Attempts to define a new variable
+// The variable name will be taken from the data field of the current codeword, and the variable value will be taken from the top of the data stack.
 void defVar(){
 /*
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for !\n");
+		fprintf(stderr,"ERROR: Insufficient stack operands for !\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(cmdbuf->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for !\n");
+		fprintf(stderr,"ERROR: Variable name required for !\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -739,60 +741,56 @@ void printSpace(){
 }
 
 void listDicts(){
-/*
 	assert(vocab != NULL);
 	subdict * tempSub = vocab->sub;
+	if(vocab->grow == NULL || vocab->grow->open == 0){
+		printf("Warning: no dictionary selected for expansion\n");
+	}else{
+		printf("%s OPEN\n",vocab->grow->name);
+	}
 	printf("$PRIME OPEN\n");
 	while(tempSub != NULL){
-		printf("%s",tempSub->name);
-		if(tempSub->open) printf(" OPEN\n");
-		else printf(" CLOSED\n");
+		if(tempSub != vocab->grow){
+			printf("%s",tempSub->name);
+			if(tempSub->open) printf(" OPEN\n");
+			else printf(" CLOSED\n");
+		}
 		tempSub = tempSub->next;
 	}
-*/
 	return;
 }
 
+// The GROW command will use the data field of the current codeword to locate the subdict to grow.
+// If the subdict doesn't exist, it will be created. If the subdict is closed, it will be reopened.
 void growSub(){
-/*
-	subdict * tempSub = vocab->sub;
-
-	if(cmdbuf->top < 0){
-		fprintf(stderr,"ERROR: Must specify a subvocabulary name\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	if(strncmp(cmdTop(cmdbuf)->text,"$",1)){
+	// The dictionary name is in the text field of the current codeword.
+	// The subdict must begin with a $ character, and it cannot be $PRIME.
+	if(strncmp(current_codeword->text,"$",1)){
 		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-
-	if(!strcmp(cmdTop(cmdbuf)->text,"$PRIME")){
+	if(!strcmp(current_codeword->text,"$PRIME")){
 		fprintf(stderr,"ERROR: cannot alter $PRIME subvocabulary\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	while(tempSub != NULL){
-		if(!strcmp(cmdTop(cmdbuf)->text, tempSub->name)) {
-			break;
-		}
-		tempSub = tempSub->next;
-	}
+	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open. If it doesn't exist, we need to create it and open it.
+	subdict * tempSub = findDict(vocab, current_codeword->text);
 
 	if(tempSub == NULL){ // We are making a new subdict
-		tempSub = newDict(vocab, cmdTop(cmdbuf)->text);
+		tempSub = newDict(vocab, current_codeword->text);
 	}
 
 	vocab->grow = tempSub;
 	tempSub->open = 1;
-	cmdDrop(cmdbuf);
-*/
 	return;
 }
 
+// As with GROW, the SHUT command will use the data field of the current codeword to locate the subdict to shut.
+// If the subdict doesn't exist, an error is printed. If the subdict is already closed, nothing happens.
+// If the subdict is currently selected for growth, it will be deselected.
 void shutSub(){
 /*
 	subdict * tempSub = vocab->sub;
@@ -826,6 +824,8 @@ void shutSub(){
 */
 }
 
+// As with GROW, the OPEN command will use the data field of the current codeword to locate the subdict to open.
+// If the subdict doesn't exist, an error is printed. If the subdict is already open, nothing happens.
 void openSub(){
 /*
 	subdict * tempSub = vocab->sub;
@@ -935,4 +935,21 @@ void stackDepth(){
 	return;
 }
 
-
+// Lists user-defined words in open subdicts.
+void inventoryWords(){
+	subdict * tempSub = vocab->sub;
+	codeword_t * tempWord;
+	while(tempSub != NULL){
+		if(tempSub->open){
+			printf("Subdict: %s\n",tempSub->name);
+			tempWord = tempSub->wordlist;
+			while(tempWord != NULL){
+				printf("  %s",tempWord->name);
+				printf("  %s\n",tempWord->text);
+				tempWord = tempWord->next;
+			}
+		}
+		tempSub = tempSub->next;
+	}
+	return;
+}

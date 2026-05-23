@@ -396,6 +396,10 @@ int commandParse(char * line, dict * vocab){
 				cmdbuf->status &= (~STAT_INC_COMPILE);
 				printf("Definition of %s complete\n",newWordName);
 				CHECK_CAP_TEXT(1)
+				// Remove trailing newlines in definition text
+				while(newWordTextLen > 0 && newWordText[newWordTextLen - 1] == '\n'){
+					newWordTextLen--;
+				}
 				newWordText[newWordTextLen] = '\0';
 				printf("%s\n",newWordText);
 				for(int i=0; i<newWordCodeLen; i++){
@@ -411,6 +415,22 @@ int commandParse(char * line, dict * vocab){
 				// Detach
 				newWordCode = NULL;
 				newWordText = NULL;
+			}else if(!strcmp(statement, "GROW") || !strcmp(statement, "USE") || !strcmp(statement, "SHUT") || !strcmp(statement, "ONLY")){
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					ERR_FORB_SYM_IN_WORD
+				}
+				cmdbuf->status |= STAT_INC_DICT_OP;
+				// Get the codeword for this operation
+				codeword_t * dict_entry = coreSearch(statement, vocab);
+				// Emit codeword to command buffer. We will update the data field later once we have the dictionary name.
+				cmdAppend(cmdbuf, dict_entry);
+			}else if(cmdbuf->status & STAT_INC_DICT_OP){
+				cmdbuf->status &= (~STAT_INC_DICT_OP);
+				// The codeword that we need to update is thelast one we emitted.
+				codeword_t * last_cw = cmdbuf->array[cmdbuf->size - 1];
+				// We won't do the lookup here. Instead we attach the dictionary name as text. The coreword will handle the rest.
+				last_cw->text = malloc((1+strlen(statement))*sizeof(char));
+				strcpy(last_cw->text, statement);
 			}else if(cmdbuf->status & STAT_INC_COMPILE){
 				if(newWordName == NULL){
 					// We just found a name for the new definition

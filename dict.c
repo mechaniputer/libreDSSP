@@ -83,33 +83,31 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	codeword_t * tempWord;
 	codeword_t * lastWord;
 
+	if(vocab->grow == NULL){
+		// TODO This should be handled gracefully (free resources, return NULL, print error).
+		printf("Fatal Error: We are defining a word but no dictionary is selected\n");
+		assert(0);
+	}
 	// If there is at least one word already
 	if(vocab->grow->wordlist != NULL){
-		if(vocab->grow == NULL){
-			// This should have been caught in the parser
-			printf("Fatal Error: We are defining a word but no dictionary is selected\n");
-			assert(0);
-		}else{
-			if((vocab->grow->open) && (vocab->grow->wordlist != NULL)){
-				tempWord = vocab->grow->wordlist;
-				while(tempWord != NULL){
-					if(!strcmp(tempWord->name, name)){
-						printf("Found old definition of %s\n",name);
-						return tempWord;
-					}
-					lastWord = tempWord;
-					tempWord = tempWord->next;
+		if((vocab->grow->open) && (vocab->grow->wordlist != NULL)){
+			tempWord = vocab->grow->wordlist;
+			while(tempWord != NULL){
+				if(!strcmp(tempWord->name, name)){
+					printf("Replacing old definition of %s in %s\n",name, vocab->grow->name);
+					return tempWord;
 				}
+				lastWord = tempWord;
+				tempWord = tempWord->next;
 			}
 		}
-		printf("First definition of %s\n",name);
+
 		// Didn't find the word
 		// We will allocate it and link it to the dictionary
 		lastWord->next = malloc(sizeof(codeword_t));
 		tempWord = lastWord->next;
 	}else{
 		// This is the very first word in this dictionary
-		printf("Dictionary begins with %s\n",name);
 		vocab->grow->wordlist = malloc(sizeof(codeword_t));
 		tempWord = vocab->grow->wordlist;
 	}
@@ -151,16 +149,26 @@ void defCore(char * name, void (*func)(), dict * vocab){
 	}
 }
 
+// Inserts a new dictionary at the start of the linked list (as a stack)
 subdict * newDict(dict * vocab, char * name){
-	subdict * tempSub = vocab->sub;
-	while(tempSub->next != NULL) tempSub = tempSub->next;
-	tempSub->next = malloc(sizeof(subdict));
-	tempSub = tempSub->next;
+	// Insert
+	subdict * tempSub = malloc(sizeof(subdict));
+	tempSub->next = vocab->sub;
+	vocab->sub = tempSub;
+	// Populate
 	tempSub->name = malloc(strlen(name)+1);
 	strcpy(tempSub->name, name);
 	tempSub->open = 1;
-	tempSub->next = NULL;
 	tempSub->wordlist = NULL;
 	vocab->grow = tempSub;
 	return tempSub;
+}
+
+subdict * findDict(dict * vocab, char * name){
+	subdict * tempSub = vocab->sub;
+	while(tempSub != NULL){
+		if(!strcmp(tempSub->name, name)) return tempSub;
+		tempSub = tempSub->next;
+	}
+	return NULL;
 }
