@@ -27,13 +27,14 @@
 #define STAT_INC_COMMENT   (1UL<<0)
 #define STAT_INC_STRING    (1UL<<1)
 #define STAT_INC_PRINT     (1UL<<2)
-#define STAT_INC_COMPILE   (1UL<<3)
-#define STAT_INC_ESCAPE    (1UL<<4)
-#define STAT_INC_DICT_OP   (1UL<<5) // For GROW, USE, SHUT, ONLY
-#define STAT_INC_VAR_DECL  (1UL<<6) // For VAR
-#define STAT_INC_VAR_ASGN  (1UL<<7) // For ! assignments, and for variable declarations with initial values
-#define STAT_INC_VCTR 	   (1UL<<8) // For vectors (eg 9 VCTR ROW, which declares a 10 element vector named ROW)
-
+#define STAT_INC_COMPILE   (1UL<<3)  // For an incomplete : definition
+#define STAT_INC_ESCAPE    (1UL<<4)  // For an escape char to apply to the next char
+#define STAT_INC_DICT_OP   (1UL<<5)  // For GROW, USE, SHUT, ONLY
+#define STAT_INC_VAR_DECL  (1UL<<6)  // For VAR
+#define STAT_INC_VAR_ASGN  (1UL<<7)  // For ! assignments, and for variable declarations with initial values
+#define STAT_INC_VCTR 	   (1UL<<8)  // For vectors (eg 9 VCTR ROW, which declares a 10 element vector named ROW)
+#define STAT_BR_NO_ELSE    (1UL<<9)  // For a BR that still needs an ELSE
+#define STAT_BR_ELSE       (1UL<<10) // For a BR with an ELSE that still needs the last outcome.
 
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;

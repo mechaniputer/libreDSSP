@@ -63,6 +63,7 @@ void branchzero();
 void branchplus();
 void branchsign();
 void branch();
+void brelse();
 void equality();
 void greaterthan();
 void lessthan();

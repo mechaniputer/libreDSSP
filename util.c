@@ -49,18 +49,18 @@ extern stack *returnStack;
 #define INIT_WORDCODE_CAP (32)
 #define INIT_WORDTEXT_CAP (32)
 
-#define ERR_RETURN 	free(statement); cmdbuf->status = 0; return 1;
+#define ERR_FATAL 	assert(0);
 
-#define ERR_FORB_SYM_IN_WORD printf("Error: forbidden symbol inside word\n"); ERR_RETURN
-#define ERR_FORB_SEMICOLON   printf("Error: forbidden use of semicolon\n"); ERR_RETURN
-#define ERR_INC_PRINT        printf("Error: Incomplete print statement\n"); ERR_RETURN
-#define ERR_INC_STRING       printf("Error: Incomplete string literal\n"); ERR_RETURN
-#define ERR_NEST_COMMENT     printf("Error: comments cannot be nested\n"); ERR_RETURN
-#define ERR_NEST_DEF         printf("Error: definitions cannot be nested\n"); ERR_RETURN
-#define ERR_EMPTY_DEF        printf("Error: definitions must contain a name\n"); ERR_RETURN
-#define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_RETURN
-#define ERR_TOS              printf("Error: TOS not found in core dictionary\n"); ERR_RETURN
-#define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_RETURN
+#define ERR_FORB_SYM_IN_WORD printf("Error: forbidden symbol inside word\n"); ERR_FATAL
+#define ERR_FORB_SEMICOLON   printf("Error: forbidden use of semicolon\n"); ERR_FATAL
+#define ERR_INC_PRINT        printf("Error: Incomplete print statement\n"); ERR_FATAL
+#define ERR_INC_STRING       printf("Error: Incomplete string literal\n"); ERR_FATAL
+#define ERR_NEST_COMMENT     printf("Error: comments cannot be nested\n"); ERR_FATAL
+#define ERR_NEST_DEF         printf("Error: definitions cannot be nested\n"); ERR_FATAL
+#define ERR_EMPTY_DEF        printf("Error: definitions must contain a name\n"); ERR_FATAL
+#define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_FATAL
+#define ERR_MISSING_CORE     printf("Error: missing word in core dictionary\n"); ERR_FATAL
+#define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_FATAL
 
 #define GROW_PARSE_BUFFER \
 	statement_cap += INIT_STATEMENT_CAP; \
@@ -155,6 +155,7 @@ void word_next(){
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
 	}
+	printf("word_next() finished looping\n");
 	return;
 }
 
@@ -166,7 +167,7 @@ void word_enter(){
 	// Push former context
 	push(returnStack, (intptr_t) cmdbuf->ip);
 	push(returnStack, (intptr_t) cmdbuf->array);
-	//printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+	printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
 	// Load the new context
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
@@ -185,7 +186,7 @@ void word_exit(){
 	// Restore earlier context
 	cmdbuf->array = (codeword_t **) pop(returnStack);
 	cmdbuf->ip = (int) pop(returnStack);
-	//printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+	printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
 	return; // to word_next() or a loop coreword
 }
@@ -264,7 +265,7 @@ int commandParse(char * line, dict * vocab){
 					codeword_t * push_len = newLiteral((intptr_t) strlen(statement));
 					codeword_t * print_st = coreSearch("TOS", vocab);
 					if(print_st == NULL){
-						ERR_TOS
+						ERR_MISSING_CORE
 					}
 					if(cmdbuf->status & STAT_INC_COMPILE){
 						// Add codewords to word definition
@@ -331,9 +332,6 @@ int commandParse(char * line, dict * vocab){
 			statement_len++;
 
 		}else if (((ch == '\0') || (ch == ' ') || (ch == '\t')) && (statement_len != 0)){ 	// Whitespace, deduplicated, including newlines
-			// TODO If we just saw {IF*, BR*, DO, :, ELSE, TRAP} then we set the appropriate incomplete status flag here so we can print a ? prompt or detect errors
-
-			// TODO Check if last word completed a sequence (branch/trap operands, VAR/VCTR assignments/declarations) so we can clear flags
 			statement[statement_len] = '\0';
 			if(isNum(statement)){
 				codeword_t *lit_cw = newLiteral(atol(statement));
@@ -348,6 +346,7 @@ int commandParse(char * line, dict * vocab){
 				}
 			}else if(!strcmp(statement, ":")){ // Beginning of word declaration
 				if(cmdbuf->status != 0){
+					printf("Error Status is %d\n",cmdbuf->status);
 					ERR_NEST_DEF
 				}
 				// Make sure a destination dictionary is selected
@@ -393,9 +392,7 @@ int commandParse(char * line, dict * vocab){
 				}
 				newWordText[newWordTextLen] = '\0';
 				printf("%s\n",newWordText);
-				for(int i=0; i<newWordCodeLen; i++){
-					printf("%d: %p\n",i, newWordCode[i]);
-				}
+
 				// Allocate new word in appropriate dictionary, or find prior word to redefine
 				dict_entry = wordDefine(newWordName, vocab);
 				// Populate the dictionary entry
@@ -415,6 +412,34 @@ int commandParse(char * line, dict * vocab){
 				codeword_t * dict_entry = coreSearch(statement, vocab);
 				// Emit codeword to command buffer. We will update the data field later once we have the dictionary name.
 				cmdAppend(cmdbuf, dict_entry);
+			}else if(!strcmp(statement, "BR")){
+				cmdbuf->status |= STAT_BR_NO_ELSE;
+				codeword_t *dict_entry = coreSearch("BR", vocab);
+				if(dict_entry == NULL){
+					ERR_MISSING_CORE
+				}
+				// Emit to cmdbuf or word array
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = dict_entry;
+				}else{
+					cmdAppend(cmdbuf, dict_entry);
+				}
+			}else if((cmdbuf->status & STAT_BR_NO_ELSE) && !strcmp(statement, "ELSE")){
+				printf("Found an ELSE\n");
+				cmdbuf->status &= (~STAT_BR_NO_ELSE);
+				cmdbuf->status |= STAT_BR_ELSE;
+				codeword_t *dict_entry = coreSearch("ELSE", vocab);
+				if(dict_entry == NULL){
+					ERR_MISSING_CORE
+				}
+				// Emit to cmdbuf or word array
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = dict_entry;
+				}else{
+					cmdAppend(cmdbuf, dict_entry);
+				}
 			}else if(cmdbuf->status & STAT_INC_DICT_OP){
 				cmdbuf->status &= (~STAT_INC_DICT_OP);
 				// The codeword that we need to update is thelast one we emitted.
@@ -442,13 +467,26 @@ int commandParse(char * line, dict * vocab){
 					if(NULL != dict_entry){ // Found in core dictionary
 						CHECK_CAP_CODE
 						newWordCode[newWordCodeLen++] = dict_entry;
+						// If this finishes a BR-ELSE, reset that status
+						if(cmdbuf->status & STAT_BR_ELSE){
+							printf("Found ELSE condition (coreword) inside compiled word\n");
+							cmdbuf->status &= (~STAT_BR_ELSE);
+						}
 					}else{ // Not found in core dictionary
 						dict_entry = wordSearch(statement, vocab);
 						// Emit the pointer to first element of found word code
 						if(NULL != dict_entry){
 							CHECK_CAP_CODE
 							newWordCode[newWordCodeLen++] = dict_entry;
+							// If this finishes a BR-ELSE, reset that status
+							if(cmdbuf->status & STAT_BR_ELSE){
+								printf("Found ELSE condition (user word) inside compiled word\n");
+								cmdbuf->status &= (~STAT_BR_ELSE);
+							}
+
+						}else{
 							// TODO If undef word is used, add it to the table and emit UNDEF ptr
+							printf("Unknown word %s found in word definition\n",statement);
 						}
 					}
 				}
@@ -457,10 +495,16 @@ int commandParse(char * line, dict * vocab){
 				codeword_t *dict_entry = coreSearch(statement, vocab);
 				if(NULL != dict_entry){
 					cmdAppend(cmdbuf, dict_entry);
+					if(cmdbuf->status & STAT_BR_ELSE){
+						cmdbuf->status &= (~STAT_BR_ELSE);
+					}
 				}else{
 					dict_entry = wordSearch(statement, vocab);
 					if(NULL != dict_entry){
 						cmdAppend(cmdbuf, dict_entry);
+						if(cmdbuf->status & STAT_BR_ELSE){
+							cmdbuf->status &= (~STAT_BR_ELSE);
+						}
 					}
 				}
 				if(NULL == dict_entry) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?

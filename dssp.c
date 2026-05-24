@@ -71,6 +71,7 @@ int main(int argc, char *argv[]){
 	defCore("BR+", branchplus, vocab);
 	defCore("BRS", branchsign, vocab);
 	defCore("BR", branch, vocab);
+	defCore("ELSE", brelse, vocab); // Not to be used directly
 	defCore("=", equality, vocab);
 	defCore(">", greaterthan, vocab);
 	defCore("<", lessthan, vocab);
@@ -161,10 +162,10 @@ int main(int argc, char *argv[]){
 			free(line);
 			word_next();
 
-			printf("Printing cmdbuf->array\n");
-			for(int i=0; i<=cmdbuf->size; i++){
-				printf("%d: %p\n",i, cmdbuf->array[i]);
-			}
+			//printf("Printing cmdbuf->array\n");
+			//for(int i=0; i<=cmdbuf->size; i++){
+			//	printf("%d: %p\n",i, cmdbuf->array[i]);
+			//}
 			cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
 			cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
 

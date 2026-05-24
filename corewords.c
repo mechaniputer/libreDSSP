@@ -309,7 +309,7 @@ static inline void brs_helper(codeword_t *outcome){
 }
 
 void branchminus(){
-	printf("In branchminus()\n");
+	//printf("In branchminus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR-\n");
 		debug();
@@ -331,11 +331,11 @@ void branchminus(){
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
-	return; // to word_next()
+	return;
 }
 
 void branchzero(){
-	printf("In branchzero()\n");
+	//printf("In branchzero()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR0\n");
 		debug();
@@ -357,11 +357,11 @@ void branchzero(){
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
-	return; // to word_next()
+	return;
 }
 
 void branchplus(){
-	printf("In branchplus()\n");
+	//printf("In branchplus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR+\n");
 		debug();
@@ -383,11 +383,11 @@ void branchplus(){
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
-	return; // to word_next()
+	return;
 }
 
 void branchsign(){
-	printf("In branchsign()\n");
+	//printf("In branchsign()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 3){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BRS\n");
 		debug();
@@ -400,7 +400,7 @@ void branchsign(){
 		cmdClear(cmdbuf);
 		return;
 	}
-	showStack();
+
 	intptr_t temp = pop(dataStack);
 	if(temp < 0){ // Do the first thing
 		printf("Doing first thing\n");
@@ -412,52 +412,68 @@ void branchsign(){
 		printf("Doing third thing\n");
 		brs_helper(cmdbuf->array[(cmdbuf->ip)+3]);
 	}
-	return; // to word_next()
+	return;
 }
 
+// Example of branch syntax:
+// BR 0 P0 1 P1 2 P2 ELSE P3
+// Minimum operands: 1 condition, 1 outcome, 1 ELSE, 1 more outcome. (total 4)
 void branch(){
-/*
-	command *tempcmd;
-	command *branchCom = malloc(sizeof(command));
-	branchCom->text = malloc(3*sizeof(char));
-	strcpy(branchCom->text, "BR");
-	branchCom->func = NULL; // TODO This can be made faster with threading
-
-	if((cmdbuf->top < 0) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
+	printf("In branch()\n");
+	debug();
+	if((cmdbuf->size - cmdbuf->ip) < 4){
+		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR\n");
+		debug();
 		cmdClear(cmdbuf);
 		return;
 	}
-	int temp = top(dataStack);
-
-	if(!strcmp("ELSE", cmdTop(cmdbuf)->text)){
-		pop(dataStack);
-		cmdDrop(cmdbuf);
-	}else if(temp == atoi(cmdTop(cmdbuf)->text)){
-		if((cmdbuf->top < 3) || (dataStack->top < 0)){
-			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
-			cmdClear(cmdbuf);
-			return;
-		}
-		pop(dataStack);
-		cmdDrop(cmdbuf);
-		tempcmd = cmdPop(cmdbuf);
-		while(strcmp("ELSE", cmdPop(cmdbuf)->text));
-		cmdPop(cmdbuf); // FIXME Why is it not safe to free this?
-		cmdPush(cmdbuf, tempcmd);
-	}else{
-		if((cmdbuf->top < 3) || (dataStack->top < 0)){
-			free(branchCom);
-			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
-			cmdClear(cmdbuf);
-			return;
-		}
-		cmdDrop(cmdbuf);
-		cmdDrop(cmdbuf);
-		cmdPush(cmdbuf, branchCom);
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient data operands for BR\n");
+		debug();
+		cmdClear(cmdbuf);
+		return;
 	}
-*/
+
+	intptr_t tempval = pop(dataStack);
+	int tempcondip = cmdbuf->ip+1; // IP of condition we are checking
+	codeword_t * tempcond = cmdbuf->array[tempcondip];
+	while(strcmp(tempcond->name, "ELSE") && (tempcond->data != tempval)){
+		tempcondip += 2;
+		tempcond = cmdbuf->array[tempcondip];
+	}
+	int elseip = tempcondip;
+	while(cmdbuf->array[elseip]!= NULL && strcmp(cmdbuf->array[elseip]->name, "ELSE")){
+		elseip += 2;
+		if(elseip >= cmdbuf->size){
+			assert(0);
+		}
+	}
+	assert(!strcmp(cmdbuf->array[elseip]->name, "ELSE"));
+
+	codeword_t * outcome = cmdbuf->array[tempcondip+1];
+	if(outcome->user == 1){
+		// Push IP to return to after branch completes
+		push(returnStack, (intptr_t) elseip+1);
+		push(returnStack, (intptr_t) cmdbuf->array);
+		printf("BR() pushed return IP: %d cmdbuf->array: %p\n", (int) elseip+1, (void*)cmdbuf->array);
+		// Set branch IP
+		cmdbuf->array = (codeword_t **) (outcome->data);
+		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+	}else{ // Literal, print, or core
+		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
+		(*outcome->xt)();
+		cmdbuf->ip =elseip+2;
+	}
 	return;
+}
+
+// BR won't actually run this word. It mostly exists to prevent user from defining ELSE.
+// Should find a more elegant solution later.
+// Maybe use the BR data field to indicate the ELSE outcome IP.
+// Would still need to reserve the word (add a reserved words mechanism apart from corewords)
+void brelse(){
+	printf("In brelse(), but this function shouldn't run!\n");
+	assert(0);
 }
 
 void equality(){
@@ -530,13 +546,14 @@ void doloop(){
 	// For asserts below:
 	int snapshot_return_stack_top = returnStack->top; // We will use this to ensure that the return stack is balanced after the loop completes
 	codeword_t ** snapshot_cmdbuf_array = cmdbuf->array; // We will use this to ensure that the correct command buffer is active after the loop completes
-
+	printf("DO took snapshot of cmdbuf: %p\n",snapshot_cmdbuf_array);
 	int count = pop(dataStack);
 	int do_ip = cmdbuf->ip; // Preserve this for loop repetitions
 	codeword_t * command = cmdbuf->array[cmdbuf->ip+1];
 	if(command->user == 1){
 		// For user words.
 		for(int i=0; i<count; i++){
+			printf("cmdbuf->array: %p  snapshot: %p\n",cmdbuf->array, snapshot_cmdbuf_array);
 			assert(cmdbuf->array == snapshot_cmdbuf_array);
 			assert(returnStack->top == snapshot_return_stack_top);
 
@@ -545,6 +562,11 @@ void doloop(){
 
 			(*command->xt)(); // word_enter()
 
+
+			// FIXME this is totally wrong.
+			// If we enter a user word that contains another user word, it will skip the inner word's word_exit().
+			// We only want to skip the outer word's word_exit().
+
 			// We cannot use word_next() because it will call word_exit() and proceed to the next word in the command buffer.
 			// This code is a near-duplicate of the loop in word_next(), but with some key differences.
 			cmdbuf->ip = 0;
@@ -552,6 +574,7 @@ void doloop(){
 			assert(cmdbuf->array[stop_ip]->xt == word_exit);
 			while(cmdbuf->ip < stop_ip){
 				current_codeword = cmdbuf->array[cmdbuf->ip];
+				printf("\nDO executing %s\n",current_codeword->name);
 				(*current_codeword->xt)();
 				cmdbuf->ip++;
 			}
@@ -564,7 +587,7 @@ void doloop(){
 			showStack();
 			current_codeword = command; // Important for pushLiteral to reference the correct data field
 			(*command->xt)();
-			printf("Returned from command execution\n");
+			//printf("Returned from command execution\n");
 		}
 	}
 	// word_next() will increment the IP again after this,
