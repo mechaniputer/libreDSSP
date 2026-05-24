@@ -14,9 +14,9 @@ Vim source highlighting files are included in vim/.
 ## Contributing
 Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue with instructions to reproduce it.
 
-Before contributing you may want to search for documents about prior implementations of DSSP. Documentation is scarce, is often fragmentary, and is usually written in Russian. To add confusion, there have also been several dialects of DSSP with (seemingly minor) differences. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them.
+Before contributing you may want to search for documents about prior implementations of DSSP. Documentation is scarce, is often fragmentary, and is usually written in Russian. To add confusion, there have also been several dialects of DSSP with various differences. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them. Note that we are not pursuing ternary support and only target 64-bit and 32-bit hardware.
 
-Contributions should preserve DSSP syntax, behavior, and approach, rather than simply following what is usually done in FORTH (although an understanding of FORTH can help fill gaps in information about DSSP)
+Contributions should preserve DSSP syntax, behavior, and approach, rather than simply following what is usually done in FORTH (although an understanding of FORTH can help fill gaps in information about DSSP).
 
 The libreDSSP tutor (TUTOR.DSP) does not yet cover all of the implemented language features. Pull requests to add or improve training steps are appreciated.
 

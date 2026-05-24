@@ -93,9 +93,9 @@ int main(int argc, char *argv[]){
 
 	// Misc
 	// TODO for special functions we should just use references instead of the dictionary.
-	defCore("PUSHLIT", pushLiteral, vocab); // FIXME Not to be used directly
-	defCore("DOCOLON", word_enter, vocab); // FIXME Not to be used directly
-	defCore(";S", word_exit, vocab); // FIXME Not to be used directly
+	//defCore("PUSHLIT", pushLiteral, vocab); // Lookup not needed
+	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
+	defCore(";S", word_exit, vocab); // Not to be used directly
 	defCore("!", defVar, vocab);
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
@@ -108,6 +108,7 @@ int main(int argc, char *argv[]){
 	defCore("TOS", termOutString, vocab);
 	defCore("DEEP", stackDepth, vocab);
 	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
+	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
 
 	// Sub-Dictionaries
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later

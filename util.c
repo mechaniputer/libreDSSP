@@ -58,10 +58,9 @@ extern stack *returnStack;
 #define ERR_NEST_COMMENT     printf("Error: comments cannot be nested\n"); ERR_RETURN
 #define ERR_NEST_DEF         printf("Error: definitions cannot be nested\n"); ERR_RETURN
 #define ERR_EMPTY_DEF        printf("Error: definitions must contain a name\n"); ERR_RETURN
-#define ERR_PUSHLIT          printf("Error: PUSHLIT not found in core dictionary\n"); ERR_RETURN
-#define ERR_DOCOLON          printf("Error: DOCOLON not found in core dictionary\n"); ERR_RETURN
-#define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_RETURN
 #define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_RETURN
+#define ERR_TOS              printf("Error: TOS not found in core dictionary\n"); ERR_RETURN
+#define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_RETURN
 
 #define GROW_PARSE_BUFFER \
 	statement_cap += INIT_STATEMENT_CAP; \
@@ -265,7 +264,7 @@ int commandParse(char * line, dict * vocab){
 					codeword_t * push_len = newLiteral((intptr_t) strlen(statement));
 					codeword_t * print_st = coreSearch("TOS", vocab);
 					if(print_st == NULL){
-						ERR_EXIT
+						ERR_TOS
 					}
 					if(cmdbuf->status & STAT_INC_COMPILE){
 						// Add codewords to word definition
@@ -375,7 +374,7 @@ int commandParse(char * line, dict * vocab){
 				if(newWordName == NULL){
 					ERR_EMPTY_DEF
 				}
-				// Populate last code element with EXIT/;S
+				// Populate last code element with word_exit() AKA ;S
 				codeword_t * dict_entry = coreSearch(";S", vocab);
 				if(NULL == dict_entry){
 					ERR_EXIT
@@ -445,7 +444,7 @@ int commandParse(char * line, dict * vocab){
 						newWordCode[newWordCodeLen++] = dict_entry;
 					}else{ // Not found in core dictionary
 						dict_entry = wordSearch(statement, vocab);
-						// Emit the pointer to first element of found word code, which itself will be a pointer to the code body of DOCOLON
+						// Emit the pointer to first element of found word code
 						if(NULL != dict_entry){
 							CHECK_CAP_CODE
 							newWordCode[newWordCodeLen++] = dict_entry;
