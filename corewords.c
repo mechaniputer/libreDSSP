@@ -222,7 +222,8 @@ void showTop(){
 void showStack(){
 	printf("[");
 	for(int i=0; i<=(dataStack->top); i++){
-		printf(" %ld",dataStack->array[i]);
+		if(i != 0) printf(" ");
+		printf("%ld",dataStack->array[i]);
 	}
 	printf("]\n");
 	return;
@@ -510,30 +511,68 @@ void lessthan(){
 	return;
 }
 
-// FIXME frees are tricky here.
-// FIXME If the dataStack grows then any prior references to commands on the dataStack become invalid.
-// FIXME This problem could result in bugs literally anywhere in the interpreter!!!
-// FIXME However those problems seem to manifest here especially because it is one of the only core words where the dataStack is likely to grow a lot.
-// TODO There are definitely bugs present in this function which sometimes cause the interpreter to crash.
+
+// This coreword requires one data stack operand [n] and one word operand (the next word in the command buffer).
+// The data operand [n] is popped. The command operand is executed n times.
 void doloop(){
-/*
-	int i;
-	if((cmdbuf->top < 0) || (dataStack->top < 0)){
+	//printf("In doloop()\n");
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	command *repeat; // This one will be the master copy
-	command *to_free = cmdPop(cmdbuf); // We must free this before the dataStack gets a chance to grow
-	newCommand(to_free, &repeat); // This produces a local copy that can't get realloced away if the cmdbuffer decides to grow
-	cmdFree(to_free);
-
-	int reps = pop(dataStack);
-
-	for(i = 0; i < reps; i++){
-		cmdPush(cmdbuf, repeat);
+	if((cmdbuf->size - cmdbuf->ip) < 1){
+		fprintf(stderr,"ERROR: Insufficient command operands for DO\n");
+		cmdClear(cmdbuf);
+		return;
 	}
-*/
+
+	// For asserts below:
+	int snapshot_return_stack_top = returnStack->top; // We will use this to ensure that the return stack is balanced after the loop completes
+	codeword_t ** snapshot_cmdbuf_array = cmdbuf->array; // We will use this to ensure that the correct command buffer is active after the loop completes
+
+	int count = pop(dataStack);
+	int do_ip = cmdbuf->ip; // Preserve this for loop repetitions
+	codeword_t * command = cmdbuf->array[cmdbuf->ip+1];
+	if(command->user == 1){
+		// For user words.
+		for(int i=0; i<count; i++){
+			assert(cmdbuf->array == snapshot_cmdbuf_array);
+			assert(returnStack->top == snapshot_return_stack_top);
+
+			cmdbuf->ip = do_ip+1; // word_enter() needs the IP to point to the command operand.
+			current_codeword = command; // Important for pushLiteral to reference the correct data field
+
+			(*command->xt)(); // word_enter()
+
+			// We cannot use word_next() because it will call word_exit() and proceed to the next word in the command buffer.
+			// This code is a near-duplicate of the loop in word_next(), but with some key differences.
+			cmdbuf->ip = 0;
+			int stop_ip = cmdbuf->size-1; // This stops before word_exit().
+			assert(cmdbuf->array[stop_ip]->xt == word_exit);
+			while(cmdbuf->ip < stop_ip){
+				current_codeword = cmdbuf->array[cmdbuf->ip];
+				(*current_codeword->xt)();
+				cmdbuf->ip++;
+			}
+			word_exit(); // Only called when we are done looping the word.
+		}
+	}else{
+		// For non-user words.
+		cmdbuf->ip = do_ip+1; // The command itself won't change IP so this can be outside the loop.
+		for(int i=0; i<count; i++){
+			showStack();
+			current_codeword = command; // Important for pushLiteral to reference the correct data field
+			(*command->xt)();
+			printf("Returned from command execution\n");
+		}
+	}
+	// word_next() will increment the IP again after this,
+	cmdbuf->ip = do_ip+1;
+	// Assert that the correct cmdbuf is active
+	assert(cmdbuf->array == snapshot_cmdbuf_array);
+	// Ensure that the return stack is balanced after the loop
+	assert(returnStack->top == snapshot_return_stack_top);
 	return;
 }
 
@@ -669,7 +708,7 @@ void dropStack(){
 }
 
 void pushLiteral(){
-	printf("Pushing %ld\n",current_codeword->data);
+	//printf("Pushing %ld\n",current_codeword->data);
 	push(dataStack, current_codeword->data);
 	return;
 }

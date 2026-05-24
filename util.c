@@ -138,23 +138,19 @@ int isNum(char * st){
 	return 1;
 }
 
-// TODO Need to allow use of undefined words via placeholder (DSSP thing)
-//		"introduce a table of undefined names and some procedure to support it"
-//		"table of addresses where this word is used"
-//		Does this mean we need a placeholder word that just prints "undefined word" and returns to the prompt?
-// TODO Error handling? What if there is an error such as an undefined word being executed?
-//		Currently an error clears the cmdstack which makes the loop check fail and return. This will not work for subroutines.
-//		Instead we might have to use a goto or something
-void word_next(){
-	// Note: As a possible future optimization, in keeping with traditional
-	// FORTH techniques, the cmdbuf could instead contain an EXIT word that
-	// returns to the prompt so we don't need a conditional branch.
 
-	// Execute code in cmdbuf->array until we hit a NULL sentinel codeword
-	// Each element is a codeword_t struct with an execution token (xt)
+// Executes code in cmdbuf->array until we hit a NULL sentinel codeword
+// Each element is a codeword_t struct with an execution token (xt)
+void word_next(){
+	// Since the NULL sentinel already terminates a word, we might consider
+	// removing word_exit() from word definitions and conditionally calling it
+	// in this loop (based on whether we just ran a user word vs a string of
+	// commands from the prompt or a file. It might be better for branch
+	// prediction on modern CPUs, plus it would save some memory in user words.
+	// We would also need to revise looping corewords with this change.
 
 	cmdbuf->ip = 0;
-	// For literals (and corewords), there is no array?
+	// TODO Consider using the size as a bound instead of a NULL sentinel (fewer loads)
 	while(cmdbuf->array[cmdbuf->ip] != NULL){
 		current_codeword = cmdbuf->array[cmdbuf->ip];
 		(*current_codeword->xt)();
@@ -163,40 +159,36 @@ void word_next(){
 	return;
 }
 
-// AKA DO_COLON
-// Not the same as COLON, which will be used to allocate and define a word
-void word_enter(){
-	printf("DOCOLON entering %s\n", (cmdbuf->array[cmdbuf->ip] == NULL ? "Unknown":cmdbuf->array[cmdbuf->ip]->name));
 
-	//   PUSH IP     onto the "return address stack"
-	//   Ours has two parts: the current code array and the current IP
+// AKA DO_COLON
+void word_enter(){
+	//printf("word_enter() entering %s\n", current_codeword->name);
+
+	// Push former context
 	push(returnStack, (intptr_t) cmdbuf->ip);
 	push(returnStack, (intptr_t) cmdbuf->array);
+	//printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
-	//   W+2 -> IP   W still points to the Code Field, so W+2 is
-	//               the address of the Body!  (Assuming a 2-byte
-	//               address -- other Forths may be different.)
-	// Again, same two parts must be initialized for the new context
+	// Load the new context
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
 	cmdbuf->size = current_codeword->size;
 	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
-	printf("This word has size %d\n",cmdbuf->size);
+	//printf("This word has size %d\n",cmdbuf->size);
 
-	//   JUMP to interpreter ("NEXT")
-	return; // to word_next()
+	return; // to word_next() or a loop coreword
 }
 
 // AKA ;S
 // Not the same as SEMICOLON, which will finalize a new word definition
 void word_exit(){
-	//printf("Hello from word_exit AKA ;S\n");
-	//   POP IP   from the "return address stack"
-	// Pop array first (was pushed second by word_enter)
+	//printf("In word_exit()\n");
+
+	// Restore earlier context
 	cmdbuf->array = (codeword_t **) pop(returnStack);
 	cmdbuf->ip = (int) pop(returnStack);
+	//printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
-	//   JUMP to interpreter
-	return; // to word_next()
+	return; // to word_next() or a loop coreword
 }
 
 // Populates the command buffer. Tracks completeness of current statement.

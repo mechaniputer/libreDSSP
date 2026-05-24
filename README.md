@@ -34,6 +34,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 	* =, <, >
 	* NEG, ABS
 	* BYE, ..(show stack), .(show top of stack)
+	* DO
 	* IF+, IF0, IF-
 	* BR+, BR0, BR-, BRS
 	* D (drop), C (copy), DS (drop entire stack)
@@ -55,7 +56,6 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 
 ## What doesn't work yet
 	* Push address of string
-	* DO
 	* BR
 	* Integer variables
 	* Top-down programming (reference undefined words when defining words)
