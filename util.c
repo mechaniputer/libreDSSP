@@ -155,7 +155,7 @@ void word_next(){
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
 	}
-	printf("word_next() finished looping\n");
+	//printf("word_next() finished looping\n");
 	return;
 }
 
@@ -167,7 +167,7 @@ void word_enter(){
 	// Push former context
 	push(returnStack, (intptr_t) cmdbuf->ip);
 	push(returnStack, (intptr_t) cmdbuf->array);
-	printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+	//printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
 	// Load the new context
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
@@ -186,7 +186,7 @@ void word_exit(){
 	// Restore earlier context
 	cmdbuf->array = (codeword_t **) pop(returnStack);
 	cmdbuf->ip = (int) pop(returnStack);
-	printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+	//printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
 	return; // to word_next() or a loop coreword
 }
@@ -412,6 +412,19 @@ int commandParse(char * line, dict * vocab){
 				codeword_t * dict_entry = coreSearch(statement, vocab);
 				// Emit codeword to command buffer. We will update the data field later once we have the dictionary name.
 				cmdAppend(cmdbuf, dict_entry);
+			}else if(!strcmp(statement, "DO")){
+				cmdbuf->status |= STAT_INC_DO_LOOP;
+				codeword_t *dict_entry = coreSearch("DO", vocab);
+				if(dict_entry == NULL){
+					ERR_MISSING_CORE
+				}
+				// Emit to cmdbuf or word array
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = dict_entry;
+				}else{
+					cmdAppend(cmdbuf, dict_entry);
+				}
 			}else if(!strcmp(statement, "BR")){
 				cmdbuf->status |= STAT_BR_NO_ELSE;
 				codeword_t *dict_entry = coreSearch("BR", vocab);
@@ -442,7 +455,7 @@ int commandParse(char * line, dict * vocab){
 				}
 			}else if(cmdbuf->status & STAT_INC_DICT_OP){
 				cmdbuf->status &= (~STAT_INC_DICT_OP);
-				// The codeword that we need to update is thelast one we emitted.
+				// The codeword that we need to update is the last one we emitted.
 				codeword_t * last_cw = cmdbuf->array[cmdbuf->size - 1];
 				// We won't do the lookup here. Instead we attach the dictionary name as text. The coreword will handle the rest.
 				last_cw->text = malloc((1+strlen(statement))*sizeof(char));
@@ -471,6 +484,17 @@ int commandParse(char * line, dict * vocab){
 						if(cmdbuf->status & STAT_BR_ELSE){
 							printf("Found ELSE condition (coreword) inside compiled word\n");
 							cmdbuf->status &= (~STAT_BR_ELSE);
+						}else if(cmdbuf->status & STAT_INC_DO_LOOP){
+							// If this finishes a DO, reset that status
+							printf("Found core word %s inside DO loop\n", statement);
+							cmdbuf->status &= (~STAT_INC_DO_LOOP);
+							// Emit LOOP codeword after the single-word loop body
+							codeword_t *loop_cw = coreSearch("LOOP", vocab);
+							if(loop_cw == NULL){
+								ERR_MISSING_CORE
+							}
+							CHECK_CAP_CODE
+							newWordCode[newWordCodeLen++] = loop_cw;
 						}
 					}else{ // Not found in core dictionary
 						dict_entry = wordSearch(statement, vocab);
@@ -482,6 +506,17 @@ int commandParse(char * line, dict * vocab){
 							if(cmdbuf->status & STAT_BR_ELSE){
 								printf("Found ELSE condition (user word) inside compiled word\n");
 								cmdbuf->status &= (~STAT_BR_ELSE);
+							}else if(cmdbuf->status & STAT_INC_DO_LOOP){
+								// If this finishes a DO, reset that status
+								printf("Found user word %s inside DO loop\n", statement);
+								cmdbuf->status &= (~STAT_INC_DO_LOOP);
+								// Emit LOOP codeword after the single-word loop body
+								codeword_t *loop_cw = coreSearch("LOOP", vocab);
+								if(loop_cw == NULL){
+									ERR_MISSING_CORE
+								}
+								CHECK_CAP_CODE
+								newWordCode[newWordCodeLen++] = loop_cw;
 							}
 
 						}else{
@@ -497,6 +532,16 @@ int commandParse(char * line, dict * vocab){
 					cmdAppend(cmdbuf, dict_entry);
 					if(cmdbuf->status & STAT_BR_ELSE){
 						cmdbuf->status &= (~STAT_BR_ELSE);
+					}else if(cmdbuf->status & STAT_INC_DO_LOOP){
+						// If this finishes a DO, reset that status
+						printf("Found core word %s inside DO loop\n", statement);
+						cmdbuf->status &= (~STAT_INC_DO_LOOP);
+						// Emit LOOP codeword after the single-word loop body
+						codeword_t *loop_cw = coreSearch("LOOP", vocab);
+						if(loop_cw == NULL){
+							ERR_MISSING_CORE
+						}
+						cmdAppend(cmdbuf, loop_cw);
 					}
 				}else{
 					dict_entry = wordSearch(statement, vocab);
@@ -504,6 +549,16 @@ int commandParse(char * line, dict * vocab){
 						cmdAppend(cmdbuf, dict_entry);
 						if(cmdbuf->status & STAT_BR_ELSE){
 							cmdbuf->status &= (~STAT_BR_ELSE);
+						}else if(cmdbuf->status & STAT_INC_DO_LOOP){
+							// If this finishes a DO, reset that status
+							printf("Found user word %s inside DO loop\n", statement);
+							cmdbuf->status &= (~STAT_INC_DO_LOOP);
+							// Emit LOOP codeword after the single-word loop body
+							codeword_t *loop_cw = coreSearch("LOOP", vocab);
+							if(loop_cw == NULL){
+								ERR_MISSING_CORE
+							}
+							cmdAppend(cmdbuf, loop_cw);
 						}
 					}
 				}

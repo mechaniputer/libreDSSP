@@ -312,19 +312,19 @@ void branchminus(){
 	//printf("In branchminus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR-\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient data operands for BR-\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(pop(dataStack) < 0){ // Do the first thing
-		printf("Doing first thing\n");
+		//printf("Doing first thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
 	}else{
 		printf("Doing second thing\n");
@@ -338,22 +338,22 @@ void branchzero(){
 	//printf("In branchzero()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR0\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient data operands for BR0\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(pop(dataStack) == 0){ // Do the first thing
-		printf("Doing first thing\n");
+		//printf("Doing first thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
 	}else{
-		printf("Doing second thing\n");
+		//printf("Doing second thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
@@ -364,22 +364,22 @@ void branchplus(){
 	//printf("In branchplus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR+\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient data operands for BR+\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	if(pop(dataStack) > 0){ // Do the first thing
-		printf("Doing first thing\n");
+		//printf("Doing first thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
 	}else{
-		printf("Doing second thing\n");
+		//printf("Doing second thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
@@ -390,26 +390,26 @@ void branchsign(){
 	//printf("In branchsign()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 3){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BRS\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient data operands for BRS\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	intptr_t temp = pop(dataStack);
 	if(temp < 0){ // Do the first thing
-		printf("Doing first thing\n");
+		//printf("Doing first thing\n");
 		brs_helper(cmdbuf->array[(cmdbuf->ip)+1]);
 	}else if(temp == 0){ // Do the second thing
-		printf("Doing second thing\n");
+		//printf("Doing second thing\n");
 		brs_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}else{ // Do the third thing
-		printf("Doing third thing\n");
+		//printf("Doing third thing\n");
 		brs_helper(cmdbuf->array[(cmdbuf->ip)+3]);
 	}
 	return;
@@ -419,17 +419,17 @@ void branchsign(){
 // BR 0 P0 1 P1 2 P2 ELSE P3
 // Minimum operands: 1 condition, 1 outcome, 1 ELSE, 1 more outcome. (total 4)
 void branch(){
-	printf("In branch()\n");
-	debug();
+	//printf("In branch()\n");
+	//debug();
 	if((cmdbuf->size - cmdbuf->ip) < 4){
 		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient data operands for BR\n");
-		debug();
+		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -455,7 +455,7 @@ void branch(){
 		// Push IP to return to after branch completes
 		push(returnStack, (intptr_t) elseip+1);
 		push(returnStack, (intptr_t) cmdbuf->array);
-		printf("BR() pushed return IP: %d cmdbuf->array: %p\n", (int) elseip+1, (void*)cmdbuf->array);
+		//printf("BR() pushed return IP: %d cmdbuf->array: %p\n", (int) elseip+1, (void*)cmdbuf->array);
 		// Set branch IP
 		cmdbuf->array = (codeword_t **) (outcome->data);
 		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
@@ -530,7 +530,12 @@ void lessthan(){
 
 // This coreword requires one data stack operand [n] and one word operand (the next word in the command buffer).
 // The data operand [n] is popped. The command operand is executed n times.
-void doloop(){
+// Here's how it works:
+// Pop the data stack. If it's >0, decrement it and push it to the return stack.
+// Then simply return and let word_next() advance into the following word.
+// That word is followed by LOOP, which will handle repetition.
+// If the data stack is <=0, skip the loop (like what BR+ would do)
+void do_begin(){
 	//printf("In doloop()\n");
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
@@ -543,59 +548,30 @@ void doloop(){
 		return;
 	}
 
-	// For asserts below:
-	int snapshot_return_stack_top = returnStack->top; // We will use this to ensure that the return stack is balanced after the loop completes
-	codeword_t ** snapshot_cmdbuf_array = cmdbuf->array; // We will use this to ensure that the correct command buffer is active after the loop completes
-	printf("DO took snapshot of cmdbuf: %p\n",snapshot_cmdbuf_array);
-	int count = pop(dataStack);
-	int do_ip = cmdbuf->ip; // Preserve this for loop repetitions
-	codeword_t * command = cmdbuf->array[cmdbuf->ip+1];
-	if(command->user == 1){
-		// For user words.
-		for(int i=0; i<count; i++){
-			printf("cmdbuf->array: %p  snapshot: %p\n",cmdbuf->array, snapshot_cmdbuf_array);
-			assert(cmdbuf->array == snapshot_cmdbuf_array);
-			assert(returnStack->top == snapshot_return_stack_top);
-
-			cmdbuf->ip = do_ip+1; // word_enter() needs the IP to point to the command operand.
-			current_codeword = command; // Important for pushLiteral to reference the correct data field
-
-			(*command->xt)(); // word_enter()
-
-
-			// FIXME this is totally wrong.
-			// If we enter a user word that contains another user word, it will skip the inner word's word_exit().
-			// We only want to skip the outer word's word_exit().
-
-			// We cannot use word_next() because it will call word_exit() and proceed to the next word in the command buffer.
-			// This code is a near-duplicate of the loop in word_next(), but with some key differences.
-			cmdbuf->ip = 0;
-			int stop_ip = cmdbuf->size-1; // This stops before word_exit().
-			assert(cmdbuf->array[stop_ip]->xt == word_exit);
-			while(cmdbuf->ip < stop_ip){
-				current_codeword = cmdbuf->array[cmdbuf->ip];
-				printf("\nDO executing %s\n",current_codeword->name);
-				(*current_codeword->xt)();
-				cmdbuf->ip++;
-			}
-			word_exit(); // Only called when we are done looping the word.
-		}
+	intptr_t tempval = pop(dataStack);
+	if(tempval > 0){
+		push(returnStack, tempval-1);
 	}else{
-		// For non-user words.
-		cmdbuf->ip = do_ip+1; // The command itself won't change IP so this can be outside the loop.
-		for(int i=0; i<count; i++){
-			showStack();
-			current_codeword = command; // Important for pushLiteral to reference the correct data field
-			(*command->xt)();
-			//printf("Returned from command execution\n");
-		}
+		cmdbuf->ip += 1; // Skip the following word, which should be LOOP
 	}
-	// word_next() will increment the IP again after this,
-	cmdbuf->ip = do_ip+1;
-	// Assert that the correct cmdbuf is active
-	assert(cmdbuf->array == snapshot_cmdbuf_array);
-	// Ensure that the return stack is balanced after the loop
-	assert(returnStack->top == snapshot_return_stack_top);
+	return;
+}
+
+// Pop the counter from the return stack.
+// If it's 0 go to the next word (as normal).
+// If it's >0, decrement it, push it, and re-execute the previous word.
+void loop(){
+	//printf("In loop()\n");
+	if(returnStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient return stack operands for LOOP\n");
+		cmdClear(cmdbuf);
+		return;
+	}
+	intptr_t tempval = pop(returnStack);
+	if(tempval > 0){
+		push(returnStack, tempval-1);
+		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
+	}
 	return;
 }
 

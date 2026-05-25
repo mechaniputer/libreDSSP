@@ -69,7 +69,8 @@ void greaterthan();
 void lessthan();
 
 // Looping
-void doloop();
+void do_begin();
+void loop();
 
 // Stack manipulation
 void exch2();

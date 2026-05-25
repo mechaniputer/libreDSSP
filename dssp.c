@@ -77,7 +77,8 @@ int main(int argc, char *argv[]){
 	defCore("<", lessthan, vocab);
 
 	// Looping and flow control
-	defCore("DO", doloop, vocab);
+	defCore("DO", do_begin, vocab);
+	defCore("LOOP", loop, vocab); // Not to be used directly
 
 	// Stack manipulation
 	defCore("E2", exch2, vocab);
