@@ -29,62 +29,60 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 
 
 ## What works
-	* Basic math operations (+,*,-,/)
-	* 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
-	* =, <, >
-	* NEG, ABS
-	* BYE, ..(show stack), .(show top of stack)
-	* DO
-	* IF+, IF0, IF-
-	* BR+, BR0, BR-, BRS
-	* D (drop), C (copy), DS (drop entire stack)
-	* DEEP (push height of stack)
-	* ET, E2, E3, E4
-	* CT, C2, C3, C4
-	* Function declarations
-	* TOS
-	* TIN, TON (Not sure if correct behavior)
-	* SP, CR
-	* ."hello" printing
-	* [comments]
-	* GNU readline support
-	* Load and run code from file at startup
-	* B10 (as a placeholder since we currently only support base 10 I/O)
-	* GROW, USE, SHUT, ?$
-	* WORDS (This is a FORTH loanword. Currently unsure if DSSP had an equivalent.)
+- Top-down programming! (reference undefined words when defining words)
+- UNDEF (list undefined words)
+- Basic math operations (+,*,-,/)
+- 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
+- =, <, >
+- NEG, ABS
+- BYE, ..(show stack), .(show top of stack)
+- DO
+- IF+, IF0, IF-
+- BR+, BR0, BR-, BRS, BR
+- D (drop), C (copy), DS (drop entire stack)
+- DEEP (push height of stack)
+- ET, E2, E3, E4
+- CT, C2, C3, C4
+- Function declarations
+- TOS
+- TIN, TON (Not sure if correct behavior)
+- SP, CR
+- ."hello" printing
+- [comments]
+- GNU readline support
+- Load and run code from file at startup
+- B10 (as a placeholder since we currently only support base 10 I/O)
+- GROW, USE, SHUT, ?$
+- WORDS (This is a FORTH loanword. Currently unsure if DSSP had an equivalent.)
 
 
 ## What doesn't work yet
-	* Push address of string
-	* BR
-	* Integer variables
-	* Top-down programming (reference undefined words when defining words)
-	* UNDEF (list undefined words)
-	* SAVE, LOAD
-	* ONLY, CANCEL, FORGET, CLEAR
-	* Arrays, fixed variables, etc
-	* RP
-	* SGN, NOT
-	* EX, EX-, EX0, EX+, EXT
-	* SORT, SPIN, MAX, MIN
-	* T0, T1
-	* TRB, TOB, BASE@
-	* TIB, TIS
-	* B2, B8, B16
-	* SHL, SHR, other bitwise operations
-	* ' (push address of var)
-	* '' (push address of function)
-	* EXEC (execute function from address on stack)
-	* TEXEC (execute text)
-	* BELL
-	* LPSP, LPCR, LPS, LPT, LPFF
-	* INT, TRAP, ON, EON
-	* Everything unaccounted for in this README
+- Integer/pointer variables
+- Push address of string
+- SAVE, LOAD
+- ONLY, CANCEL, FORGET, CLEAR
+- Arrays, fixed variables, etc
+- RP, EX, EX-, EX0, EX+, EXT
+- SGN, NOT
+- SORT, SPIN, MAX, MIN
+- T0, T1
+- TRB, TOB, BASE@
+- TIB, TIS
+- B2, B8, B16
+- SHL, SHR, other bitwise operations
+- ' (push address of var)
+- '' (push address of function)
+- EXEC (execute function from address on stack)
+- TEXEC (execute text)
+- BELL
+- LPSP, LPCR, LPS, LPT, LPFF
+- INT, TRAP, ON, EON
+- Everything unaccounted for in this README
 
 
 ## Possible future goals
-	* Full documentation and in-shell interactive tutorial
-	* Floating point math
-	* External libraries for special or platform-specific uses
-	* Portability improvements including embedded devices
-	* Multithreading support by spawning additional kernels?
+- Full documentation and in-shell interactive tutorial
+- Floating point math
+- External libraries for special or platform-specific uses
+- Portability improvements including embedded devices
+- Multithreading support by spawning additional kernels?
