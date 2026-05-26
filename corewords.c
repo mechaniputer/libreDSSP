@@ -710,7 +710,7 @@ void dropStack(){
 }
 
 void _undefined(){
-	printf("Error: Undefined word %s called during execution", current_codeword->name);
+	printf("Error: Undefined word %s called during execution\n", current_codeword->name);
 	// TODO clean return to prompt
 	exit(0);
 }
@@ -970,6 +970,16 @@ void termOutString(){
 void stackDepth(){
 	push(dataStack, (dataStack->top)+1);
 	return;
+}
+
+// Lists all undefined words
+void inventoryUndefined(){
+	undefined_word_t * temp = vocab->undefined;
+	while(temp != NULL){
+		//printf("Traversal sees %s\n",temp->name);
+		printf("%s\n",temp->name);
+		temp = temp->next;
+	}
 }
 
 // Lists user-defined words in open subdicts.

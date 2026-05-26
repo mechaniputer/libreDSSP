@@ -110,6 +110,7 @@ int main(int argc, char *argv[]){
 	defCore("TON", termOutNum, vocab);
 	defCore("TOS", termOutString, vocab);
 	defCore("DEEP", stackDepth, vocab);
+	defCore("UNDEF",inventoryUndefined, vocab);
 	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
 	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
 

@@ -176,7 +176,7 @@ undefined_word_t* find_undefined_word(dict *vocab, char *name){
 	printf("Looking for undefined word %s\n", name);
 	undefined_word_t * temp = vocab->undefined;
 	while(temp != NULL){
-		printf("Traversal sees %s\n",temp->name);
+		//printf("Traversal sees %s\n",temp->name);
 		if(!strcmp(temp->name, name)) return temp;
 		temp = temp->next;
 	}

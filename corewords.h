@@ -99,6 +99,8 @@ void termInNum();
 void termOutNum();
 void termOutString();
 void stackDepth();
+void inventoryUndefined();
 void inventoryWords();
+
 
 #endif
