@@ -382,20 +382,6 @@ int commandParse(char * line, dict * vocab){
 					ERR_EMPTY_DEF
 				}
 
-
-				if(cmdbuf->status & STAT_INC_DO_LOOP){
-					// If this finishes a DO, reset that status
-					printf("This word completed a DO loop at the end of a word\n");
-					cmdbuf->status &= (~STAT_INC_DO_LOOP);
-					// Emit LOOP codeword after the single-word loop body
-					codeword_t *loop_cw = coreSearch("LOOP", vocab);
-					if(loop_cw == NULL){
-						ERR_MISSING_CORE
-					}
-					CHECK_CAP_CODE
-					newWordCode[newWordCodeLen++] = loop_cw;
-				}
-
 				// Populate last code element with word_exit() AKA ;S
 				codeword_t * dict_entry = coreSearch(";S", vocab);
 				if(NULL == dict_entry){
@@ -565,6 +551,22 @@ int commandParse(char * line, dict * vocab){
 							// Emit a ref.
 							CHECK_CAP_CODE
 							newWordCode[newWordCodeLen++] = entry->placeholder;
+
+							if(cmdbuf->status & STAT_BR_ELSE){
+								printf("Found ELSE condition (coreword) inside compiled word\n");
+								cmdbuf->status &= (~STAT_BR_ELSE);
+							}else if(cmdbuf->status & STAT_INC_DO_LOOP){
+								// If this finishes a DO, reset that status
+								printf("This word completed a DO loop at the end of a word\n");
+								cmdbuf->status &= (~STAT_INC_DO_LOOP);
+								// Emit LOOP codeword after the single-word loop body
+								codeword_t *loop_cw = coreSearch("LOOP", vocab);
+								if(loop_cw == NULL){
+									ERR_MISSING_CORE
+								}
+								CHECK_CAP_CODE
+								newWordCode[newWordCodeLen++] = loop_cw;
+							}
 						}
 					}
 				}
