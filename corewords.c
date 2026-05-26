@@ -282,6 +282,7 @@ static inline void branch_helper(codeword_t *outcome){
 		// Push IP to return to after branch completes
 		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
 		push(returnStack, (intptr_t) cmdbuf->array);
+		push(returnStack, (intptr_t) cmdbuf->size);
 		// Set branch IP
 		cmdbuf->array = (codeword_t **) (outcome->data);
 		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
@@ -298,6 +299,7 @@ static inline void brs_helper(codeword_t *outcome){
 		// Push IP to return to after branch completes
 		push(returnStack, (intptr_t) (cmdbuf->ip)+3);
 		push(returnStack, (intptr_t) cmdbuf->array);
+		push(returnStack, (intptr_t) cmdbuf->size);
 		// Set branch IP
 		cmdbuf->array = (codeword_t **) (outcome->data);
 		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
@@ -455,6 +457,7 @@ void branch(){
 		// Push IP to return to after branch completes
 		push(returnStack, (intptr_t) elseip+1);
 		push(returnStack, (intptr_t) cmdbuf->array);
+		push(returnStack, (intptr_t) cmdbuf->size);
 		//printf("BR() pushed return IP: %d cmdbuf->array: %p\n", (int) elseip+1, (void*)cmdbuf->array);
 		// Set branch IP
 		cmdbuf->array = (codeword_t **) (outcome->data);
@@ -704,6 +707,12 @@ void drop(){
 void dropStack(){
 	dataStack->top = -1;
 	return;
+}
+
+void _undefined(){
+	printf("Error: Undefined word %s called during execution", current_codeword->name);
+	// TODO clean return to prompt
+	exit(0);
 }
 
 void pushLiteral(){

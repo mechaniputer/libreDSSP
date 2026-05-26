@@ -39,6 +39,7 @@ int main(int argc, char *argv[]){
 	vocab->core = NULL;
 	vocab->grow = NULL;
 	vocab->var = NULL;
+	vocab->undefined = NULL;
 
 	// Arithmetic
 	defCore("+", plus, vocab);

@@ -37,6 +37,7 @@ int newWordTextCap;
 codeword_t **newWordCode;
 int newWordCodeLen;
 int newWordCodeCap;
+codeword_t * newWordDictEntry;
 
 // Global for the codeword currently being executed
 codeword_t *current_codeword = NULL;
@@ -151,6 +152,7 @@ void word_next(){
 	cmdbuf->ip = 0;
 	// TODO Consider using the size as a bound instead of a NULL sentinel (fewer loads)
 	while(cmdbuf->array[cmdbuf->ip] != NULL){
+		//debug();
 		current_codeword = cmdbuf->array[cmdbuf->ip];
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
@@ -167,6 +169,7 @@ void word_enter(){
 	// Push former context
 	push(returnStack, (intptr_t) cmdbuf->ip);
 	push(returnStack, (intptr_t) cmdbuf->array);
+	push(returnStack, (intptr_t) cmdbuf->size);
 	//printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
 
 	// Load the new context
@@ -174,6 +177,7 @@ void word_enter(){
 	cmdbuf->size = current_codeword->size;
 	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
 	//printf("This word has size %d\n",cmdbuf->size);
+	//debug();
 
 	return; // to word_next() or a loop coreword
 }
@@ -182,8 +186,10 @@ void word_enter(){
 // Not the same as SEMICOLON, which will finalize a new word definition
 void word_exit(){
 	//printf("In word_exit()\n");
+	//printf("Return stack height is %d\n",returnStack->top);
 
 	// Restore earlier context
+	cmdbuf->size = (int) pop(returnStack);
 	cmdbuf->array = (codeword_t **) pop(returnStack);
 	cmdbuf->ip = (int) pop(returnStack);
 	//printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
@@ -366,6 +372,8 @@ int commandParse(char * line, dict * vocab){
 				newWordTextCap = INIT_WORDTEXT_CAP;
 				newWordTextLen = 0;
 				newWordCodeLen = 0;
+				// Allocate new word in appropriate dictionary, or find prior word to redefine
+				newWordDictEntry = NULL;
 			}else if(!strcmp(statement, ";")){
 				if(!(cmdbuf->status & STAT_INC_COMPILE)){
 					ERR_FORB_SEMICOLON
@@ -373,6 +381,21 @@ int commandParse(char * line, dict * vocab){
 				if(newWordName == NULL){
 					ERR_EMPTY_DEF
 				}
+
+
+				if(cmdbuf->status & STAT_INC_DO_LOOP){
+					// If this finishes a DO, reset that status
+					printf("This word completed a DO loop at the end of a word\n");
+					cmdbuf->status &= (~STAT_INC_DO_LOOP);
+					// Emit LOOP codeword after the single-word loop body
+					codeword_t *loop_cw = coreSearch("LOOP", vocab);
+					if(loop_cw == NULL){
+						ERR_MISSING_CORE
+					}
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = loop_cw;
+				}
+
 				// Populate last code element with word_exit() AKA ;S
 				codeword_t * dict_entry = coreSearch(";S", vocab);
 				if(NULL == dict_entry){
@@ -383,8 +406,9 @@ int commandParse(char * line, dict * vocab){
 					CHECK_CAP_CODE
 					newWordCode[newWordCodeLen] = NULL;  // Restore NULL sentinel at end of code array now that we know the final length
 				}
+
 				cmdbuf->status &= (~STAT_INC_COMPILE);
-				printf("Definition of %s complete\n",newWordName);
+				printf("Definition of %s complete with status %d\n",newWordName, cmdbuf->status);
 				CHECK_CAP_TEXT(1)
 				// Remove trailing newlines in definition text
 				while(newWordTextLen > 0 && newWordText[newWordTextLen - 1] == '\n'){
@@ -393,16 +417,24 @@ int commandParse(char * line, dict * vocab){
 				newWordText[newWordTextLen] = '\0';
 				printf("%s\n",newWordText);
 
-				// Allocate new word in appropriate dictionary, or find prior word to redefine
-				dict_entry = wordDefine(newWordName, vocab);
 				// Populate the dictionary entry
-				dict_entry->data = (intptr_t) newWordCode;  // Set code array pointer
-				dict_entry->size = newWordCodeLen;
-				dict_entry->text = newWordText;
+				newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer
+				newWordDictEntry->size = newWordCodeLen;
+				newWordDictEntry->text = newWordText;
+
+				// Check if this was a previously undefined word
+				undefined_word_t * entry = find_undefined_word(vocab, newWordName);
+				if(NULL != entry){
+					// This word was on someone's wishlist!
+					resolve_undefined_word(vocab, newWordName, newWordDictEntry);
+				}else{
+					printf("This was word was not previously referenced.\n");
+				}
 
 				// Detach
 				newWordCode = NULL;
 				newWordText = NULL;
+				newWordDictEntry = NULL;
 			}else if(!strcmp(statement, "GROW") || !strcmp(statement, "USE") || !strcmp(statement, "SHUT") || !strcmp(statement, "ONLY")){
 				if(cmdbuf->status & STAT_INC_COMPILE){
 					ERR_FORB_SYM_IN_WORD
@@ -467,6 +499,8 @@ int commandParse(char * line, dict * vocab){
 					// Until then we will maintain the information in separate variables
 					newWordName = malloc((1+strlen(statement))*sizeof(char));
 					strcpy(newWordName, statement);
+					newWordDictEntry = wordDefine(newWordName, vocab);
+
 					// newWordCode already allocated in compile mode setup
 					// Populate start of text entry
 					CHECK_CAP_TEXT(strlen(newWordName)+3)
@@ -520,8 +554,17 @@ int commandParse(char * line, dict * vocab){
 							}
 
 						}else{
-							// TODO If undef word is used, add it to the table and emit UNDEF ptr
 							printf("Unknown word %s found in word definition\n",statement);
+							// Check for the word in the undefined words list
+							undefined_word_t* entry = find_undefined_word(vocab, statement);
+							// If it's not there yet, add it.
+							if(NULL == entry){
+								entry = create_undefined_word(vocab, statement);
+							}
+							add_reference(entry, newWordDictEntry);
+							// Emit a ref.
+							CHECK_CAP_CODE
+							newWordCode[newWordCodeLen++] = entry->placeholder;
 						}
 					}
 				}
@@ -562,7 +605,10 @@ int commandParse(char * line, dict * vocab){
 						}
 					}
 				}
-				if(NULL == dict_entry) printf("%s not known\n",statement); // TODO abort rest of input? Use UNDEF word?
+				if(NULL == dict_entry){
+					// No point in using undef table since this is live execution.
+					printf("%s not known\n",statement);
+				}
 			}
 			statement_len = 0; // No need to get a new buffer since we didn't detach it
 		}

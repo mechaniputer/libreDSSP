@@ -43,13 +43,23 @@
 
 */
 
+typedef struct undefined_word undefined_word_t;
+
 typedef struct codeword codeword_t;
 typedef struct variable variable;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
-// TODO add table of undefined words
 // TODO add GC table
+
+struct undefined_word {
+	char *name;                    // name of undefined word
+	codeword_t **references;       // array of pointers to codewords that reference this
+	int ref_count;                 // number of references
+	int ref_capacity;              // allocated space for references array
+	codeword_t * placeholder;      // The word that all of the refs point to
+	undefined_word_t *next;        // next entry in linked list
+};
 
 struct variable
 {
@@ -72,6 +82,7 @@ struct dict
 	subdict * sub;
 	subdict * grow;
 	variable * var;
+	undefined_word_t *undefined;
 };
 
 // Looks for defined variables
@@ -88,5 +99,11 @@ void defCore(char * name, void (*func)(), dict * vocab);
 subdict * newDict(dict * vocab, char * name);
 // Finds a sub-dictionary by name, returns NULL if not found
 subdict * findDict(dict * vocab, char * name);
+
+// Utility functions for undefined word table
+undefined_word_t* find_undefined_word(dict *d, char *name);
+undefined_word_t* create_undefined_word(dict *d, char *name);
+void add_reference(undefined_word_t *undef, codeword_t *ref);
+void resolve_undefined_word(dict *vocab, char *name, codeword_t *def);
 
 #endif
