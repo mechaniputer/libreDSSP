@@ -721,60 +721,40 @@ void pushLiteral(){
 	return;
 }
 
-// Attempts to define a new variable
-// The variable name will be taken from the data field of the current codeword, and the variable value will be taken from the top of the data stack.
-void defVar(){
-/*
-	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient stack operands for !\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	if(cmdbuf->top < 0){
-		fprintf(stderr,"ERROR: Variable name required for !\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	command * name = cmdPop(cmdbuf);
-	int value = pop(dataStack);
-	variable * temp;
-
-	assert(vocab != NULL);
+// Declare the existence of a named variable
+// The data field of the current codeword should contain the address of the desired (char *) name of the variable
+// We initialize variables to 0. Not sure whether original DSSP did this.
+// FIXME: Variables should be placed in subdicts, not separately. They should share the same namespace as words.
+void declVar(){
+	char * varname = (char *) current_codeword->data;
 
 	// See if it is a core word
-	if(coreSearch(name->text, vocab)){
-		fprintf(stderr,"ERROR: %s is in core dictionary\n",name->text);
+	 if(coreSearch(varname, vocab)){
+		fprintf(stderr,"ERROR: Cannot name variable %s. Name conflict with core dictionary word.\n",varname);
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	if(wordSearch(name->text, vocab) != NULL){
-		fprintf(stderr,"ERROR: %s is in dictionary\n",name->text);
+	// TODO use new growSearch() function
+
+	if(varSearch(varname, vocab)){
+		fprintf(stderr,"ERROR: There is already a variable named %s.\n",varname);
 		cmdClear(cmdbuf);
 		return;
 	}
 
-	if(vocab->var == NULL){
-		vocab->var = malloc(sizeof(variable));
-		temp = vocab->var;
-		strcpy(temp->name, name->text);
-		temp->next = NULL;
-	}else{
-		temp = varSearch(name->text, vocab);
-		if(temp == NULL){
-			temp = vocab->var;
-			while(temp->next != NULL) temp = temp->next;
-			temp->next = malloc(sizeof(variable));
-			temp = temp->next;
-			strcpy(temp->name, name->text);
-			temp->next = NULL;
-		}
+}
+
+// Assign top of stack to a variable
+// The data field of the current codeword should contain the address of the correct variable struct
+void assignVar(){
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient data operands for !\n");
+		cmdClear(cmdbuf);
+		return;
 	}
 
-	temp->value = value;
-*/
+	((variable *)(current_codeword->data))->value = pop(dataStack);
 	return;
 }
 

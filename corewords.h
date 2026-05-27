@@ -88,7 +88,8 @@ void dropStack();
 // Misc
 void _undefined();
 void pushLiteral();
-void defVar();
+void declVar();
+void assignVar();
 void printNewline();
 void printSpace();
 void listDicts();

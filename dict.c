@@ -26,11 +26,22 @@
 #include "util.h"
 #include "corewords.h"
 
+// FIXME In order to unify the namespace of subdict words and subdict vars, we need this new function:
+// Searches vocab->grow to ensure that a name is free in this namespace.
+// Should be used whenever defining a new variable to ensure that it doessn't mask a function
+// Should be used whenever defining a new word to ensure that it doesn't mask a variable.
+// Return 0: Nothing found
+// Return 1: Word found
+// Return 2: Variable found
+int growSearch(char * name, dict * vocab){
+	return 0;
+}
+
 // Looks for defined variables
 variable * varSearch(char * name, dict * vocab){
 	variable * tempVar;
 	if(name[0] == '\0') return NULL;
-	if(vocab->var != NULL){
+	/*if(vocab->var != NULL){
 		tempVar = vocab->var;
 		do{
 			if(!strcmp(tempVar->name, name)){
@@ -38,7 +49,7 @@ variable * varSearch(char * name, dict * vocab){
 			}
 			tempVar = tempVar->next;
 		}while(tempVar != NULL);
-	}
+	}*/
 	return NULL;
 }
 

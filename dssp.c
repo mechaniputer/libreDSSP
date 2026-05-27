@@ -38,7 +38,6 @@ int main(int argc, char *argv[]){
 	vocab = malloc(sizeof(dict));
 	vocab->core = NULL;
 	vocab->grow = NULL;
-	vocab->var = NULL;
 	vocab->undefined = NULL;
 
 	// Arithmetic
@@ -99,7 +98,8 @@ int main(int argc, char *argv[]){
 	//defCore("PUSHLIT", pushLiteral, vocab); // Lookup not needed
 	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
 	defCore(";S", word_exit, vocab); // Not to be used directly
-	defCore("!", defVar, vocab);
+	defCore("VAR", declVar, vocab);
+	defCore("!", assignVar, vocab);
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
 	defCore("?$", listDicts, vocab);
@@ -120,6 +120,7 @@ int main(int argc, char *argv[]){
 	vocab->sub->open = 1;
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
+	vocab->sub->var = NULL;
 	vocab->grow = vocab->sub; // We will grow this dictionary by default
 
 	// Version

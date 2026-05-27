@@ -27,18 +27,25 @@
 
 /*	DICTIONARY HIERARCHY:
 	Core words are stored in a linked list in the dict struct. They are always present.
-	User words are stored in subdicts, which are linked together in a linked list in the dict struct.
-	Individual subdicts can be open or closed.
-	
-         dict --- variable --- variable --- variable
-        /    \
-       /       subdict --- subdict --- subdict
-  codeword_t      |           |           |
-      |       codeword_t  codeword_t  codeword_t
-  codeword_t      |           |           |
-      |       codeword_t  codeword_t  codeword_t
-  codeword_t      |           |           |
-      |       codeword_t  codeword_t  codeword_t
+	User words and variables are stored in subdicts, which are linked together in a linked list in the dict struct.
+	One subdict at a time can be selected for new word definitions and variable declarations
+	Individual subdicts can be open or closed to lookups.
+
+
+                      variable    variable    variable
+                        /           /           /
+                    variable    variable    variable
+                      /           /           /
+                     /           /           /
+         dict --- subdict --- subdict --- subdict
+        /            \           \           \
+       /              \           \           \
+  codeword_t       codeword_t  codeword_t  codeword_t
+      |                \           \           \
+  codeword_t        codeword_t  codeword_t  codeword_t
+      |                 \           \           \
+  codeword_t         codeword_t  codeword_t  codeword_t
+      |
   codeword_t
 
 */
@@ -74,6 +81,7 @@ struct subdict
 	subdict * next;
 	int open;
 	codeword_t * wordlist;
+	variable * var;
 };
 
 struct dict
@@ -81,7 +89,6 @@ struct dict
 	codeword_t * core;
 	subdict * sub;
 	subdict * grow;
-	variable * var;
 	undefined_word_t *undefined;
 };
 
