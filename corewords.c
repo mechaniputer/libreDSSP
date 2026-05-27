@@ -329,7 +329,7 @@ void branchminus(){
 		//printf("Doing first thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
 	}else{
-		printf("Doing second thing\n");
+		//printf("Doing second thing\n");
 		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
 	}
 
@@ -721,11 +721,18 @@ void pushLiteral(){
 	return;
 }
 
+// current_codeword->data should point to a variable struct
+void pushVar(){
+	variable * var = (variable *)current_codeword->data;
+	intptr_t val = var->value;
+	push(dataStack, val);
+}
+
 // Declare the existence of a named variable
 // The data field of the current codeword should contain the address of the desired (char *) name of the variable
 // We initialize variables to 0. Not sure whether original DSSP did this.
 // FIXME: Variables should be placed in subdicts, not separately. They should share the same namespace as words.
-void declVar(){
+void declareVar(){
 	char * varname = (char *) current_codeword->data;
 
 	// See if it is a core word
@@ -749,10 +756,12 @@ void declVar(){
 
 	// No problems. Declare the var.
 	variable * tempVar = malloc(sizeof(variable));
-	tempVar->name = malloc(strlen(varname));
+	tempVar->name = malloc(1+strlen(varname));
+	strcpy(tempVar->name, varname);
 	tempVar->value = 0;
 	tempVar->next = vocab->grow->varlist;
 	vocab->grow->varlist = tempVar;
+	printf("Declared variable %s\n",varname);
 }
 
 // Assign top of stack to a variable

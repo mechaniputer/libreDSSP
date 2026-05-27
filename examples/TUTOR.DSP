@@ -17,6 +17,9 @@
 
 [Interactive libreDSSP tutor]
 
+VAR STEP
+VAR PREVDEPTH
+
 : next CR STEP BR 
 	0 step0
 	1 step1
@@ -117,8 +120,7 @@
 	." of the stack is a positive number and otherwise skips it. IF- does the opposite, evaluating the following" CR
 	." word only when the top of the stack is negative. IF0 evaluates the following word if the top of the stack" CR
 	." is 0 and skips it if the top of the stack is nonzero." CR
-	." Try putting numbers on the stack and typing things like: IF+ .'positive' (but use double quotes to make" CR
-	." the printing work)" CR
+	." Try putting numbers on the stack and typing things like: IF+ 123 456" CR
 	incStep
 	nextRemind ;
 

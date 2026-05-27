@@ -69,6 +69,8 @@ void cmdClear(cmdbuffer * cmdbuf);
 void cmdAppend(cmdbuffer * cmdbuf, codeword_t * cw);
 void cmdGrow(cmdbuffer * cmdbuf);
 codeword_t * newLiteral(intptr_t value);
-
+codeword_t * newVarDecl(char * name);
+codeword_t * newVarAsgn(variable * dest);
+codeword_t * newVarPush(variable * var);
 
 #endif

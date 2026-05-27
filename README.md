@@ -32,6 +32,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - Top-down programming! (reference undefined words when defining words)
 - UNDEF (list undefined words)
 - Basic math operations (+,*,-,/)
+- VAR, !, push value of variable by name
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
 - =, <, >
 - NEG, ABS
@@ -57,7 +58,6 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 
 
 ## What doesn't work yet
-- Integer/pointer variables
 - Push address of string
 - SAVE, LOAD
 - ONLY, CANCEL, FORGET, CLEAR
@@ -72,6 +72,8 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - SHL, SHR, other bitwise operations
 - ' (push address of var)
 - '' (push address of function)
+- @ (dereference top of stack and push result)
+- !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
 - EXEC (execute function from address on stack)
 - TEXEC (execute text)
 - BELL

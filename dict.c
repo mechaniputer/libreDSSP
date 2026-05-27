@@ -42,6 +42,7 @@ int growSearch(char * name, dict * vocab){
 
 	subdict * growsub = vocab->grow;
 
+	//printf("growsub() searches dictionary %s\n",growsub->name);
 	// Search for word name collisions
 	tempWord = growsub->wordlist;
 	while(tempWord != NULL){
@@ -54,6 +55,7 @@ int growSearch(char * name, dict * vocab){
 	// Search for var name collisions
 	tempVar = growsub->varlist;
 	while(tempVar != NULL){
+		//printf("growsub() sees %s\n",tempVar->name);
 		if(!strcmp(tempVar->name, name)){
 			return 2;
 		}
@@ -235,7 +237,7 @@ undefined_word_t* create_undefined_word(dict *vocab, char *name){
 	printf("Creating undefined word %s\n",name);
 	// Allocate and initialize
 	undefined_word_t * newUndef = malloc(sizeof(undefined_word_t));
-	newUndef->name = malloc(strlen(name));
+	newUndef->name = malloc(1+strlen(name));
 	strcpy(newUndef->name, name);
 	newUndef->references = malloc(4*sizeof(codeword_t *));
 	newUndef->ref_count = 0;

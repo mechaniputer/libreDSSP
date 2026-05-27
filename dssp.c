@@ -98,7 +98,7 @@ int main(int argc, char *argv[]){
 	//defCore("PUSHLIT", pushLiteral, vocab); // Lookup not needed
 	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
 	defCore(";S", word_exit, vocab); // Not to be used directly
-	defCore("VAR", declVar, vocab);
+	defCore("VAR", declareVar, vocab);
 	defCore("!", assignVar, vocab);
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);

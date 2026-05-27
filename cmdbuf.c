@@ -71,3 +71,34 @@ codeword_t * newLiteral(intptr_t value) {
 	cw->user = 0; // Not user-defined word
 	return cw;
 }
+
+codeword_t * newVarDecl(char * name){
+	codeword_t *cw = malloc(sizeof(codeword_t));
+	cw->xt = declareVar;
+	cw->data = (intptr_t) malloc(1+strlen(name));
+	strcpy((char *)cw->data, name);
+	cw->name = "(var decl)";
+	cw->text = NULL;
+	cw->user = 0; // Not user-defined word
+	return cw;
+}
+
+codeword_t * newVarAsgn(variable * dest) {
+	codeword_t *cw = malloc(sizeof(codeword_t));
+	cw->xt = assignVar;
+	cw->data = (intptr_t) dest;
+	cw->name = "(var asgn)";
+	cw->text = NULL;
+	cw->user = 0; // Not user-defined word
+	return cw;
+}
+
+codeword_t * newVarPush(variable * var){
+	codeword_t *cw = malloc(sizeof(codeword_t));
+	cw->xt = pushVar;
+	cw->data = (intptr_t) var;
+	cw->name = "(var push)";
+	cw->text = NULL;
+	cw->user = 0; // Not user-defined word
+	return cw;
+}

@@ -262,10 +262,10 @@ int commandParse(char * line, dict * vocab){
 				statement[statement_len] = '\0';
 				cmdbuf->status &= (~STAT_INC_STRING);
 				// FIXME Should we try to prevent memory leaks from strings that we lose the pointer to? (with a string/var registry and periodic GC?)
-				printf("String complete: %s\n",statement);
+				//printf("String complete: %s\n",statement);
 
 				if(cmdbuf->status & STAT_INC_PRINT){
-					printf("Emitting print codewords for string\n");
+					//printf("Emitting print codewords for string\n");
 					cmdbuf->status &= (~STAT_INC_PRINT);
 					// Emit a codeword that pushes the string pointer
 					codeword_t * push_ptr = newLiteral((intptr_t) statement);
@@ -431,6 +431,54 @@ int commandParse(char * line, dict * vocab){
 				codeword_t * dict_entry = coreSearch(statement, vocab);
 				// Emit codeword to command buffer. We will update the data field later once we have the dictionary name.
 				cmdAppend(cmdbuf, dict_entry);
+			}else if(!strcmp(statement, "VAR")){
+				if(cmdbuf->status & STAT_INC_VAR_DECL){
+					fprintf(stderr,"ERROR: Nested VAR declaration\n");
+					ERR_FATAL
+				}else if(cmdbuf->status & STAT_INC_VAR_ASGN){
+					fprintf(stderr,"ERROR: VAR declaration inside assignment\n");
+					ERR_FATAL
+				}
+				cmdbuf->status |= STAT_INC_VAR_DECL;
+			}else if(cmdbuf->status & STAT_INC_VAR_DECL){
+				cmdbuf->status &= (~STAT_INC_VAR_DECL);
+				// Found the name to declare
+				// Emit the word
+				codeword_t * decl = newVarDecl(statement);
+				// Emit to cmdbuf or word array
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = decl;
+				}else{
+					cmdAppend(cmdbuf, decl);
+				}
+			}else if(!strcmp(statement, "!")){
+				if(cmdbuf->status & STAT_INC_VAR_DECL){
+					fprintf(stderr,"ERROR: Nested VAR declaration\n");
+					ERR_FATAL
+				}else if(cmdbuf->status & STAT_INC_VAR_ASGN){
+					fprintf(stderr,"ERROR: VAR declaration inside assignment\n");
+					ERR_FATAL
+				}
+				cmdbuf->status |= STAT_INC_VAR_ASGN;
+			}else if(cmdbuf->status & STAT_INC_VAR_ASGN){
+				cmdbuf->status &= (~STAT_INC_VAR_ASGN);
+				// Got the variable name. Check if it exists.
+				char * varName = malloc((1+strlen(statement))*sizeof(char));
+				strcpy(varName, statement);
+				// Make sure it's not already used by a variable
+				if(2 != growSearch(varName, vocab)){
+					fprintf(stderr,"ERROR: No such variable %s exists\n",varName);
+					ERR_FATAL
+				}
+				variable * destvar = varSearch(varName, vocab);
+				codeword_t * asgn = newVarAsgn(destvar);
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = asgn;
+				}else{
+					cmdAppend(cmdbuf, asgn);
+				}
 			}else if(!strcmp(statement, "DO")){
 				cmdbuf->status |= STAT_INC_DO_LOOP;
 				codeword_t *dict_entry = coreSearch("DO", vocab);
@@ -499,6 +547,7 @@ int commandParse(char * line, dict * vocab){
 					newWordTextLen = strlen(newWordText);
 				}else{
 					// Add word to ongoing word definition
+					variable * var_lookup = NULL;
 					codeword_t *dict_entry = coreSearch(statement, vocab);
 					if(NULL != dict_entry){ // Found in core dictionary
 						CHECK_CAP_CODE
@@ -521,7 +570,8 @@ int commandParse(char * line, dict * vocab){
 						}
 					}else{ // Not found in core dictionary
 						dict_entry = wordSearch(statement, vocab);
-						// Emit the pointer to first element of found word code
+						var_lookup = varSearch(statement, vocab);
+						// Emit the pointer to codeword_t for user word
 						if(NULL != dict_entry){
 							CHECK_CAP_CODE
 							newWordCode[newWordCodeLen++] = dict_entry;
@@ -532,6 +582,31 @@ int commandParse(char * line, dict * vocab){
 							}else if(cmdbuf->status & STAT_INC_DO_LOOP){
 								// If this finishes a DO, reset that status
 								printf("Found user word %s inside DO loop\n", statement);
+								cmdbuf->status &= (~STAT_INC_DO_LOOP);
+								// Emit LOOP codeword after the single-word loop body
+								codeword_t *loop_cw = coreSearch("LOOP", vocab);
+								if(loop_cw == NULL){
+									ERR_MISSING_CORE
+								}
+								CHECK_CAP_CODE
+								newWordCode[newWordCodeLen++] = loop_cw;
+							}
+						}else if(NULL != var_lookup){
+							// Emit pointer to codeword invoking var push routine
+							codeword_t * cw = newVarPush(var_lookup);
+							if(cw == NULL){
+								ERR_MISSING_CORE
+							}
+							CHECK_CAP_CODE
+							newWordCode[newWordCodeLen++] = cw;
+
+							// If this finishes a BR-ELSE, reset that status
+							if(cmdbuf->status & STAT_BR_ELSE){
+								printf("Found ELSE condition (var push) inside compiled word\n");
+								cmdbuf->status &= (~STAT_BR_ELSE);
+							}else if(cmdbuf->status & STAT_INC_DO_LOOP){
+								// If this finishes a DO, reset that status
+								printf("Found var push %s inside DO loop\n", statement);
 								cmdbuf->status &= (~STAT_INC_DO_LOOP);
 								// Emit LOOP codeword after the single-word loop body
 								codeword_t *loop_cw = coreSearch("LOOP", vocab);
@@ -576,6 +651,7 @@ int commandParse(char * line, dict * vocab){
 			}else{
 				// Normal execution mode - emit word to cmdbuf
 				codeword_t *dict_entry = coreSearch(statement, vocab);
+				variable * var_lookup = NULL;
 				if(NULL != dict_entry){
 					cmdAppend(cmdbuf, dict_entry);
 					if(cmdbuf->status & STAT_BR_ELSE){
@@ -608,9 +684,18 @@ int commandParse(char * line, dict * vocab){
 							}
 							cmdAppend(cmdbuf, loop_cw);
 						}
+					}else{
+						var_lookup = varSearch(statement, vocab);
+						if(NULL != var_lookup){
+							codeword_t * cw = newVarPush(var_lookup);
+							if(cw == NULL){
+								ERR_MISSING_CORE
+							}
+							cmdAppend(cmdbuf, cw);
+						}
 					}
 				}
-				if(NULL == dict_entry){
+				if((NULL == dict_entry) && (NULL == var_lookup)){
 					// No point in using undef table since this is live execution.
 					printf("%s not known\n",statement);
 				}
