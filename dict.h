@@ -70,7 +70,7 @@ struct undefined_word {
 
 struct variable
 {
-	char name[16];
+	char * name;
 	int value;
 	variable * next;
 };
@@ -81,7 +81,7 @@ struct subdict
 	subdict * next;
 	int open;
 	codeword_t * wordlist;
-	variable * var;
+	variable * varlist;
 };
 
 struct dict
@@ -92,6 +92,8 @@ struct dict
 	undefined_word_t *undefined;
 };
 
+// Check if a name is already used for a word/var
+int growSearch(char * name, dict * vocab);
 // Looks for defined variables
 variable * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined

@@ -62,6 +62,7 @@ extern stack *returnStack;
 #define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_FATAL
 #define ERR_MISSING_CORE     printf("Error: missing word in core dictionary\n"); ERR_FATAL
 #define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_FATAL
+#define ERR_NAME_CONFLICT    printf("Error: Name conflict between var and word\n"); ERR_FATAL
 
 #define GROW_PARSE_BUFFER \
 	statement_cap += INIT_STATEMENT_CAP; \
@@ -481,10 +482,12 @@ int commandParse(char * line, dict * vocab){
 			}else if(cmdbuf->status & STAT_INC_COMPILE){
 				if(newWordName == NULL){
 					// We just found a name for the new definition
-					// We can look it up to see if it is a redefinition at the very end if successful.
-					// Until then we will maintain the information in separate variables
 					newWordName = malloc((1+strlen(statement))*sizeof(char));
 					strcpy(newWordName, statement);
+					// Make sure it's not already used by a variable
+					if(2 == growSearch(newWordName, vocab)){
+						ERR_NAME_CONFLICT
+					}
 					newWordDictEntry = wordDefine(newWordName, vocab);
 
 					// newWordCode already allocated in compile mode setup

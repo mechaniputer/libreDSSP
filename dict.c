@@ -34,26 +34,62 @@
 // Return 1: Word found
 // Return 2: Variable found
 int growSearch(char * name, dict * vocab){
+	variable * tempVar;
+	codeword_t * tempWord;
+
+	assert(vocab->grow != NULL);
+	assert(vocab->grow->open);
+
+	subdict * growsub = vocab->grow;
+
+	// Search for word name collisions
+	tempWord = growsub->wordlist;
+	while(tempWord != NULL){
+		if(!strcmp(tempWord->name, name)){
+			return 1;
+		}
+		tempWord = tempWord->next;
+	}
+
+	// Search for var name collisions
+	tempVar = growsub->varlist;
+	while(tempVar != NULL){
+		if(!strcmp(tempVar->name, name)){
+			return 2;
+		}
+		tempVar = tempVar->next;
+	}
 	return 0;
 }
 
 // Looks for defined variables
+// TODO add a way for the user to configure the subdict search order
 variable * varSearch(char * name, dict * vocab){
 	variable * tempVar;
+	subdict * tempSub;
+
+	// Variable must have a name greater than 1 char
 	if(name[0] == '\0') return NULL;
-	/*if(vocab->var != NULL){
-		tempVar = vocab->var;
-		do{
-			if(!strcmp(tempVar->name, name)){
-				return tempVar;
+
+	// Search subdicts
+	tempSub = vocab->sub;
+	while(tempSub != NULL){
+		if((tempSub->open) && (tempSub->varlist != NULL)){
+			tempVar = tempSub->varlist;
+			while(tempVar != NULL){
+				if(!strcmp(tempVar->name, name)){
+					return tempVar;
+				}
+				tempVar = tempVar->next;
 			}
-			tempVar = tempVar->next;
-		}while(tempVar != NULL);
-	}*/
+		}
+		tempSub = tempSub->next;
+	}
 	return NULL;
 }
 
 // Searches non-core dictionaries, returns codeword_t if it exists
+// TODO add a way for the user to configure the subdict search order
 codeword_t * wordSearch(char * name, dict * vocab){
 	codeword_t * tempWord;
 	subdict * tempSub;

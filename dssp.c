@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
 	vocab->sub->open = 1;
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
-	vocab->sub->var = NULL;
+	vocab->sub->varlist = NULL;
 	vocab->grow = vocab->sub; // We will grow this dictionary by default
 
 	// Version

@@ -735,14 +735,24 @@ void declVar(){
 		return;
 	}
 
-	// TODO use new growSearch() function
-
-	if(varSearch(varname, vocab)){
-		fprintf(stderr,"ERROR: There is already a variable named %s.\n",varname);
+	// Make sure the name isn't already used in vocab->grow
+	int used = growSearch(varname, vocab);
+	if(1== used){
+		fprintf(stderr,"ERROR: Cannot name variable %s. Name conflict with user dictionary word.\n",varname);
+		cmdClear(cmdbuf);
+		return;
+	}else if(2 == used){
+		fprintf(stderr,"ERROR: Cannot name variable %s. Name conflict with prior variable.\n",varname);
 		cmdClear(cmdbuf);
 		return;
 	}
 
+	// No problems. Declare the var.
+	variable * tempVar = malloc(sizeof(variable));
+	tempVar->name = malloc(strlen(varname));
+	tempVar->value = 0;
+	tempVar->next = vocab->grow->varlist;
+	vocab->grow->varlist = tempVar;
 }
 
 // Assign top of stack to a variable
