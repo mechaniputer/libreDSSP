@@ -35,7 +35,7 @@ void textPrint(char * text);
 int isNum(char * foo);
 void run(stack * stack, cmdstack * cmdstack, dict * vocab);
 void stackInput(char * line, cmdstack * cmdstack);
-char * prompt();
+char * prompt(int unfinished);
 // Searches dictionaries, runs a word if possible
 void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab);
 
