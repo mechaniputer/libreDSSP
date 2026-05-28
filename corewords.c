@@ -298,8 +298,16 @@ static inline void branch_helper(codeword_t *outcome){
 }
 
 // Similar to branch_helper but for the three-way branch in BRS. Main difference is that the IP increment is 3 instead of 2.
-// FIXME The check to see if we are executing EX is hacky and won't scale to EX-/EX0/EX+ and certainly not EXT!
+// FIXME The check to see if we are executing EX is hacky and won't work for EXT!
 //       I need a better way to alter control flow here
+//       I believe the right approach is to use "JUMP" words to skip non-taken branch outcomes.
+//       Note that this will increase the size of user defined words.
+//       At first these JUMP words will just skip the next intruction, but as a later optimization they can each be set to skip to the end of the branch.
+//       With that change, branches will not need to call xt() anymore (we will rely fully on word_next()).
+//       Branches will still set the IP forwards once (at most) but won't need to do any follow-up.
+//       The next step will be to modify EX to (still clean up the loop counter and then) do what word_exit() does.
+//       As long as everything else in the call chain simply returns to word_next(), it should work.
+//       Then EXT can do what EX does multiple times in a loop. Again, if we find our way back to word_next(), it should be fine.
 static inline void brs_helper(codeword_t *outcome){
 	if(outcome->user == 1){
 		// Push IP to return to after branch completes
@@ -312,7 +320,7 @@ static inline void brs_helper(codeword_t *outcome){
 	}else if(!strcmp(outcome->name, "EX")){
 		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
 		(*outcome->xt)();
-		// Don't change the IP
+		// Don't change the IP since EX just changed it to point to ;S
 	}else{ // Literal, print, or core
 		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
 		(*outcome->xt)();
