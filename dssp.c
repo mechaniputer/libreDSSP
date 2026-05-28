@@ -78,7 +78,10 @@ int main(int argc, char *argv[]){
 
 	// Looping and flow control
 	defCore("DO", do_begin, vocab);
-	defCore("LOOP", loop, vocab); // Not to be used directly
+	defCore("DO_LOOP", do_loop, vocab); // Not to be used directly
+	defCore("RP", rp_begin, vocab);
+	defCore("RP_LOOP", rp_loop, vocab); // Not to be used directly
+	defCore("EX", loop_exit, vocab);
 
 	// Stack manipulation
 	defCore("E2", exch2, vocab);
@@ -98,6 +101,7 @@ int main(int argc, char *argv[]){
 	//defCore("PUSHLIT", pushLiteral, vocab); // Lookup not needed
 	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
 	defCore(";S", word_exit, vocab); // Not to be used directly
+	defCore("NOP", noop, vocab);
 	defCore("VAR", declareVar, vocab);
 	defCore("!", assignVar, vocab);
 	defCore("CR", printNewline, vocab);

@@ -36,6 +36,7 @@
 #define STAT_BR_NO_ELSE    (1UL<<9)  // For a BR that still needs an ELSE
 #define STAT_BR_ELSE       (1UL<<10) // For a BR with an ELSE that still needs the last outcome.
 #define STAT_INC_DO_LOOP   (1UL<<11) // For an incomplete DO-LOOP
+#define STAT_INC_RP_LOOP   (1UL<<12) // For an incomplete RP-LOOP
 
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;

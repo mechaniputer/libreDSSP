@@ -286,6 +286,10 @@ static inline void branch_helper(codeword_t *outcome){
 		// Set branch IP
 		cmdbuf->array = (codeword_t **) (outcome->data);
 		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+	}else if(!strcmp(outcome->name, "EX")){
+		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
+		(*outcome->xt)();
+		// Don't change the IP
 	}else{ // Literal, print, or core
 		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
 		(*outcome->xt)();
@@ -294,6 +298,8 @@ static inline void branch_helper(codeword_t *outcome){
 }
 
 // Similar to branch_helper but for the three-way branch in BRS. Main difference is that the IP increment is 3 instead of 2.
+// FIXME The check to see if we are executing EX is hacky and won't scale to EX-/EX0/EX+ and certainly not EXT!
+//       I need a better way to alter control flow here
 static inline void brs_helper(codeword_t *outcome){
 	if(outcome->user == 1){
 		// Push IP to return to after branch completes
@@ -303,6 +309,10 @@ static inline void brs_helper(codeword_t *outcome){
 		// Set branch IP
 		cmdbuf->array = (codeword_t **) (outcome->data);
 		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
+	}else if(!strcmp(outcome->name, "EX")){
+		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
+		(*outcome->xt)();
+		// Don't change the IP
 	}else{ // Literal, print, or core
 		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
 		(*outcome->xt)();
@@ -541,7 +551,7 @@ void lessthan(){
 void do_begin(){
 	//printf("In doloop()\n");
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
+		fprintf(stderr,"ERROR: Insufficient data operands for DO\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -563,10 +573,10 @@ void do_begin(){
 // Pop the counter from the return stack.
 // If it's 0 go to the next word (as normal).
 // If it's >0, decrement it, push it, and re-execute the previous word.
-void loop(){
+void do_loop(){
 	//printf("In loop()\n");
 	if(returnStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient return stack operands for LOOP\n");
+		fprintf(stderr,"ERROR: Insufficient return stack operands for DO_LOOP\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -577,6 +587,58 @@ void loop(){
 	}
 	return;
 }
+
+void rp_begin(){
+	if((cmdbuf->size - cmdbuf->ip) < 1){
+		fprintf(stderr,"ERROR: Insufficient command operands for RP\n");
+		cmdClear(cmdbuf);
+		return;
+	}
+
+	// In RP, 1 means keep looping, 0 means stop.
+	push(returnStack, 1);
+	return;
+}
+
+void rp_loop(){
+	//printf("in rp_loop()\n");
+	if(returnStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient return stack operands for RP_LOOP\n");
+		cmdClear(cmdbuf);
+		return;
+	}
+	intptr_t tempval = top(returnStack);
+	if(tempval == 1){
+		// Keep looping
+		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
+	}else if(tempval == 0){
+		// EX/EX-/EX0/EX+/EXT has been run, making the count 0.
+		pop(returnStack);
+	}else{
+		fprintf(stderr, "ERROR: Unexpected value %ld on return stack in rp_loop()\n",tempval);
+		exit(-1);
+	}
+	return;
+}
+
+// First replace the top of the return stack with 0
+// Then exit the current word by skipping ahead to word_exit().
+void loop_exit(){
+	//printf("In loop_exit()\n");
+	// The return stack will have 3 values on top of the one we actually need.
+	intptr_t tempval = returnStack->array[returnStack->top - 3];
+	if(tempval <= 0){
+		fprintf(stderr, "ERROR: Unexpected value %ld on return stack in loop_exit()\n",tempval);
+		exit(-1);
+	}else{
+		returnStack->array[returnStack->top - 3] = 0;
+	}
+	//debug();
+	cmdbuf->ip = cmdbuf->size -2; // Will be incremented again by word_next()
+	//printf("EX jumping to command: %s\n", cmdbuf->array[cmdbuf->ip + 1]->name);
+	return;
+}
+
 
 // Stack manipulation
 void exch2(){
@@ -706,6 +768,10 @@ void drop(){
 
 void dropStack(){
 	dataStack->top = -1;
+	return;
+}
+
+void noop(){
 	return;
 }
 

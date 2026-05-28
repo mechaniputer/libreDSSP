@@ -172,6 +172,7 @@ void word_enter(){
 	push(returnStack, (intptr_t) cmdbuf->array);
 	push(returnStack, (intptr_t) cmdbuf->size);
 	//printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+	//printf("Return stack height is %d\n",returnStack->top);
 
 	// Load the new context
 	cmdbuf->array = (codeword_t **) (current_codeword->data);
@@ -492,6 +493,19 @@ int commandParse(char * line, dict * vocab){
 				}else{
 					cmdAppend(cmdbuf, dict_entry);
 				}
+			}else if(!strcmp(statement, "RP")){
+				cmdbuf->status |= STAT_INC_RP_LOOP;
+				codeword_t *dict_entry = coreSearch("RP", vocab);
+				if(dict_entry == NULL){
+					ERR_MISSING_CORE
+				}
+				// Emit to cmdbuf or word array
+				if(cmdbuf->status & STAT_INC_COMPILE){
+					CHECK_CAP_CODE
+					newWordCode[newWordCodeLen++] = dict_entry;
+				}else{
+					cmdAppend(cmdbuf, dict_entry);
+				}
 			}else if(!strcmp(statement, "BR")){
 				cmdbuf->status |= STAT_BR_NO_ELSE;
 				codeword_t *dict_entry = coreSearch("BR", vocab);
@@ -561,7 +575,18 @@ int commandParse(char * line, dict * vocab){
 							printf("Found core word %s inside DO loop\n", statement);
 							cmdbuf->status &= (~STAT_INC_DO_LOOP);
 							// Emit LOOP codeword after the single-word loop body
-							codeword_t *loop_cw = coreSearch("LOOP", vocab);
+							codeword_t *loop_cw = coreSearch("DO_LOOP", vocab);
+							if(loop_cw == NULL){
+								ERR_MISSING_CORE
+							}
+							CHECK_CAP_CODE
+							newWordCode[newWordCodeLen++] = loop_cw;
+						}else if(cmdbuf->status & STAT_INC_RP_LOOP){
+							// If this finishes a RP, reset that status
+							printf("Found core word %s inside RP loop\n", statement);
+							cmdbuf->status &= (~STAT_INC_RP_LOOP);
+							// Emit RP_LOOP codeword after the single-word loop body
+							codeword_t *loop_cw = coreSearch("RP_LOOP", vocab);
 							if(loop_cw == NULL){
 								ERR_MISSING_CORE
 							}
@@ -584,7 +609,18 @@ int commandParse(char * line, dict * vocab){
 								printf("Found user word %s inside DO loop\n", statement);
 								cmdbuf->status &= (~STAT_INC_DO_LOOP);
 								// Emit LOOP codeword after the single-word loop body
-								codeword_t *loop_cw = coreSearch("LOOP", vocab);
+								codeword_t *loop_cw = coreSearch("DO_LOOP", vocab);
+								if(loop_cw == NULL){
+									ERR_MISSING_CORE
+								}
+								CHECK_CAP_CODE
+								newWordCode[newWordCodeLen++] = loop_cw;
+							}else if(cmdbuf->status & STAT_INC_RP_LOOP){
+								// If this finishes a DO, reset that status
+								printf("Found user word %s inside DO loop\n", statement);
+								cmdbuf->status &= (~STAT_INC_RP_LOOP);
+								// Emit LOOP codeword after the single-word loop body
+								codeword_t *loop_cw = coreSearch("RP_LOOP", vocab);
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
@@ -609,7 +645,18 @@ int commandParse(char * line, dict * vocab){
 								printf("Found var push %s inside DO loop\n", statement);
 								cmdbuf->status &= (~STAT_INC_DO_LOOP);
 								// Emit LOOP codeword after the single-word loop body
-								codeword_t *loop_cw = coreSearch("LOOP", vocab);
+								codeword_t *loop_cw = coreSearch("DO_OOP", vocab);
+								if(loop_cw == NULL){
+									ERR_MISSING_CORE
+								}
+								CHECK_CAP_CODE
+								newWordCode[newWordCodeLen++] = loop_cw;
+							}else if(cmdbuf->status & STAT_INC_RP_LOOP){
+								// If this finishes a RP, reset that status
+								printf("Found var push %s inside RP loop\n", statement);
+								cmdbuf->status &= (~STAT_INC_RP_LOOP);
+								// Emit LOOP codeword after the single-word loop body
+								codeword_t *loop_cw = coreSearch("RP_LOOP", vocab);
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
@@ -638,7 +685,18 @@ int commandParse(char * line, dict * vocab){
 								printf("This word completed a DO loop at the end of a word\n");
 								cmdbuf->status &= (~STAT_INC_DO_LOOP);
 								// Emit LOOP codeword after the single-word loop body
-								codeword_t *loop_cw = coreSearch("LOOP", vocab);
+								codeword_t *loop_cw = coreSearch("DO_LOOP", vocab);
+								if(loop_cw == NULL){
+									ERR_MISSING_CORE
+								}
+								CHECK_CAP_CODE
+								newWordCode[newWordCodeLen++] = loop_cw;
+							}else if(cmdbuf->status & STAT_INC_RP_LOOP){
+								// If this finishes a RP, reset that status
+								printf("This word completed a RP loop at the end of a word\n");
+								cmdbuf->status &= (~STAT_INC_RP_LOOP);
+								// Emit LOOP codeword after the single-word loop body
+								codeword_t *loop_cw = coreSearch("RP_LOOP", vocab);
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
@@ -661,7 +719,17 @@ int commandParse(char * line, dict * vocab){
 						printf("Found core word %s inside DO loop\n", statement);
 						cmdbuf->status &= (~STAT_INC_DO_LOOP);
 						// Emit LOOP codeword after the single-word loop body
-						codeword_t *loop_cw = coreSearch("LOOP", vocab);
+						codeword_t *loop_cw = coreSearch("DO_LOOP", vocab);
+						if(loop_cw == NULL){
+							ERR_MISSING_CORE
+						}
+						cmdAppend(cmdbuf, loop_cw);
+					}else if(cmdbuf->status & STAT_INC_RP_LOOP){
+						// If this finishes a DO, reset that status
+						printf("Found core word %s inside RP loop\n", statement);
+						cmdbuf->status &= (~STAT_INC_RP_LOOP);
+						// Emit LOOP codeword after the single-word loop body
+						codeword_t *loop_cw = coreSearch("RP_LOOP", vocab);
 						if(loop_cw == NULL){
 							ERR_MISSING_CORE
 						}
@@ -678,7 +746,17 @@ int commandParse(char * line, dict * vocab){
 							printf("Found user word %s inside DO loop\n", statement);
 							cmdbuf->status &= (~STAT_INC_DO_LOOP);
 							// Emit LOOP codeword after the single-word loop body
-							codeword_t *loop_cw = coreSearch("LOOP", vocab);
+							codeword_t *loop_cw = coreSearch("DO_LOOP", vocab);
+							if(loop_cw == NULL){
+								ERR_MISSING_CORE
+							}
+							cmdAppend(cmdbuf, loop_cw);
+						}else if(cmdbuf->status & STAT_INC_RP_LOOP){
+							// If this finishes a DO, reset that status
+							printf("Found user word %s inside RP loop\n", statement);
+							cmdbuf->status &= (~STAT_INC_RP_LOOP);
+							// Emit LOOP codeword after the single-word loop body
+							codeword_t *loop_cw = coreSearch("RP_LOOP", vocab);
 							if(loop_cw == NULL){
 								ERR_MISSING_CORE
 							}

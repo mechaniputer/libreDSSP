@@ -70,7 +70,10 @@ void lessthan();
 
 // Looping
 void do_begin();
-void loop();
+void do_loop();
+void rp_begin();
+void rp_loop();
+void loop_exit();
 
 // Stack manipulation
 void exch2();
@@ -86,6 +89,7 @@ void drop();
 void dropStack();
 
 // Misc
+void noop();
 void _undefined();
 void pushLiteral();
 void pushVar();
