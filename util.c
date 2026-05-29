@@ -46,7 +46,7 @@ codeword_t *current_codeword = NULL;
 extern stack *returnStack;
 
 #define INIT_STATEMENT_CAP (8)
-#define INIT_WORDCODE_CAP (32)
+#define INIT_WORDCODE_CAP (16)
 #define INIT_WORDTEXT_CAP (32)
 
 #define ERR_FATAL 	assert(0);
