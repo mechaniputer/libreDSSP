@@ -15,7 +15,7 @@
 #	You should have received a copy of the GNU General Public License \
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
 CFLAGS = -I/usr/local/include -L/usr/local/lib -Wall -ggdb
-LDLIBS = -lreadline
+LDLIBS = -ledit
 all: dssp
 dssp: stack.o cmdbuf.o dict.o corewords.o util.o
 	cc $(CFLAGS) dssp.c -o dssp stack.o cmdbuf.o dict.o corewords.o util.o $(LDLIBS)

@@ -305,9 +305,10 @@ static inline void branch_helper(codeword_t *outcome){
 //       At first these JUMP words will just skip the next intruction, but as a later optimization they can each be set to skip to the end of the branch.
 //       With that change, branches will not need to call xt() anymore (we will rely fully on word_next()).
 //       Branches will still set the IP forwards once (at most) but won't need to do any follow-up.
-//       The next step will be to modify EX to (still clean up the loop counter and then) do what word_exit() does.
-//       As long as everything else in the call chain simply returns to word_next(), it should work.
-//       Then EXT can do what EX does multiple times in a loop. Again, if we find our way back to word_next(), it should be fine.
+//       The next step will be to modify EX to (still clean up the loop counter and then) do what word_exit() does until we find the loop we are in.
+//       We can find the loop by exiting words until we are about to execute do_loop or rp_loop (there might be a cleaner way)
+//       As long as everything else in the call chain simply returns to word_next() and we run do_loop or rp_loop, it should work.
+//       EXT can do the same thing for more layers of loops. Again, if we find our way back to word_next(), it should be fine.
 static inline void brs_helper(codeword_t *outcome){
 	if(outcome->user == 1){
 		// Push IP to return to after branch completes

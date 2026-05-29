@@ -21,8 +21,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <editline/readline.h>
 
 #include "util.h"
 #include "dict.h"

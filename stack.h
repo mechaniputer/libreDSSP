@@ -27,9 +27,9 @@ typedef struct stack stack;
 
 struct stack
 {
+	long * array;
 	int capacity;
 	int top;
-	long * array;
 };
 
 stack * newStack();

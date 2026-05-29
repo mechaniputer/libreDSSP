@@ -61,27 +61,27 @@ typedef struct dict dict;
 
 struct undefined_word {
 	char *name;                    // name of undefined word
-	codeword_t **references;       // array of pointers to codewords that reference this
-	int ref_count;                 // number of references
-	int ref_capacity;              // allocated space for references array
+	codeword_t ** references;       // array of pointers to codewords that reference this
 	codeword_t * placeholder;      // The word that all of the refs point to
 	undefined_word_t *next;        // next entry in linked list
+	int ref_count;                 // number of references
+	int ref_capacity;              // allocated space for references array
 };
 
 struct variable
 {
 	char * name;
-	int value;
 	variable * next;
+	int value;
 };
 
 struct subdict
 {
 	char * name;
 	subdict * next;
-	int open;
 	codeword_t * wordlist;
 	variable * varlist;
+	int open;
 };
 
 struct dict
@@ -89,7 +89,7 @@ struct dict
 	codeword_t * core;
 	subdict * sub;
 	subdict * grow;
-	undefined_word_t *undefined;
+	undefined_word_t * undefined;
 };
 
 // Check if a name is already used for a word/var

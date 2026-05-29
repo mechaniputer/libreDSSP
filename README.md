@@ -50,7 +50,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - SP, CR
 - ."hello" printing
 - [comments]
-- GNU readline support
+- Editline support (Also works with GNU readline)
 - Load and run code from file at startup
 - B10 (as a placeholder since we currently only support base 10 I/O)
 - GROW, USE, SHUT, ?$

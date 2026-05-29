@@ -47,21 +47,20 @@ typedef struct codeword codeword_t;
 struct codeword
 {
 	void (*xt)();  // Execution token (a function pointer)
+	codeword_t * next;
+	char * name;    // Word name
+	char * text;    // For user words, the original definition. For printString, the string to print. Others can be NULL.
 	intptr_t data; // Data payload: literal, pointer, or 0
 	int size;      // Number of words in this word
-	char *name;    // Word name
 	int user;      // 1 if user-defined, 0 if not.
-	char *text;    // For user words, the original definition. For printString, the string to print. Others can be NULL.
-	codeword_t * next;
 };
 
 struct cmdbuffer_struct
 {
+	codeword_t ** array;
 	int capacity;
 	int size;
 	int status; // Used by parser to note incomplete phrases
-	codeword_t ** array;
-
 	int ip; // Current instruction pointer
 };
 
