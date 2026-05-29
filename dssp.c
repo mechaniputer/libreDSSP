@@ -40,6 +40,12 @@ int main(int argc, char *argv[]){
 	vocab->grow = NULL;
 	vocab->undefined = NULL;
 
+	// Most common literals
+	defCore("1", push_one, vocab);
+	defCore("2", push_two, vocab);
+	defCore("4", push_four, vocab);
+	defCore("8", push_eight, vocab);
+
 	// Arithmetic
 	defCore("+", plus, vocab);
 	defCore("*", multiply, vocab);
@@ -98,7 +104,7 @@ int main(int argc, char *argv[]){
 
 	// Misc
 	// TODO for special functions we should just use references instead of the dictionary.
-	//defCore("PUSHLIT", pushLiteral, vocab); // Lookup not needed
+	defCore("PUSHLIT", pushLiteral, vocab);
 	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
 	defCore(";S", word_exit, vocab); // Not to be used directly
 	defCore("NOP", noop, vocab);

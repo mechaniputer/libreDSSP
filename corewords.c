@@ -34,6 +34,23 @@ extern codeword_t * current_codeword;
 extern stack *returnStack;
 extern dict * vocab;
 
+
+void push_one(){
+	push(dataStack, 1);
+}
+
+void push_two(){
+	push(dataStack, 2);
+}
+
+void push_four(){
+	push(dataStack, 4);
+}
+
+void push_eight(){
+	push(dataStack, 8);
+}
+
 void plus(){
 	int temp;
 	// -1 indicates empty dataStack
@@ -276,6 +293,7 @@ void ifminus(){
 	return;
 }
 
+/*
 // This helper replaces common code in BR-, BR0, and BR+ to reduce code duplication and make it easier to maintain.
 static inline void branch_helper(codeword_t *outcome){
 	if(outcome->user == 1){
@@ -327,12 +345,16 @@ static inline void brs_helper(codeword_t *outcome){
 		(*outcome->xt)();
 		cmdbuf->ip += 3;
 	}
-}
+}*/
 
+// Example code:    BR- FOO BAR
+// Compiled result: BR- FOO SKP BAR
+// If taken, do nothing.
+// If not taken, ip+=2
 void branchminus(){
 	//printf("In branchminus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
-		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR-\n");
+			fprintf(stderr,"ERROR: Insufficient branch outcomes for BR-\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
@@ -344,17 +366,17 @@ void branchminus(){
 		return;
 	}
 
-	if(pop(dataStack) < 0){ // Do the first thing
-		//printf("Doing first thing\n");
-		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
-	}else{
-		//printf("Doing second thing\n");
-		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
+	if(pop(dataStack) >= 0){
+		cmdbuf->ip += 2;
 	}
 
 	return;
 }
 
+// Example code:    BR0 FOO BAR
+// Compiled result: BR0 FOO SKP BAR
+// If taken, do nothing.
+// If not taken, ip+=2
 void branchzero(){
 	//printf("In branchzero()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
@@ -370,17 +392,17 @@ void branchzero(){
 		return;
 	}
 
-	if(pop(dataStack) == 0){ // Do the first thing
-		//printf("Doing first thing\n");
-		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
-	}else{
-		//printf("Doing second thing\n");
-		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
+	if(pop(dataStack) != 0){
+		cmdbuf->ip += 2;
 	}
 
 	return;
 }
 
+// Example code:    BR+ FOO BAR
+// Compiled result: BR+ FOO SKP BAR
+// If taken, do nothing.
+// If not taken, ip++
 void branchplus(){
 	//printf("In branchplus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
@@ -396,17 +418,15 @@ void branchplus(){
 		return;
 	}
 
-	if(pop(dataStack) > 0){ // Do the first thing
-		//printf("Doing first thing\n");
-		branch_helper(cmdbuf->array[(cmdbuf->ip)+1]);
-	}else{
-		//printf("Doing second thing\n");
-		branch_helper(cmdbuf->array[(cmdbuf->ip)+2]);
+	if(pop(dataStack) > 0){
+		cmdbuf->ip += 2;
 	}
 
 	return;
 }
 
+// Example code:    BRS FOO BAR BAZ
+// Compiled result: BRS FOO SKP BAR SKP BAZ
 void branchsign(){
 	//printf("In branchsign()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 3){
@@ -423,22 +443,17 @@ void branchsign(){
 	}
 
 	intptr_t temp = pop(dataStack);
-	if(temp < 0){ // Do the first thing
-		//printf("Doing first thing\n");
-		brs_helper(cmdbuf->array[(cmdbuf->ip)+1]);
-	}else if(temp == 0){ // Do the second thing
-		//printf("Doing second thing\n");
-		brs_helper(cmdbuf->array[(cmdbuf->ip)+2]);
+	// If it's <0 we do nothing and the next word runs
+	if(temp == 0){ // Do the second thing
+		cmdbuf->ip += 2;
 	}else{ // Do the third thing
-		//printf("Doing third thing\n");
-		brs_helper(cmdbuf->array[(cmdbuf->ip)+3]);
+		cmdbuf->ip += 4;
 	}
 	return;
 }
 
-// Example of branch syntax:
-// BR 0 P0 1 P1 2 P2 ELSE P3
-// Minimum operands: 1 condition, 1 outcome, 1 ELSE, 1 more outcome. (total 4)
+// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
+// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ ERG
 void branch(){
 	//printf("In branch()\n");
 	//debug();
@@ -456,9 +471,12 @@ void branch(){
 	}
 
 	intptr_t tempval = pop(dataStack);
+
 	int tempcondip = cmdbuf->ip+1; // IP of condition we are checking
 	codeword_t * tempcond = cmdbuf->array[tempcondip];
+	// FIXME should put actual values in the cells, not rely on ->data
 	while(strcmp(tempcond->name, "ELSE") && (tempcond->data != tempval)){
+		printf("Name is %s\n", tempcond->name);
 		tempcondip += 2;
 		tempcond = cmdbuf->array[tempcondip];
 	}
@@ -791,8 +809,10 @@ void _undefined(){
 }
 
 void pushLiteral(){
-	//printf("Pushing %ld\n",current_codeword->data);
-	push(dataStack, current_codeword->data);
+	intptr_t operand = (intptr_t) cmdbuf->array[cmdbuf->ip+1];
+	printf("Pushing %ld\n",operand);
+	push(dataStack, operand);
+	cmdbuf->ip++;
 	return;
 }
 

@@ -31,6 +31,10 @@ extern codeword_t *current_codeword;
 typedef struct dict dict;
 
 // Arithmetic
+void push_one();
+void push_two();
+void push_four();
+void push_eight();
 void plus();
 void multiply();
 void minus();

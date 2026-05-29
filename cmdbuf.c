@@ -62,24 +62,7 @@ void cmdGrow(cmdbuffer * cmdbuf){
 
 
 // FIXME: These one-use codewords are not the DSSP way!
-//        I have realized that in DSSP-32, there were corewords to push 0, 1, 2, 4 (not 3).
-//        Any other literal push was fetched from the word body
-//        This means literal pushes (aside from 0, 1,2,4) are ineligible to be BR/IF/DO/RP outcomes
-//        Same goes for:
-//        newVarDecl(): VAR X
-//        newVarAsgn(): ! x
-//        newVarPush(): X
-
-codeword_t * newLiteral(intptr_t value) {
-	codeword_t *cw = malloc(sizeof(codeword_t));
-	cw->xt = pushLiteral;
-	cw->data = value;
-	cw->name = "(literal)";
-	cw->text = NULL;
-	cw->next = NULL;
-	cw->user = 0; // Not user-defined word
-	return cw;
-}
+//        Currently phasing them out
 
 codeword_t * newVarDecl(char * name){
 	codeword_t *cw = malloc(sizeof(codeword_t));

@@ -302,15 +302,33 @@ void resolve_undefined_word(dict *vocab, char *name, codeword_t *def){
 	for(int i=0; i<curr->ref_count ; i++){
 		// i denotes just one of our references
 		int num_words = curr->references[i]->size;
-		//printf("num_words is %d", num_words);
+		printf("num_words is %d\n", num_words);
 		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
+		print_codewords(dependent_array);
+
+		int temp_else_index=0;
+		codeword_t * else_cw_ptr = coreSearch("ELSE", vocab);
+		assert(else_cw_ptr != NULL);
+
 		for(int j=0; j<num_words; j++){
-			//printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
-			//printf("See name %s \n", dependent_array[j]->name);
+			printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
+			printf("See name %s \n", dependent_array[j]->name);
 			if(!strcmp(name, dependent_array[j]->name)){
 				// Found a match
 				dependent_array[j] = def;
 			}
+			if(!strcmp(dependent_array[j]->name, "PUSHLIT")){
+				// Skip the literal
+				j++;
+			}
+			if(!strcmp(dependent_array[j]->name, "BR")){
+				// Find the ELSE so we know when to stop taking double steps
+				for(temp_else_index = j+1; temp_else_index<num_words; temp_else_index++){
+					if(dependent_array[j] == else_cw_ptr) break;
+				}
+			}
+
+			if(j < temp_else_index) j++; // Take double steps until we are out of the BR
 		}
 	}
 

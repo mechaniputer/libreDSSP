@@ -44,6 +44,7 @@ codeword_t *current_codeword = NULL;
 // Global return stack for nested word execution
 // (defined in dssp.c, used by word_enter() and word_exit())
 extern stack *returnStack;
+extern dict * vocab;
 
 #define INIT_STATEMENT_CAP (8)
 #define INIT_WORDCODE_CAP (16)
@@ -96,18 +97,51 @@ extern stack *returnStack;
 // Shows current cmdbuf, ip, and stack contents
 void debug(){
 	printf("*** DEBUG INFO ***\n");
-	for(int i=0; i<= cmdbuf->size; i++){
-		printf("%p: ", (void*)cmdbuf->array[i]);
-		if(cmdbuf->array[i] != NULL){
-			printf(" %s", cmdbuf->array[i]->name);
-		}
-		if(i== cmdbuf->ip){
-			printf(" <IP>");
-		}
-		printf("\n");
-	}
+	printf("IP = %d\n",cmdbuf->ip);
+	print_codewords(cmdbuf->array);
 	showStack();
 	printf("*** END ***\n");
+}
+
+// Takes a pointer to any NULL-terminated array of codewords
+// Displays the contents/meaning of each one in sequence
+// Essentially a DSSP decompiler
+void print_codewords(codeword_t ** array){
+	// Note: This hack is necessary to avoid segfaulting on codewords containing literal values
+	int temp_else_index = 0;
+	codeword_t * else_cw_ptr = coreSearch("ELSE", vocab);
+	assert(else_cw_ptr != NULL);
+
+	int i=0;
+	while((array[i] != NULL) || (i < temp_else_index)){
+		// Either we are looking at a BR literal or we are not at the NULL sentinel yet
+
+		if(i < temp_else_index){
+			/// We are taking double steps inside of a BR
+			// Print the literal
+			printf("%p LIT %ld\n", (void*)&array[i], (intptr_t) cmdbuf->array[i]);
+			i++;
+		}
+
+		// If we were pointing at a literal before, we incremented i and should see a named word.
+		printf("%p CMD %s\n", (void*)&array[i], array[i]->name);
+		if(!strcmp("PUSHLIT", array[i]->name)){
+			// PUSHLIT is followed by a literal that we don't want to dereference
+			i++;
+			printf("%p: ", (void*) &array[i]);
+			printf("Literal %ld\n", (intptr_t) array[i]);
+		}else if(!strcmp(array[i]->name, "BR")){
+			// BR is followed by a bunch of literals that we don't want to dereference
+			// Find the ELSE so we know when to stop taking double steps
+			// WARNING: NO NULL CHECK HERE
+			int limit = 0;
+			for(temp_else_index = i+1; ; temp_else_index+=2){
+				if(array[temp_else_index] == else_cw_ptr) break;
+				if((limit++) > 15) assert(0);
+			}
+		}
+		i++;
+	}
 }
 
 // Deals with ."hello" print statements
@@ -148,23 +182,22 @@ void word_next(){
 	// commands from the prompt or a file. It might be better for branch
 	// prediction on modern CPUs, plus it would save some memory in user words.
 	// We would also need to revise looping corewords with this change.
-
 	cmdbuf->ip = 0;
 	// TODO Consider using the size as a bound instead of a NULL sentinel (fewer loads)
 	while(cmdbuf->array[cmdbuf->ip] != NULL){
-		//debug();
+		debug();
 		current_codeword = cmdbuf->array[cmdbuf->ip];
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
 	}
-	//printf("word_next() finished looping\n");
+	printf("word_next() finished looping\n");
 	return;
 }
 
 
 // AKA DO_COLON
 void word_enter(){
-	//printf("word_enter() entering %s\n", current_codeword->name);
+	printf("word_enter() entering %s\n", current_codeword->name);
 
 	// Push former context
 	push(returnStack, (intptr_t) cmdbuf->ip);
@@ -273,25 +306,30 @@ int commandParse(char * line, dict * vocab){
 				//printf("String complete: %s\n",statement);
 
 				if(cmdbuf->status & STAT_INC_PRINT){
-					//printf("Emitting print codewords for string\n");
+					printf("Emitting print codewords for string\n");
 					cmdbuf->status &= (~STAT_INC_PRINT);
-					// Emit a codeword that pushes the string pointer
-					codeword_t * push_ptr = newLiteral((intptr_t) statement);
-					codeword_t * push_len = newLiteral((intptr_t) strlen(statement));
-					codeword_t * print_st = coreSearch("TOS", vocab);
-					if(print_st == NULL){
+
+					codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
+					codeword_t * st_addr = (codeword_t *) statement;
+					codeword_t * st_len = (codeword_t *) strlen(statement);
+					codeword_t * cw_print_st = coreSearch("TOS", vocab);
+					if((cw_print_st == NULL) || (cw_push_literal == NULL)){
 						ERR_MISSING_CORE
 					}
 					if(cmdbuf->status & STAT_INC_COMPILE){
 						// Add codewords to word definition
-						add_cw_to_def(push_ptr);
-						add_cw_to_def(push_len);
-						add_cw_to_def(print_st);
+						add_cw_to_def(cw_push_literal);
+						add_cw_to_def(st_addr);
+						add_cw_to_def(cw_push_literal);
+						add_cw_to_def(st_len);
+						add_cw_to_def(cw_print_st);
 					}else{
 						// Add codewords to command buffer
-						add_cw_to_cmdbuf(cmdbuf, push_ptr);
-						add_cw_to_cmdbuf(cmdbuf, push_len);
-						add_cw_to_cmdbuf(cmdbuf, print_st);
+						add_cw_to_cmdbuf(cmdbuf, cw_push_literal);
+						add_cw_to_cmdbuf(cmdbuf, st_addr);
+						add_cw_to_cmdbuf(cmdbuf, cw_push_literal);
+						add_cw_to_cmdbuf(cmdbuf, st_len);
+						add_cw_to_cmdbuf(cmdbuf, cw_print_st);
 					}
 				}else{
 					// TODO: Handle the case where the string is not marked for printing
@@ -345,15 +383,53 @@ int commandParse(char * line, dict * vocab){
 
 		}else if (((ch == '\0') || (ch == ' ') || (ch == '\t')) && (statement_len != 0)){ 	// Whitespace, deduplicated, including newlines
 			statement[statement_len] = '\0';
-			if(isNum(statement)){
-				codeword_t *lit_cw = newLiteral(atol(statement));
 
-				if(cmdbuf->status & STAT_INC_COMPILE){
-					// Add literal codeword to word definition
-					add_cw_to_def(lit_cw);
+			if(cmdbuf->status & STAT_BR_NO_ELSE){
+				// Every alternating word after a BR should be treated as a condition
+				if(cmdbuf->status & STAT_EXPECT_BR_COND){
+					cmdbuf->status &= (~STAT_EXPECT_BR_COND); // The current statement is not a branch condition nor ELSE
 				}else{
-					// Add literal codeword to command buffer
-					add_cw_to_cmdbuf(cmdbuf, lit_cw);
+					cmdbuf->status |= STAT_EXPECT_BR_COND; // The current statement should be interpreted as a branch condition (or an ELSE)
+				}
+			}
+
+			if(isNum(statement)){
+
+				// FIXME We need to detect whether this is a BR condition!
+				// If it's a BR condition, put the actual value in the cell.
+				// Otherwise do the below.
+				if(cmdbuf->status & STAT_EXPECT_BR_COND){
+					codeword_t * lit_val = (codeword_t *) atol(statement);
+						if(cmdbuf->status & STAT_INC_COMPILE){
+							// Add literal codeword to word definition
+							add_cw_to_def(lit_val);
+						}else{
+							// Add literal codeword to command buffer
+							add_cw_to_cmdbuf(cmdbuf, lit_val);
+						}
+				}else{
+					// Might be one of the single-word core literals
+					codeword_t * cw = coreSearch(statement, vocab);
+					if(cw != NULL){
+						if(cmdbuf->status & STAT_INC_COMPILE){
+							add_cw_to_def(cw);
+						}else{
+							add_cw_to_cmdbuf(cmdbuf, cw);
+						}
+					}else{
+						codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
+						codeword_t * lit_val = (codeword_t *) atol(statement);
+
+						if(cmdbuf->status & STAT_INC_COMPILE){
+							// Add literal codeword to word definition
+							add_cw_to_def(cw_push_literal);
+							add_cw_to_def(lit_val);
+						}else{
+							// Add literal codeword to command buffer
+							add_cw_to_cmdbuf(cmdbuf, cw_push_literal);
+							add_cw_to_cmdbuf(cmdbuf, lit_val);
+						}
+					}
 				}
 			}else if(!strcmp(statement, ":")){ // Beginning of word declaration
 				if(cmdbuf->status != 0){
@@ -516,7 +592,9 @@ int commandParse(char * line, dict * vocab){
 				}
 			}else if((cmdbuf->status & STAT_BR_NO_ELSE) && !strcmp(statement, "ELSE")){
 				//printf("Found an ELSE\n");
+				assert(cmdbuf->status & STAT_EXPECT_BR_COND); // If we see an ELSE, we were also expecting a condition
 				cmdbuf->status &= (~STAT_BR_NO_ELSE);
+				cmdbuf->status &= (~STAT_EXPECT_BR_COND);
 				cmdbuf->status |= STAT_BR_ELSE;
 				codeword_t *dict_entry = coreSearch("ELSE", vocab);
 				if(dict_entry == NULL){
@@ -764,6 +842,7 @@ int commandParse(char * line, dict * vocab){
 					printf("%s not known\n",statement);
 				}
 			}
+
 			statement_len = 0; // No need to get a new buffer since we didn't detach it
 		}
 	}while(ch != '\0');

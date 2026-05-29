@@ -37,6 +37,7 @@
 #define STAT_BR_ELSE       (1UL<<10) // For a BR with an ELSE that still needs the last outcome.
 #define STAT_INC_DO_LOOP   (1UL<<11) // For an incomplete DO-LOOP
 #define STAT_INC_RP_LOOP   (1UL<<12) // For an incomplete RP-LOOP
+#define STAT_EXPECT_BR_COND (1UL<<13) // For when the next thing is expected to be either ELSE or a number
 
 typedef struct cmdbuffer_struct cmdbuffer;
 typedef struct command_struct command;
@@ -68,7 +69,7 @@ cmdbuffer * newCmdBuffer();
 void cmdClear(cmdbuffer * cmdbuf);
 void add_cw_to_cmdbuf(cmdbuffer * cmdbuf, codeword_t * cw);
 void cmdGrow(cmdbuffer * cmdbuf);
-codeword_t * newLiteral(intptr_t value);
+//codeword_t * newLiteral(intptr_t value);
 codeword_t * newVarDecl(char * name);
 codeword_t * newVarAsgn(variable * dest);
 codeword_t * newVarPush(variable * var);
