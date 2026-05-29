@@ -302,8 +302,11 @@ void resolve_undefined_word(dict *vocab, char *name, codeword_t *def){
 	for(int i=0; i<curr->ref_count ; i++){
 		// i denotes just one of our references
 		int num_words = curr->references[i]->size;
+		//printf("num_words is %d", num_words);
 		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
 		for(int j=0; j<num_words; j++){
+			//printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
+			//printf("See name %s \n", dependent_array[j]->name);
 			if(!strcmp(name, dependent_array[j]->name)){
 				// Found a match
 				dependent_array[j] = def;

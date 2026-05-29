@@ -47,8 +47,7 @@ void cmdClear(cmdbuffer * cmdbuf) {
 	return;
 }
 
-// As we add things to struct command, this needs to be expanded
-void cmdAppend(cmdbuffer * cmdbuf, codeword_t * cw) {
+void add_cw_to_cmdbuf(cmdbuffer * cmdbuf, codeword_t * cw) {
 	if((cmdbuf->capacity) == (cmdbuf->size+1)) cmdGrow(cmdbuf);
 	cmdbuf->array[cmdbuf->size++] = cw;
 	cmdbuf->array[cmdbuf->size] = NULL;  // Maintain NULL sentinel
