@@ -67,7 +67,6 @@ void branchzero();
 void branchplus();
 void branchsign();
 void branch();
-void brelse();
 void equality();
 void greaterthan();
 void lessthan();
@@ -93,6 +92,8 @@ void drop();
 void dropStack();
 
 // Misc
+void skip1();
+void skip2();
 void noop();
 void _undefined();
 void pushLiteral();

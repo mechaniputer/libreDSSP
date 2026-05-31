@@ -28,12 +28,14 @@
 cmdbuffer *cmdbuf;
 stack *dataStack;
 stack *returnStack;
+stack * loopStack;
 dict * vocab; // Contains all recognized words, including core and user defined
 
 int main(int argc, char *argv[]){
 	cmdbuf = newCmdBuffer();
 	dataStack = newStack();
 	returnStack = newStack();
+	loopStack = newStack();
 
 	vocab = malloc(sizeof(dict));
 	vocab->core = NULL;
@@ -77,7 +79,6 @@ int main(int argc, char *argv[]){
 	defCore("BR+", branchplus, vocab);
 	defCore("BRS", branchsign, vocab);
 	defCore("BR", branch, vocab);
-	defCore("ELSE", brelse, vocab); // Not to be used directly
 	defCore("=", equality, vocab);
 	defCore(">", greaterthan, vocab);
 	defCore("<", lessthan, vocab);
@@ -107,6 +108,8 @@ int main(int argc, char *argv[]){
 	defCore("PUSHLIT", pushLiteral, vocab);
 	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
 	defCore(";S", word_exit, vocab); // Not to be used directly
+	defCore("SKP1", skip1, vocab); // Not to be used directly
+	defCore("SKP2", skip2, vocab); // Not to be used directly
 	defCore("NOP", noop, vocab);
 	defCore("VAR", declareVar, vocab);
 	defCore("!", assignVar, vocab);

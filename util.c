@@ -94,7 +94,7 @@ extern dict * vocab;
 		newWordText = realloc(newWordText, newWordTextCap * sizeof(char)); \
 	}
 
-// Shows current cmdbuf, ip, and stack contents
+// Shows current ip, cmdbuf, and stack contents
 void debug(){
 	printf("*** DEBUG INFO ***\n");
 	printf("IP = %d\n",cmdbuf->ip);
@@ -106,39 +106,39 @@ void debug(){
 // Takes a pointer to any NULL-terminated array of codewords
 // Displays the contents/meaning of each one in sequence
 // Essentially a DSSP decompiler
+// UNTESTED: Hopefully works with new SKP-based BR, will test with new parser
 void print_codewords(codeword_t ** array){
 	// Note: This hack is necessary to avoid segfaulting on codewords containing literal values
-	int temp_else_index = 0;
+	int loop_end_index = 0;
 	codeword_t * else_cw_ptr = coreSearch("ELSE", vocab);
 	assert(else_cw_ptr != NULL);
 
 	int i=0;
-	while((array[i] != NULL) || (i < temp_else_index)){
+	while((array[i] != NULL) || (i < loop_end_index)){
 		// Either we are looking at a BR literal or we are not at the NULL sentinel yet
 
-		if(i < temp_else_index){
-			/// We are taking double steps inside of a BR
+		if((i < loop_end_index) && ((loop_end_index-i) % 3 == 0)){
+			// The condition above determines whether we are looking at a literal value
 			// Print the literal
-			printf("%p LIT %ld\n", (void*)&array[i], (intptr_t) cmdbuf->array[i]);
+			printf("%d) %p LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
 			i++;
 		}
 
 		// If we were pointing at a literal before, we incremented i and should see a named word.
-		printf("%p CMD %s\n", (void*)&array[i], array[i]->name);
+		printf("%d) %p CMD %s\n", i, (void*)&array[i], array[i]->name);
 		if(!strcmp("PUSHLIT", array[i]->name)){
 			// PUSHLIT is followed by a literal that we don't want to dereference
 			i++;
-			printf("%p: ", (void*) &array[i]);
-			printf("Literal %ld\n", (intptr_t) array[i]);
+			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
 		}else if(!strcmp(array[i]->name, "BR")){
-			// BR is followed by a bunch of literals that we don't want to dereference
-			// Find the ELSE so we know when to stop taking double steps
-			// WARNING: NO NULL CHECK HERE
-			int limit = 0;
-			for(temp_else_index = i+1; ; temp_else_index+=2){
-				if(array[temp_else_index] == else_cw_ptr) break;
-				if((limit++) > 15) assert(0);
+			// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
+			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ ERG
+			for(loop_end_index = i+3; ; loop_end_index+=3){
+				if(array[loop_end_index] != skip2) break;
 			}
+			// loop_end_index now points to ERG in the example above (position 9)
+			// We want it to point to the last literal (position 7):
+			loop_end_index -= 2;
 		}
 		i++;
 	}

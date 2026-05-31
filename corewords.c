@@ -31,7 +31,8 @@
 extern void debug();
 
 extern codeword_t * current_codeword;
-extern stack *returnStack;
+extern stack * returnStack;
+extern stack * loopStack;
 extern dict * vocab;
 
 
@@ -293,62 +294,9 @@ void ifminus(){
 	return;
 }
 
-/*
-// This helper replaces common code in BR-, BR0, and BR+ to reduce code duplication and make it easier to maintain.
-static inline void branch_helper(codeword_t *outcome){
-	if(outcome->user == 1){
-		// Push IP to return to after branch completes
-		push(returnStack, (intptr_t) (cmdbuf->ip)+2);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		push(returnStack, (intptr_t) cmdbuf->size);
-		// Set branch IP
-		cmdbuf->array = (codeword_t **) (outcome->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
-	}else if(!strcmp(outcome->name, "EX")){
-		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
-		(*outcome->xt)();
-		// Don't change the IP
-	}else{ // Literal, print, or core
-		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
-		(*outcome->xt)();
-		cmdbuf->ip += 2;
-	}
-}
-
-// Similar to branch_helper but for the three-way branch in BRS. Main difference is that the IP increment is 3 instead of 2.
-// FIXME The check to see if we are executing EX is hacky and won't work for EXT!
-//       I need a better way to alter control flow here
-//       I believe the right approach is to use "JUMP" words to skip non-taken branch outcomes.
-//       Note that this will increase the size of user defined words.
-//       At first these JUMP words will just skip the next intruction, but as a later optimization they can each be set to skip to the end of the branch.
-//       With that change, branches will not need to call xt() anymore (we will rely fully on word_next()).
-//       Branches will still set the IP forwards once (at most) but won't need to do any follow-up.
-//       The next step will be to modify EX to (still clean up the loop counter and then) do what word_exit() does until we find the loop we are in.
-//       We can find the loop by exiting words until we are about to execute do_loop or rp_loop (there might be a cleaner way)
-//       As long as everything else in the call chain simply returns to word_next() and we run do_loop or rp_loop, it should work.
-//       EXT can do the same thing for more layers of loops. Again, if we find our way back to word_next(), it should be fine.
-static inline void brs_helper(codeword_t *outcome){
-	if(outcome->user == 1){
-		// Push IP to return to after branch completes
-		push(returnStack, (intptr_t) (cmdbuf->ip)+3);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		push(returnStack, (intptr_t) cmdbuf->size);
-		// Set branch IP
-		cmdbuf->array = (codeword_t **) (outcome->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
-	}else if(!strcmp(outcome->name, "EX")){
-		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
-		(*outcome->xt)();
-		// Don't change the IP since EX just changed it to point to ;S
-	}else{ // Literal, print, or core
-		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
-		(*outcome->xt)();
-		cmdbuf->ip += 3;
-	}
-}*/
 
 // Example code:    BR- FOO BAR
-// Compiled result: BR- FOO SKP BAR
+// Compiled result: BR- FOO SKP1 BAR
 // If taken, do nothing.
 // If not taken, ip+=2
 void branchminus(){
@@ -374,7 +322,7 @@ void branchminus(){
 }
 
 // Example code:    BR0 FOO BAR
-// Compiled result: BR0 FOO SKP BAR
+// Compiled result: BR0 FOO SKP1 BAR
 // If taken, do nothing.
 // If not taken, ip+=2
 void branchzero(){
@@ -400,7 +348,7 @@ void branchzero(){
 }
 
 // Example code:    BR+ FOO BAR
-// Compiled result: BR+ FOO SKP BAR
+// Compiled result: BR+ FOO SKP1 BAR
 // If taken, do nothing.
 // If not taken, ip++
 void branchplus(){
@@ -418,7 +366,7 @@ void branchplus(){
 		return;
 	}
 
-	if(pop(dataStack) > 0){
+	if(pop(dataStack) <= 0){
 		cmdbuf->ip += 2;
 	}
 
@@ -426,7 +374,7 @@ void branchplus(){
 }
 
 // Example code:    BRS FOO BAR BAZ
-// Compiled result: BRS FOO SKP BAR SKP BAZ
+// Compiled result: BRS FOO SKP1 BAR SKP1 BAZ
 void branchsign(){
 	//printf("In branchsign()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 3){
@@ -472,49 +420,16 @@ void branch(){
 
 	intptr_t tempval = pop(dataStack);
 
-	int tempcondip = cmdbuf->ip+1; // IP of condition we are checking
-	codeword_t * tempcond = cmdbuf->array[tempcondip];
-	// FIXME should put actual values in the cells, not rely on ->data
-	while(strcmp(tempcond->name, "ELSE") && (tempcond->data != tempval)){
-		printf("Name is %s\n", tempcond->name);
-		tempcondip += 2;
-		tempcond = cmdbuf->array[tempcondip];
-	}
-	int elseip = tempcondip;
-	while(cmdbuf->array[elseip]!= NULL && strcmp(cmdbuf->array[elseip]->name, "ELSE")){
-		elseip += 2;
-		if(elseip >= cmdbuf->size){
-			assert(0);
-		}
-	}
-	assert(!strcmp(cmdbuf->array[elseip]->name, "ELSE"));
-
-	codeword_t * outcome = cmdbuf->array[tempcondip+1];
-	if(outcome->user == 1){
-		// Push IP to return to after branch completes
-		push(returnStack, (intptr_t) elseip+1);
-		push(returnStack, (intptr_t) cmdbuf->array);
-		push(returnStack, (intptr_t) cmdbuf->size);
-		//printf("BR() pushed return IP: %d cmdbuf->array: %p\n", (int) elseip+1, (void*)cmdbuf->array);
-		// Set branch IP
-		cmdbuf->array = (codeword_t **) (outcome->data);
-		cmdbuf->ip = -1; // The loop in word_next() will increment this to 0
-	}else{ // Literal, print, or core
-		current_codeword = outcome; // Important for pushLiteral to reference the correct data field
-		(*outcome->xt)();
-		cmdbuf->ip =elseip+2;
-	}
+	// TODO Iterate over condition literals until we either find one that matches or isn't followed immediately by SKP2
+	// This should be done by way of a pointer value comparison with skip2
+	// It is critical that we do not check whether a possible comparison value is an "ELSE" type marker since there can be a value collision with an actual number.
+	// Every third address after BR is a value and we only use those as values.
+	// Every third address after the first outcome is a SKP2 or an outcome word (which cannot be SKP2) and that's how we find the implicit ELSE.
+	printf("BR not working right now\n");
+	assert(0);
 	return;
 }
 
-// BR won't actually run this word. It mostly exists to prevent user from defining ELSE.
-// Should find a more elegant solution later.
-// Maybe use the BR data field to indicate the ELSE outcome IP.
-// Would still need to reserve the word (add a reserved words mechanism apart from corewords)
-void brelse(){
-	printf("In brelse(), but this function shouldn't run!\n");
-	assert(0);
-}
 
 void equality(){
 	// -1 indicates empty dataStack
@@ -571,7 +486,7 @@ void lessthan(){
 // This coreword requires one data stack operand [n] and one word operand (the next word in the command buffer).
 // The data operand [n] is popped. The command operand is executed n times.
 // Here's how it works:
-// Pop the data stack. If it's >0, decrement it and push it to the return stack.
+// Pop the data stack. If it's >0, decrement it and push it to the loop stack.
 // Then simply return and let word_next() advance into the following word.
 // That word is followed by LOOP, which will handle repetition.
 // If the data stack is <=0, skip the loop (like what BR+ would do)
@@ -590,7 +505,7 @@ void do_begin(){
 
 	intptr_t tempval = pop(dataStack);
 	if(tempval > 0){
-		push(returnStack, tempval-1);
+		push(loopStack, tempval-1);
 	}else{
 		cmdbuf->ip += 1; // Skip the following word, which should be LOOP
 	}
@@ -607,9 +522,9 @@ void do_loop(){
 		cmdClear(cmdbuf);
 		return;
 	}
-	intptr_t tempval = pop(returnStack);
+	intptr_t tempval = pop(loopStack);
 	if(tempval > 0){
-		push(returnStack, tempval-1);
+		push(loopStack, tempval-1);
 		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
 	}
 	return;
@@ -623,7 +538,7 @@ void rp_begin(){
 	}
 
 	// In RP, 1 means keep looping, 0 means stop.
-	push(returnStack, 1);
+	push(loopStack, 1);
 	return;
 }
 
@@ -634,7 +549,7 @@ void rp_loop(){
 		cmdClear(cmdbuf);
 		return;
 	}
-	intptr_t tempval = top(returnStack);
+	intptr_t tempval = top(loopStack);
 	if(tempval == 1){
 		// Keep looping
 		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
@@ -648,21 +563,11 @@ void rp_loop(){
 	return;
 }
 
-// First replace the top of the return stack with 0
-// Then exit the current word by skipping ahead to word_exit().
+// First replace the top of loopStack with 0
+// Then exit words until we are back at the loop level (rp_loop or do_loop will end the loop)
 void loop_exit(){
 	//printf("In loop_exit()\n");
-	// The return stack will have 3 values on top of the one we actually need.
-	intptr_t tempval = returnStack->array[returnStack->top - 3];
-	if(tempval <= 0){
-		fprintf(stderr, "ERROR: Unexpected value %ld on return stack in loop_exit()\n",tempval);
-		exit(-1);
-	}else{
-		returnStack->array[returnStack->top - 3] = 0;
-	}
-	//debug();
-	cmdbuf->ip = cmdbuf->size -2; // Will be incremented again by word_next()
-	//printf("EX jumping to command: %s\n", cmdbuf->array[cmdbuf->ip + 1]->name);
+	// TODO
 	return;
 }
 
@@ -795,6 +700,16 @@ void drop(){
 
 void dropStack(){
 	dataStack->top = -1;
+	return;
+}
+
+void skip1(){
+	cmdbuf->ip += 1;
+	return;
+}
+
+void skip2(){
+	cmdbuf->ip += 2;
 	return;
 }
 
