@@ -306,9 +306,7 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
 		print_codewords(dependent_array);
 
-		int temp_else_index=0;
-		codeword_t * else_cw_ptr = coreSearch("ELSE", vocab);
-		assert(else_cw_ptr != NULL);
+		int loop_end_index=-1;
 
 		for(int j=0; j<num_words; j++){
 			printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
@@ -322,13 +320,15 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 				j++;
 			}
 			if(!strcmp(dependent_array[j]->name, "BR")){
-				// Find the ELSE so we know when to stop taking double steps
-				for(temp_else_index = j+1; temp_else_index<num_words; temp_else_index++){
-					if(dependent_array[j] == else_cw_ptr) break;
+				for(loop_end_index = j+3; ; loop_end_index+=3){
+					printf("%ld\n",(intptr_t) dependent_array[loop_end_index]);
+					if(dependent_array[loop_end_index]->xt != skip2) break;
 				}
+				loop_end_index -= 2;
+				printf("Loop end index is %d\n",loop_end_index);
 			}
 
-			if(j < temp_else_index) j++; // Take double steps until we are out of the BR
+			if(j < loop_end_index) j+=2; // Take double steps until we are out of the BR
 		}
 	}
 

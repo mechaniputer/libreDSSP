@@ -325,12 +325,27 @@ int parse_tokens(char * tok){
     case PARSE_COMPILE_S1:
         if(!strcmp(tok,";")){
             emit_cw(coreSearch(";S", vocab));
-            // TODO Check whether this was a previously undefined word
             printf("Definition of %s complete\n", newWordName);
+
             // Populate the dictionary entry
 			newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer
 			newWordDictEntry->size = newWordCodeLen;
 			newWordDictEntry->text = newWordText;
+
+            // Check if this was a previously undefined word
+			undefined_word_t * entry = undefSearch(newWordName, vocab);
+			if(NULL != entry){
+				// This word was on someone's wishlist!
+				resolve_undefined_word(newWordName, newWordDictEntry, vocab);
+			}else{
+				printf("This was word was not previously referenced.\n");
+			}
+
+			// Detach
+			newWordCode = NULL;
+			newWordText = NULL;
+			newWordDictEntry = NULL;
+
             PARSE_EXIT_STATE
             compiling = 0;
             break;
@@ -338,7 +353,7 @@ int parse_tokens(char * tok){
             printf("Error: Definitions cannot be nested\n");
             assert(0);
         }
-        // FALL-THROUGH. Behavior is mostly the same as PARSE_NORMAL, except we watch for :/;
+        // FALL-THROUGH
     case PARSE_NORMAL:
         // In this mode, we expect:
         // core words, user words, undef words, literal numbers, prints, strings.
