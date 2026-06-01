@@ -29,14 +29,14 @@
 #include "cmdbuf.h"
 
 // Globals to define word across potentially several parser invocations
-char *newWordName;
-char *newWordText;
-int newWordTextLen;
-int newWordTextCap;
-codeword_t **newWordCode;
-int newWordCodeLen;
-int newWordCodeCap;
-codeword_t * newWordDictEntry;
+char *newWordNameOld;
+char *newWordTextOld;
+int newWordTextLenOld;
+int newWordTextCapOld;
+codeword_t **newWordCodeOld;
+int newWordCodeLenOld;
+int newWordCodeCapOld;
+codeword_t * newWordDictEntryOld;
 
 // Global for the codeword currently being executed
 codeword_t *current_codeword = NULL;
@@ -79,19 +79,19 @@ extern dict * vocab;
 
 // Makes sure we can add another cell to a word
 #define CHECK_CAP_CODE                                                             \
-	if (newWordCodeLen >= newWordCodeCap)                                          \
+	if (newWordCodeLenOld >= newWordCodeCapOld)                                          \
 	{                                                                              \
-		newWordCodeCap *= 2;                                                       \
-		newWordCode = realloc(newWordCode, newWordCodeCap * sizeof(codeword_t *)); \
+		newWordCodeCapOld *= 2;                                                       \
+		newWordCodeOld = realloc(newWordCodeOld, newWordCodeCapOld * sizeof(codeword_t *)); \
 	}
 
 // This takes a size param since we aren't just adding one char at a time and
 // must preallocate a known size.
 #define CHECK_CAP_TEXT(SZ)                                                 \
-	if (newWordTextLen + (SZ) >= newWordTextCap)                           \
+	if (newWordTextLenOld + (SZ) >= newWordTextCapOld)                           \
 	{                                                                      \
-		newWordTextCap += (SZ);                                            \
-		newWordText = realloc(newWordText, newWordTextCap * sizeof(char)); \
+		newWordTextCapOld += (SZ);                                            \
+		newWordTextOld = realloc(newWordTextOld, newWordTextCapOld * sizeof(char)); \
 	}
 
 // Shows current ip, cmdbuf, and stack contents
@@ -99,6 +99,7 @@ void debug(){
 	printf("*** DEBUG INFO ***\n");
 	printf("IP = %d\n",cmdbuf->ip);
 	print_codewords(cmdbuf->array);
+	printf("Data Stack: ");
 	showStack();
 	printf("*** END ***\n");
 }
@@ -106,20 +107,16 @@ void debug(){
 // Takes a pointer to any NULL-terminated array of codewords
 // Displays the contents/meaning of each one in sequence
 // Essentially a DSSP decompiler
-// UNTESTED: Hopefully works with new SKP-based BR, will test with new parser
 void print_codewords(codeword_t ** array){
 	// Note: This hack is necessary to avoid segfaulting on codewords containing literal values
-	int loop_end_index = 0;
-	codeword_t * else_cw_ptr = coreSearch("ELSE", vocab);
-	assert(else_cw_ptr != NULL);
+	int loop_end_index = -1;
 
 	int i=0;
 	while((array[i] != NULL) || (i < loop_end_index)){
 		// Either we are looking at a BR literal or we are not at the NULL sentinel yet
 
-		if((i < loop_end_index) && ((loop_end_index-i) % 3 == 0)){
-			// The condition above determines whether we are looking at a literal value
-			// Print the literal
+		// The condition above determines whether we are looking at a literal value
+		if((i <= loop_end_index) && ((loop_end_index-i) % 3 == 0)){
 			printf("%d) %p LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
 			i++;
 		}
@@ -132,13 +129,15 @@ void print_codewords(codeword_t ** array){
 			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
 		}else if(!strcmp(array[i]->name, "BR")){
 			// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
-			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ ERG
+			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
 			for(loop_end_index = i+3; ; loop_end_index+=3){
-				if(array[loop_end_index] != skip2) break;
+				printf("%ld\n",(intptr_t) array[loop_end_index]);
+				if(array[loop_end_index]->xt != skip2) break;
 			}
 			// loop_end_index now points to ERG in the example above (position 9)
 			// We want it to point to the last literal (position 7):
 			loop_end_index -= 2;
+			printf("Loop end index is %d\n",loop_end_index);
 		}
 		i++;
 	}
@@ -231,13 +230,21 @@ void word_exit(){
 	return; // to word_next() or a loop coreword
 }
 
-void add_cw_to_def(codeword_t * cw){
+void add_cw_to_def_old(codeword_t * cw){
 	CHECK_CAP_CODE
-	newWordCode[newWordCodeLen++] = cw;
+	newWordCodeOld[newWordCodeLenOld++] = cw;
 	CHECK_CAP_CODE
-	newWordCode[newWordCodeLen] = NULL;
+	newWordCodeOld[newWordCodeLenOld] = NULL;
 }
 
+// Depending on whether we are in compile mode, emits to the appropriate buffer.
+void emit(codeword_t * cw){
+	if(cmdbuf->status & STAT_INC_COMPILE){
+		add_cw_to_def_old(cw);
+	}else{
+		add_cw_to_cmdbuf(cmdbuf, cw);
+	}
+}
 
 // Populates the command buffer. Tracks completeness of current statement.
 // word_next() is called from elsewhere.
@@ -267,12 +274,12 @@ int commandParse(char * line, dict * vocab){
 		// Save all text for word definition
 		// TODO comments and newlines between : and name are omitted. Do we care?
 		if(cmdbuf->status & STAT_INC_COMPILE){
-			if(newWordText != NULL){
+			if(newWordTextOld != NULL){
 				CHECK_CAP_TEXT(1)
 				if (ch == '\0'){
-					newWordText[newWordTextLen++] = '\n';
+					newWordTextOld[newWordTextLenOld++] = '\n';
 				}else{
-					newWordText[newWordTextLen++] = ch;
+					newWordTextOld[newWordTextLenOld++] = ch;
 				}
 			}
 		}
@@ -316,21 +323,11 @@ int commandParse(char * line, dict * vocab){
 					if((cw_print_st == NULL) || (cw_push_literal == NULL)){
 						ERR_MISSING_CORE
 					}
-					if(cmdbuf->status & STAT_INC_COMPILE){
-						// Add codewords to word definition
-						add_cw_to_def(cw_push_literal);
-						add_cw_to_def(st_addr);
-						add_cw_to_def(cw_push_literal);
-						add_cw_to_def(st_len);
-						add_cw_to_def(cw_print_st);
-					}else{
-						// Add codewords to command buffer
-						add_cw_to_cmdbuf(cmdbuf, cw_push_literal);
-						add_cw_to_cmdbuf(cmdbuf, st_addr);
-						add_cw_to_cmdbuf(cmdbuf, cw_push_literal);
-						add_cw_to_cmdbuf(cmdbuf, st_len);
-						add_cw_to_cmdbuf(cmdbuf, cw_print_st);
-					}
+					emit(cw_push_literal);
+					emit(st_addr);
+					emit(cw_push_literal);
+					emit(st_len);
+					emit(cw_print_st);
 				}else{
 					// TODO: Handle the case where the string is not marked for printing
 					free(statement); // TODO Temporary
@@ -400,35 +397,17 @@ int commandParse(char * line, dict * vocab){
 				// Otherwise do the below.
 				if(cmdbuf->status & STAT_EXPECT_BR_COND){
 					codeword_t * lit_val = (codeword_t *) atol(statement);
-						if(cmdbuf->status & STAT_INC_COMPILE){
-							// Add literal codeword to word definition
-							add_cw_to_def(lit_val);
-						}else{
-							// Add literal codeword to command buffer
-							add_cw_to_cmdbuf(cmdbuf, lit_val);
-						}
+					emit(lit_val);
 				}else{
 					// Might be one of the single-word core literals
 					codeword_t * cw = coreSearch(statement, vocab);
 					if(cw != NULL){
-						if(cmdbuf->status & STAT_INC_COMPILE){
-							add_cw_to_def(cw);
-						}else{
-							add_cw_to_cmdbuf(cmdbuf, cw);
-						}
+						emit(cw);
 					}else{
 						codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
 						codeword_t * lit_val = (codeword_t *) atol(statement);
-
-						if(cmdbuf->status & STAT_INC_COMPILE){
-							// Add literal codeword to word definition
-							add_cw_to_def(cw_push_literal);
-							add_cw_to_def(lit_val);
-						}else{
-							// Add literal codeword to command buffer
-							add_cw_to_cmdbuf(cmdbuf, cw_push_literal);
-							add_cw_to_cmdbuf(cmdbuf, lit_val);
-						}
+						emit(cw_push_literal);
+						emit(lit_val);
 					}
 				}
 			}else if(!strcmp(statement, ":")){ // Beginning of word declaration
@@ -443,23 +422,22 @@ int commandParse(char * line, dict * vocab){
 				printf("Entering compile mode\n");
 				cmdbuf->status |= STAT_INC_COMPILE;
 				// Prepare vars to build definition
-				if(newWordName != NULL) free(newWordName);
-				if(newWordText != NULL) free(newWordText);
-				if(newWordCode != NULL) free(newWordCode);
-				newWordCode = malloc(INIT_WORDCODE_CAP * sizeof(codeword_t*));
-				newWordCodeCap = INIT_WORDCODE_CAP;
-				newWordName = NULL;
-				newWordText = malloc(INIT_WORDTEXT_CAP * sizeof(char)); // allocate definition text array
-				newWordTextCap = INIT_WORDTEXT_CAP;
-				newWordTextLen = 0;
-				newWordCodeLen = 0;
-				// Allocate new word in appropriate dictionary, or find prior word to redefine
-				newWordDictEntry = NULL;
+				if(newWordNameOld != NULL) free(newWordNameOld);
+				if(newWordTextOld != NULL) free(newWordTextOld);
+				if(newWordCodeOld != NULL) free(newWordCodeOld);
+				newWordCodeOld = malloc(INIT_WORDCODE_CAP * sizeof(codeword_t*));
+				newWordCodeCapOld = INIT_WORDCODE_CAP;
+				newWordNameOld = NULL;
+				newWordTextOld = malloc(INIT_WORDTEXT_CAP * sizeof(char)); // allocate definition text array
+				newWordTextCapOld = INIT_WORDTEXT_CAP;
+				newWordTextLenOld = 0;
+				newWordCodeLenOld = 0;
+				newWordDictEntryOld = NULL; // Lookup occurs once we get a name
 			}else if(!strcmp(statement, ";")){
 				if(!(cmdbuf->status & STAT_INC_COMPILE)){
 					ERR_FORB_SEMICOLON
 				}
-				if(newWordName == NULL){
+				if(newWordNameOld == NULL){
 					ERR_EMPTY_DEF
 				}
 
@@ -468,37 +446,37 @@ int commandParse(char * line, dict * vocab){
 				if(NULL == dict_entry){
 					ERR_EXIT
 				}else{
-					add_cw_to_def(dict_entry);
+					add_cw_to_def_old(dict_entry);
 				}
 
 				cmdbuf->status &= (~STAT_INC_COMPILE);
-				printf("Definition of %s complete with status %d\n",newWordName, cmdbuf->status);
+				printf("Definition of %s complete with status %d\n",newWordNameOld, cmdbuf->status);
 				CHECK_CAP_TEXT(1)
 				// Remove trailing newlines in definition text
-				while(newWordTextLen > 0 && newWordText[newWordTextLen - 1] == '\n'){
-					newWordTextLen--;
+				while(newWordTextLenOld > 0 && newWordTextOld[newWordTextLenOld - 1] == '\n'){
+					newWordTextLenOld--;
 				}
-				newWordText[newWordTextLen] = '\0';
-				printf("%s\n",newWordText);
+				newWordTextOld[newWordTextLenOld] = '\0';
+				printf("%s\n",newWordTextOld);
 
 				// Populate the dictionary entry
-				newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer
-				newWordDictEntry->size = newWordCodeLen;
-				newWordDictEntry->text = newWordText;
+				newWordDictEntryOld->data = (intptr_t) newWordCodeOld;  // Set code array pointer
+				newWordDictEntryOld->size = newWordCodeLenOld;
+				newWordDictEntryOld->text = newWordTextOld;
 
 				// Check if this was a previously undefined word
-				undefined_word_t * entry = find_undefined_word(vocab, newWordName);
+				undefined_word_t * entry = undefSearch(newWordNameOld, vocab);
 				if(NULL != entry){
 					// This word was on someone's wishlist!
-					resolve_undefined_word(vocab, newWordName, newWordDictEntry);
+					resolve_undefined_word(newWordNameOld, newWordDictEntryOld, vocab);
 				}else{
 					printf("This was word was not previously referenced.\n");
 				}
 
 				// Detach
-				newWordCode = NULL;
-				newWordText = NULL;
-				newWordDictEntry = NULL;
+				newWordCodeOld = NULL;
+				newWordTextOld = NULL;
+				newWordDictEntryOld = NULL;
 			}else if(!strcmp(statement, "GROW") || !strcmp(statement, "USE") || !strcmp(statement, "SHUT") || !strcmp(statement, "ONLY")){
 				if(cmdbuf->status & STAT_INC_COMPILE){
 					ERR_FORB_SYM_IN_WORD
@@ -524,7 +502,7 @@ int commandParse(char * line, dict * vocab){
 				codeword_t * decl = newVarDecl(statement);
 				// Emit to cmdbuf or word array
 				if(cmdbuf->status & STAT_INC_COMPILE){
-					add_cw_to_def(decl);
+					add_cw_to_def_old(decl);
 				}else{
 					add_cw_to_cmdbuf(cmdbuf, decl);
 				}
@@ -547,10 +525,10 @@ int commandParse(char * line, dict * vocab){
 					fprintf(stderr,"ERROR: No such variable %s exists\n",varName);
 					ERR_FATAL
 				}
-				variable * destvar = varSearch(varName, vocab);
+				variable_t * destvar = varSearch(varName, vocab);
 				codeword_t * asgn = newVarAsgn(destvar);
 				if(cmdbuf->status & STAT_INC_COMPILE){
-					add_cw_to_def(asgn);
+					add_cw_to_def_old(asgn);
 				}else{
 					add_cw_to_cmdbuf(cmdbuf, asgn);
 				}
@@ -562,7 +540,7 @@ int commandParse(char * line, dict * vocab){
 				}
 				// Emit to cmdbuf or word array
 				if(cmdbuf->status & STAT_INC_COMPILE){
-					add_cw_to_def(dict_entry);
+					add_cw_to_def_old(dict_entry);
 				}else{
 					add_cw_to_cmdbuf(cmdbuf, dict_entry);
 				}
@@ -574,7 +552,7 @@ int commandParse(char * line, dict * vocab){
 				}
 				// Emit to cmdbuf or word array
 				if(cmdbuf->status & STAT_INC_COMPILE){
-					add_cw_to_def(dict_entry);
+					add_cw_to_def_old(dict_entry);
 				}else{
 					add_cw_to_cmdbuf(cmdbuf, dict_entry);
 				}
@@ -586,7 +564,7 @@ int commandParse(char * line, dict * vocab){
 				}
 				// Emit to cmdbuf or word array
 				if(cmdbuf->status & STAT_INC_COMPILE){
-					add_cw_to_def(dict_entry);
+					add_cw_to_def_old(dict_entry);
 				}else{
 					add_cw_to_cmdbuf(cmdbuf, dict_entry);
 				}
@@ -602,7 +580,7 @@ int commandParse(char * line, dict * vocab){
 				}
 				// Emit to cmdbuf or word array
 				if(cmdbuf->status & STAT_INC_COMPILE){
-					add_cw_to_def(dict_entry);
+					add_cw_to_def_old(dict_entry);
 				}else{
 					add_cw_to_cmdbuf(cmdbuf, dict_entry);
 				}
@@ -616,29 +594,29 @@ int commandParse(char * line, dict * vocab){
 				// TODO Put string pointer into command/wordCode body instead of using codeWord field
 				//      Modify dictionary ops to fetch operands from code body
 			}else if(cmdbuf->status & STAT_INC_COMPILE){
-				if(newWordName == NULL){
+				if(newWordNameOld == NULL){
 					// We just found a name for the new definition
-					newWordName = malloc((1+strlen(statement))*sizeof(char));
-					strcpy(newWordName, statement);
+					newWordNameOld = malloc((1+strlen(statement))*sizeof(char));
+					strcpy(newWordNameOld, statement);
 					// Make sure it's not already used by a variable
-					if(2 == growSearch(newWordName, vocab)){
+					if(2 == growSearch(newWordNameOld, vocab)){
 						ERR_NAME_CONFLICT
 					}
-					newWordDictEntry = wordDefine(newWordName, vocab);
+					newWordDictEntryOld = wordDefine(newWordNameOld, vocab);
 
 					// newWordCode already allocated in compile mode setup
 					// Populate start of text entry
-					CHECK_CAP_TEXT(strlen(newWordName)+3)
-					strcpy(newWordText, ": ");
-					strcat(newWordText, newWordName);
-					strcat(newWordText, " ");
-					newWordTextLen = strlen(newWordText);
+					CHECK_CAP_TEXT(strlen(newWordNameOld)+3)
+					strcpy(newWordTextOld, ": ");
+					strcat(newWordTextOld, newWordNameOld);
+					strcat(newWordTextOld, " ");
+					newWordTextLenOld = strlen(newWordTextOld);
 				}else{
 					// Add word to ongoing word definition
-					variable * var_lookup = NULL;
+					variable_t * var_lookup = NULL;
 					codeword_t *dict_entry = coreSearch(statement, vocab);
 					if(NULL != dict_entry){ // Found in core dictionary
-						add_cw_to_def(dict_entry);
+						add_cw_to_def_old(dict_entry);
 						// If this finishes a BR-ELSE, reset that status
 						if(cmdbuf->status & STAT_BR_ELSE){
 							printf("Found ELSE condition (coreword) inside compiled word\n");
@@ -652,7 +630,7 @@ int commandParse(char * line, dict * vocab){
 							if(loop_cw == NULL){
 								ERR_MISSING_CORE
 							}
-							add_cw_to_def(loop_cw);
+							add_cw_to_def_old(loop_cw);
 						}else if(cmdbuf->status & STAT_INC_RP_LOOP){
 							// If this finishes a RP, reset that status
 							printf("Found core word %s inside RP loop\n", statement);
@@ -662,14 +640,14 @@ int commandParse(char * line, dict * vocab){
 							if(loop_cw == NULL){
 								ERR_MISSING_CORE
 							}
-							add_cw_to_def(loop_cw);
+							add_cw_to_def_old(loop_cw);
 						}
 					}else{ // Not found in core dictionary
 						dict_entry = wordSearch(statement, vocab);
 						var_lookup = varSearch(statement, vocab);
 						// Emit the pointer to codeword_t for user word
 						if(NULL != dict_entry){
-							add_cw_to_def(dict_entry);
+							add_cw_to_def_old(dict_entry);
 							// If this finishes a BR-ELSE, reset that status
 							if(cmdbuf->status & STAT_BR_ELSE){
 								printf("Found ELSE condition (user word) inside compiled word\n");
@@ -683,7 +661,7 @@ int commandParse(char * line, dict * vocab){
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
-								add_cw_to_def(loop_cw);
+								add_cw_to_def_old(loop_cw);
 							}else if(cmdbuf->status & STAT_INC_RP_LOOP){
 								// If this finishes a DO, reset that status
 								printf("Found user word %s inside DO loop\n", statement);
@@ -693,7 +671,7 @@ int commandParse(char * line, dict * vocab){
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
-								add_cw_to_def(loop_cw);
+								add_cw_to_def_old(loop_cw);
 							}
 						}else if(NULL != var_lookup){
 							// FIXME emit generic pushaddr word followed by address of variable data
@@ -702,7 +680,7 @@ int commandParse(char * line, dict * vocab){
 							if(cw == NULL){
 								ERR_MISSING_CORE
 							}
-							add_cw_to_def(cw);
+							add_cw_to_def_old(cw);
 
 
 							// If this finishes a BR-ELSE, reset that status
@@ -718,7 +696,7 @@ int commandParse(char * line, dict * vocab){
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
-								add_cw_to_def(loop_cw);
+								add_cw_to_def_old(loop_cw);
 							}else if(cmdbuf->status & STAT_INC_RP_LOOP){
 								// If this finishes a RP, reset that status
 								printf("Found var push %s inside RP loop\n", statement);
@@ -728,20 +706,20 @@ int commandParse(char * line, dict * vocab){
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
-								add_cw_to_def(loop_cw);
+								add_cw_to_def_old(loop_cw);
 							}
 
 						}else{
 							printf("Unknown word %s found in word definition\n",statement);
 							// Check for the word in the undefined words list
-							undefined_word_t* entry = find_undefined_word(vocab, statement);
+							undefined_word_t* entry = undefSearch(statement, vocab);
 							// If it's not there yet, add it.
 							if(NULL == entry){
-								entry = create_undefined_word(vocab, statement);
+								entry = create_undefined_word(statement, vocab);
 							}
-							add_reference(entry, newWordDictEntry);
+							add_reference(entry, newWordDictEntryOld);
 							// Emit a ref.
-							add_cw_to_def(entry->placeholder);
+							add_cw_to_def_old(entry->placeholder);
 
 							if(cmdbuf->status & STAT_BR_ELSE){
 								printf("Found ELSE condition (coreword) inside compiled word\n");
@@ -755,7 +733,7 @@ int commandParse(char * line, dict * vocab){
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
-								add_cw_to_def(loop_cw);
+								add_cw_to_def_old(loop_cw);
 							}else if(cmdbuf->status & STAT_INC_RP_LOOP){
 								// If this finishes a RP, reset that status
 								printf("This word completed a RP loop at the end of a word\n");
@@ -765,7 +743,7 @@ int commandParse(char * line, dict * vocab){
 								if(loop_cw == NULL){
 									ERR_MISSING_CORE
 								}
-								add_cw_to_def(loop_cw);
+								add_cw_to_def_old(loop_cw);
 							}
 						}
 					}
@@ -773,7 +751,7 @@ int commandParse(char * line, dict * vocab){
 			}else{
 				// Normal execution mode - emit word to cmdbuf
 				codeword_t *dict_entry = coreSearch(statement, vocab);
-				variable * var_lookup = NULL;
+				variable_t * var_lookup = NULL;
 				if(NULL != dict_entry){
 					add_cw_to_cmdbuf(cmdbuf, dict_entry);
 					if(cmdbuf->status & STAT_BR_ELSE){

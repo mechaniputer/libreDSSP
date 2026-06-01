@@ -19,7 +19,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-typedef struct variable variable;
+typedef struct variable_t variable_t;
 typedef struct subdict subdict;
 typedef struct dict dict;
 

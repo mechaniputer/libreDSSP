@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#include "tokparse.h"
 #include "dict.h"
 #include "stack.h"
 #include "cmdbuf.h"
@@ -29,6 +30,8 @@ cmdbuffer *cmdbuf;
 stack *dataStack;
 stack *returnStack;
 stack * loopStack;
+stack * tokenizerStack;
+stack * parserStack;
 dict * vocab; // Contains all recognized words, including core and user defined
 
 int main(int argc, char *argv[]){
@@ -36,6 +39,8 @@ int main(int argc, char *argv[]){
 	dataStack = newStack();
 	returnStack = newStack();
 	loopStack = newStack();
+	tokenizerStack = newStack();
+	parserStack = newStack();
 
 	vocab = malloc(sizeof(dict));
 	vocab->core = NULL;
@@ -155,7 +160,14 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				if(!commandParse(bufptr, vocab)){
+				process_line(bufptr);
+				word_next();
+				free(bufptr);
+				bufsize = 0;
+				cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
+				cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
+
+				/*if(!commandParse(bufptr, vocab)){
 					word_next();
 					free(bufptr);
 					bufsize = 0;
@@ -165,16 +177,24 @@ int main(int argc, char *argv[]){
 					free(bufptr);
 					bufsize = 0;
 					// TODO error, clear command queue
-				}
+				}*/
 			}
 			fclose(file);
 		}
 	}
 
+	int status = 0;
 	while(1){
 		assert(-1 == returnStack->top); // Ensure we have an empty return stack
 		// Show prompt, get line of input
-		char * line = prompt(cmdbuf->status);
+		char * line = prompt(status);
+		status = process_line(line);
+		free(line);
+		print_codewords(cmdbuf->array);
+		word_next();
+		cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
+		cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
+		/*
 		if(!commandParse(line, vocab)){
 			free(line);
 			word_next();
@@ -190,6 +210,7 @@ int main(int argc, char *argv[]){
 			free(line);
 			// TODO error, clear command queue
 		}
+		*/
 	}
 	return 0;
 }

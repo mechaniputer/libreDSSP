@@ -53,7 +53,7 @@
 typedef struct undefined_word undefined_word_t;
 
 typedef struct codeword codeword_t;
-typedef struct variable variable;
+typedef struct variable_t variable_t;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
@@ -68,10 +68,10 @@ struct undefined_word {
 	int ref_capacity;              // allocated space for references array
 };
 
-struct variable
+struct variable_t
 {
 	char * name;
-	variable * next;
+	variable_t * next;
 	int value;
 };
 
@@ -80,7 +80,7 @@ struct subdict
 	char * name;
 	subdict * next;
 	codeword_t * wordlist;
-	variable * varlist;
+	variable_t * varlist;
 	int open;
 };
 
@@ -95,7 +95,7 @@ struct dict
 // Check if a name is already used for a word/var
 int growSearch(char * name, dict * vocab);
 // Looks for defined variables
-variable * varSearch(char * name, dict * vocab);
+variable_t * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined
 codeword_t * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
@@ -105,14 +105,14 @@ codeword_t * wordDefine(char * name, dict * vocab);
 // Defines built-in functions
 void defCore(char * name, void (*func)(), dict * vocab);
 // Creates a new sub-dictionary
-subdict * newDict(dict * vocab, char * name);
+subdict * newDict(char * name, dict * vocab);
 // Finds a sub-dictionary by name, returns NULL if not found
-subdict * findDict(dict * vocab, char * name);
+subdict * findDict(char * name, dict * vocab);
 
 // Utility functions for undefined word table
-undefined_word_t* find_undefined_word(dict *d, char *name);
-undefined_word_t* create_undefined_word(dict *d, char *name);
+undefined_word_t* undefSearch(char *name, dict *vocab);
+undefined_word_t* create_undefined_word(char *name, dict *vocab);
 void add_reference(undefined_word_t *undef, codeword_t *ref);
-void resolve_undefined_word(dict *vocab, char *name, codeword_t *def);
+void resolve_undefined_word(char *name, codeword_t *def, dict *vocab);
 
 #endif

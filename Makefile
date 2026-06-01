@@ -17,9 +17,10 @@
 CFLAGS = -I/usr/local/include -L/usr/local/lib -Wall -ggdb
 LDLIBS = -ledit -lncurses
 all: dssp
-dssp: stack.o cmdbuf.o dict.o corewords.o util.o
-	cc $(CFLAGS) dssp.c -o dssp stack.o cmdbuf.o dict.o corewords.o util.o $(LDLIBS)
+dssp: stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o
+	cc $(CFLAGS) dssp.c -o dssp stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o $(LDLIBS)
 stack.o: stack.c stack.h
+stack.o: tokparse.c tokparse.h
 cmdbuf.o: cmdbuf.c cmdbuf.h
 dict.o: dict.c dict.h
 corewords.o: corewords.c corewords.h

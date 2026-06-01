@@ -401,7 +401,7 @@ void branchsign(){
 }
 
 // Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
-// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ ERG
+// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
 void branch(){
 	//printf("In branch()\n");
 	//debug();
@@ -418,7 +418,7 @@ void branch(){
 		return;
 	}
 
-	intptr_t tempval = pop(dataStack);
+	//intptr_t tempval = pop(dataStack);
 
 	// TODO Iterate over condition literals until we either find one that matches or isn't followed immediately by SKP2
 	// This should be done by way of a pointer value comparison with skip2
@@ -517,8 +517,8 @@ void do_begin(){
 // If it's >0, decrement it, push it, and re-execute the previous word.
 void do_loop(){
 	//printf("In loop()\n");
-	if(returnStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient return stack operands for DO_LOOP\n");
+	if(loopStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient loop stack operands for DO_LOOP\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -544,8 +544,8 @@ void rp_begin(){
 
 void rp_loop(){
 	//printf("in rp_loop()\n");
-	if(returnStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient return stack operands for RP_LOOP\n");
+	if(loopStack->top < 0){
+		fprintf(stderr,"ERROR: Insufficient loop stack operands for RP_LOOP\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -555,7 +555,7 @@ void rp_loop(){
 		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
 	}else if(tempval == 0){
 		// EX/EX-/EX0/EX+/EXT has been run, making the count 0.
-		pop(returnStack);
+		pop(loopStack);
 	}else{
 		fprintf(stderr, "ERROR: Unexpected value %ld on return stack in rp_loop()\n",tempval);
 		exit(-1);
@@ -733,7 +733,7 @@ void pushLiteral(){
 
 // current_codeword->data should point to a variable struct
 void pushVar(){
-	variable * var = (variable *)current_codeword->data;
+	variable_t * var = (variable_t *)current_codeword->data;
 	intptr_t val = var->value;
 	push(dataStack, val);
 }
@@ -765,7 +765,7 @@ void declareVar(){
 	}
 
 	// No problems. Declare the var.
-	variable * tempVar = malloc(sizeof(variable));
+	variable_t * tempVar = malloc(sizeof(variable_t));
 	tempVar->name = malloc(1+strlen(varname));
 	strcpy(tempVar->name, varname);
 	tempVar->value = 0;
@@ -783,7 +783,7 @@ void assignVar(){
 		return;
 	}
 
-	((variable *)(current_codeword->data))->value = pop(dataStack);
+	((variable_t *)(current_codeword->data))->value = pop(dataStack);
 	return;
 }
 
@@ -835,10 +835,10 @@ void growSub(){
 
 	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open.
 	// If it doesn't exist, we need to create it and open it.
-	subdict * tempSub = findDict(vocab, current_codeword->text);
+	subdict * tempSub = findDict(current_codeword->text, vocab);
 
 	if(tempSub == NULL){ // We are making a new subdict
-		tempSub = newDict(vocab, current_codeword->text);
+		tempSub = newDict(current_codeword->text, vocab);
 	}
 
 	vocab->grow = tempSub;
@@ -863,7 +863,7 @@ void shutSub(){
 		return;
 	}
 
-	subdict * tempSub = findDict(vocab, current_codeword->text);
+	subdict * tempSub = findDict(current_codeword->text, vocab);
 	if (tempSub == NULL){
 		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",current_codeword->text);
 		cmdClear(cmdbuf);
@@ -888,7 +888,7 @@ void openSub(){
 		return;
 	}
 
-	subdict * tempSub = findDict(vocab, current_codeword->text);
+	subdict * tempSub = findDict(current_codeword->text, vocab);
 	if (tempSub == NULL){
 		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",current_codeword->text);
 		cmdClear(cmdbuf);

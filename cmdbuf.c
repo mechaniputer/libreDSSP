@@ -75,7 +75,7 @@ codeword_t * newVarDecl(char * name){
 	return cw;
 }
 
-codeword_t * newVarAsgn(variable * dest) {
+codeword_t * newVarAsgn(variable_t * dest) {
 	codeword_t *cw = malloc(sizeof(codeword_t));
 	cw->xt = assignVar;
 	cw->data = (intptr_t) dest;
@@ -85,7 +85,7 @@ codeword_t * newVarAsgn(variable * dest) {
 	return cw;
 }
 
-codeword_t * newVarPush(variable * var){
+codeword_t * newVarPush(variable_t * var){
 	codeword_t *cw = malloc(sizeof(codeword_t));
 	cw->xt = pushVar;
 	cw->data = (intptr_t) var;

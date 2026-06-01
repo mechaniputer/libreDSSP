@@ -34,7 +34,7 @@
 // Return 1: Word found
 // Return 2: Variable found
 int growSearch(char * name, dict * vocab){
-	variable * tempVar;
+	variable_t * tempVar;
 	codeword_t * tempWord;
 
 	assert(vocab->grow != NULL);
@@ -66,8 +66,8 @@ int growSearch(char * name, dict * vocab){
 
 // Looks for defined variables
 // TODO add a way for the user to configure the subdict search order
-variable * varSearch(char * name, dict * vocab){
-	variable * tempVar;
+variable_t * varSearch(char * name, dict * vocab){
+	variable_t * tempVar;
 	subdict * tempSub;
 
 	// Variable must have a name greater than 1 char
@@ -198,7 +198,7 @@ void defCore(char * name, void (*func)(), dict * vocab){
 }
 
 // Inserts a new subdictionary at the start of the linked list (as a stack)
-subdict * newDict(dict * vocab, char * name){
+subdict * newDict(char * name, dict * vocab){
 	// Insert
 	subdict * tempSub = malloc(sizeof(subdict));
 	tempSub->next = vocab->sub;
@@ -212,7 +212,7 @@ subdict * newDict(dict * vocab, char * name){
 	return tempSub;
 }
 
-subdict * findDict(dict * vocab, char * name){
+subdict * findDict(char * name, dict * vocab){
 	subdict * tempSub = vocab->sub;
 	while(tempSub != NULL){
 		if(!strcmp(tempSub->name, name)) return tempSub;
@@ -221,7 +221,7 @@ subdict * findDict(dict * vocab, char * name){
 	return NULL;
 }
 
-undefined_word_t* find_undefined_word(dict *vocab, char *name){
+undefined_word_t* undefSearch(char *name, dict *vocab){
 	printf("Looking for undefined word %s\n", name);
 	undefined_word_t * temp = vocab->undefined;
 	while(temp != NULL){
@@ -233,7 +233,7 @@ undefined_word_t* find_undefined_word(dict *vocab, char *name){
 }
 
 // Warning: Does not prevent adding duplicates
-undefined_word_t* create_undefined_word(dict *vocab, char *name){
+undefined_word_t* create_undefined_word(char *name, dict *vocab){
 	printf("Creating undefined word %s\n",name);
 	// Allocate and initialize
 	undefined_word_t * newUndef = malloc(sizeof(undefined_word_t));
@@ -270,7 +270,7 @@ void add_reference(undefined_word_t *undef, codeword_t *ref){
 
 // WARNING: If the words that referenced this undefined word no longer exist, it can segfault.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
-void resolve_undefined_word(dict *vocab, char *name, codeword_t *def){
+void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 	printf("Resolving previously undefined %s\n", name);
 	// First we need to find the word in the linked list.
 	// We need to keep a pointer to the previous word in the list.
