@@ -30,12 +30,10 @@
 #include "stack.h"
 
 void print_codewords(codeword_t ** array);
-void textPrint(char * text);
 int isNum(char * foo);
 void word_next();
 void word_enter();
 void word_exit();
-int commandParse(char * line, dict * vocab);
 char * prompt(int ready);
 
 #endif

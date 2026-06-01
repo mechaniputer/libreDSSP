@@ -143,18 +143,6 @@ void print_codewords(codeword_t ** array){
 	}
 }
 
-// Deals with ."hello" print statements
-void textPrint(char * text){
-	assert(text != NULL);
-	int i;
-	int len = strlen(text) - 1;
-
-	for(i = 2; i < len; i++){
-		printf("%c", text[i]);
-	}
-	return;
-}
-
 int isNum(char * st){
 	int i = 0;
 
@@ -170,7 +158,6 @@ int isNum(char * st){
 	}
 	return 1;
 }
-
 
 // Executes code in cmdbuf->array until we hit a NULL sentinel codeword
 // Each element is a codeword_t struct with an execution token (xt)
@@ -230,11 +217,43 @@ void word_exit(){
 	return; // to word_next() or a loop coreword
 }
 
+char * prompt(int status){
+	char *line;
+	if(0 == status){
+		line = readline ("* ");
+	}else{
+		line = readline ("? ");
+	}
+	//Check for EOF.
+	if (!line){
+		printf("\n");
+		line = (char*) malloc(4*sizeof(char));
+		strcpy(line, "BYE");
+	}
+	if(strcmp(line, "")) add_history(line);
+	return line;
+}
+
+
 void add_cw_to_def_old(codeword_t * cw){
 	CHECK_CAP_CODE
 	newWordCodeOld[newWordCodeLenOld++] = cw;
 	CHECK_CAP_CODE
 	newWordCodeOld[newWordCodeLenOld] = NULL;
+}
+
+/*
+
+// Deals with ."hello" print statements
+void textPrint(char * text){
+	assert(text != NULL);
+	int i;
+	int len = strlen(text) - 1;
+
+	for(i = 2; i < len; i++){
+		printf("%c", text[i]);
+	}
+	return;
 }
 
 // Depending on whether we are in compile mode, emits to the appropriate buffer.
@@ -245,6 +264,7 @@ void emit(codeword_t * cw){
 		add_cw_to_cmdbuf(cmdbuf, cw);
 	}
 }
+
 
 // Populates the command buffer. Tracks completeness of current statement.
 // word_next() is called from elsewhere.
@@ -837,21 +857,4 @@ int commandParse(char * line, dict * vocab){
 
 	return 0;
 }
-
-char * prompt(int status){
-	char *line;
-	if(0 == status){
-		line = readline ("* ");
-	}else{
-		line = readline ("? ");
-	}
-	//Check for EOF.
-	if (!line){
-		printf("\n");
-		line = (char*) malloc(4*sizeof(char));
-		strcpy(line, "BYE");
-	}
-	if(strcmp(line, "")) add_history(line);
-	return line;
-}
-
+*/

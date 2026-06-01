@@ -405,6 +405,7 @@ int parse_tokens(char * tok){
             emit_cw(coreSearch("PUSHLIT", vocab));
             emit_cw((codeword_t *) atol(tok));
         }else if((var_lookup = varSearch(tok, vocab)) != NULL){
+                // TODO emit codeword to retrieve and push var_lookup->value
                 emit_cw((codeword_t *) var_lookup);
         }else{
             // It must be a user word, possibly undefined
