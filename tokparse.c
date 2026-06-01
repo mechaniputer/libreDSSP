@@ -98,7 +98,6 @@ void tokenizer_start_line(char *line) {
 
 // Return next token from line (or NULL)
 // Filters out [comments]
-// TODO handle escaped brackets \[ and quotes \"
 char *get_next_token() {
     // If no line is here to parse
     if (!scan_ptr) return NULL;
@@ -142,8 +141,16 @@ char *get_next_token() {
                 return NULL;
             }else if(*scan_ptr == ']'){
                 tokenizer_state = pop(tokenizerStack);
+            }else if(*scan_ptr == '\\'){
+                tokenizer_state = TOK_COMMENT_ESC;
             }
-            // TODO check for backslash, go to TOK_COMMENT_ESC
+            break;
+
+        case TOK_COMMENT_ESC: // Read one character and don't pop the status, even if it's ]
+            if(*scan_ptr == '\0'){ // Cannot escape \0
+                return NULL;
+            }
+            tokenizer_state = TOK_COMMENT;
             break;
 
         case TOK_STRING:
@@ -156,10 +163,21 @@ char *get_next_token() {
                 // A quote ends the string
                 tokenAppendChar(*scan_ptr);
                 tokenizer_state = pop(tokenizerStack);
+            }else if(*scan_ptr == '\\'){
+                tokenizer_state = TOK_STRING_ESC;
             }else{
                 tokenAppendChar(*scan_ptr);
             }
             break;
+
+        case TOK_STRING_ESC: // This is here to allow us to put double quotes in strings
+            if(*scan_ptr == '\0'){ // Cannot escape \0
+                return NULL;
+            }
+            tokenAppendChar(*scan_ptr);
+            tokenizer_state = TOK_STRING;
+            break;
+
         default:
             assert(0);
             break;
