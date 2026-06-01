@@ -35,6 +35,9 @@ extern stack * returnStack;
 extern stack * loopStack;
 extern dict * vocab;
 
+void push_zero(){
+	push(dataStack, 0);
+}
 
 void push_one(){
 	push(dataStack, 1);

@@ -48,6 +48,7 @@ int main(int argc, char *argv[]){
 	vocab->undefined = NULL;
 
 	// Most common literals
+	defCore("0", push_zero, vocab);
 	defCore("1", push_one, vocab);
 	defCore("2", push_two, vocab);
 	defCore("4", push_four, vocab);
