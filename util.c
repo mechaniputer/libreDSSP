@@ -205,7 +205,7 @@ void word_enter(){
 	//printf("Return stack height is %d\n",returnStack->top);
 
 	// Load the new context
-	cmdbuf->array = (codeword_t **) (current_codeword->data);
+	cmdbuf->array = (codeword_t **) (current_codeword->userDef);
 	cmdbuf->size = current_codeword->size;
 	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
 	//printf("This word has size %d\n",cmdbuf->size);

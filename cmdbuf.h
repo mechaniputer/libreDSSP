@@ -50,10 +50,9 @@ struct codeword
 	void (*xt)();  // Execution token (a function pointer)
 	codeword_t * next;
 	char * name;    // Word name
-	char * text;    // For user words, the original definition. For printString, the string to print. Others can be NULL.
-	intptr_t data; // Data payload: literal, pointer, or 0
+	char * text;    // For user words, the original definition.
+	intptr_t userDef; // For definitions of user words
 	int size;      // Number of words in this word
-	int user;      // 1 if user-defined, 0 if not.
 };
 
 struct cmdbuffer_struct
@@ -61,7 +60,6 @@ struct cmdbuffer_struct
 	codeword_t ** array;
 	int capacity;
 	int size;
-	int status; // Used by parser to note incomplete phrases
 	int ip; // Current instruction pointer
 };
 

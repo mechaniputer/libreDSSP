@@ -26,7 +26,6 @@
 #include "util.h"
 #include "corewords.h"
 
-// FIXME In order to unify the namespace of subdict words and subdict vars, we need this new function:
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doessn't mask a function
 // Should be used whenever defining a new word to ensure that it doesn't mask a variable.
@@ -163,10 +162,9 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	tempWord->name = malloc((1+strlen(name))*sizeof(char));
 	strcpy(tempWord->name, name);
 	tempWord->xt = word_enter; // User words always call word_enter
-	tempWord->data = 0;        // Will be set to code array pointer later
-	tempWord->size = 0;        // Should correspond to number of elements in data[]
+	tempWord->userDef = 0;        // Will be set to code array pointer later
+	tempWord->size = 0;        // Should correspond to number of elements in userDef[]
 	tempWord->text = NULL;     // Will be set by parser
-	tempWord->user = 1;        // Is user-defined
 	// Regardless of initial state, now the word is named and present in the dictionary.
 	// It's up to the caller to populate the word
 	return tempWord;
@@ -179,12 +177,11 @@ void defCore(char * name, void (*func)(), dict * vocab){
 	}
 	codeword_t * temp = malloc(sizeof(codeword_t));
 	temp->xt = func;
-	temp->data = 0;      // Core words don't use data field
+	temp->userDef = 0;      // Core words don't use userDef field
 	temp->size = 0;
 	temp->name = name;
 	temp->text = NULL;   // Core words don't have source text
 	temp->next = NULL;
-	temp->user = 0;      // Not user-defined
 
 	if(vocab->core == NULL){
 		vocab->core = temp;
@@ -247,10 +244,9 @@ undefined_word_t* create_undefined_word(char *name, dict *vocab){
 	newUndef->placeholder = malloc(sizeof(codeword_t));
 	newUndef->placeholder->xt = _undefined;
 	newUndef->placeholder->name = newUndef->name; // Recycle same name buffer allocated above
-	newUndef->placeholder->data = 0;
+	newUndef->placeholder->userDef = 0;
 	newUndef->placeholder->text = NULL;
 	newUndef->placeholder->next = NULL;
-	newUndef->placeholder->user = 0; // Not user-defined word
 
 	// Insert and return
 	newUndef->next = vocab->undefined;
@@ -304,7 +300,7 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 		// i denotes just one of our references
 		int num_words = curr->references[i]->size;
 		//printf("num_words is %d\n", num_words);
-		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
+		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->userDef;
 		//print_codewords(dependent_array);
 
 		int loop_end_index=-1;

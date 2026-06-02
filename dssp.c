@@ -168,18 +168,6 @@ int main(int argc, char *argv[]){
 				bufsize = 0;
 				cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
 				cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
-
-				/*if(!commandParse(bufptr, vocab)){
-					word_next();
-					free(bufptr);
-					bufsize = 0;
-					cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
-					cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
-				}else{
-					free(bufptr);
-					bufsize = 0;
-					// TODO error, clear command queue
-				}*/
 			}
 			fclose(file);
 		}
@@ -196,23 +184,6 @@ int main(int argc, char *argv[]){
 		word_next();
 		cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
 		cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
-		/*
-		if(!commandParse(line, vocab)){
-			free(line);
-			word_next();
-
-			//printf("Printing cmdbuf->array\n");
-			//for(int i=0; i<=cmdbuf->size; i++){
-			//	printf("%d: %p\n",i, cmdbuf->array[i]);
-			//}
-			cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
-			cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
-
-		}else{
-			free(line);
-			// TODO error, clear command queue
-		}
-		*/
 	}
 	return 0;
 }

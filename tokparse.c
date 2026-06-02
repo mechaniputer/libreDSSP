@@ -314,7 +314,16 @@ int parse_tokens(char * tok){
     char * st; // For string buffers
     char * namebuf; // For buffers that we detach into the dictionary
 
-    // TODO if compiling == 1, add token to word def
+    // If we are in compile mode, record the token in the word definition text.
+    if(compiling){
+        CHECK_CAP_TEXT(strlen(tok)+1)
+        if(newWordTextLen != 0){
+            strcat(newWordText, " ");
+            newWordTextLen += 1;
+        }
+        strcat(newWordText, tok);
+        newWordTextLen += strlen(tok);
+    }
 
     switch(parser_state){
     case PARSE_COMPILE_S0:
@@ -342,7 +351,7 @@ int parse_tokens(char * tok){
             //printf("Definition of %s complete\n", newWordName);
 
             // Populate the dictionary entry
-			newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer
+			newWordDictEntry->userDef = (intptr_t) newWordCode;  // Set code array pointer
 			newWordDictEntry->size = newWordCodeLen;
 			newWordDictEntry->text = newWordText;
 
@@ -399,7 +408,6 @@ int parse_tokens(char * tok){
                 start_new_def();
                 PARSE_ENTER_STATE(PARSE_COMPILE_S0);
         }else if((st = isPrint(tok)) != NULL){
-            // TODO should use reference count for strings
             // Push the string info, and print it
             codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
             emit_cw(cw_push_literal);
@@ -408,7 +416,6 @@ int parse_tokens(char * tok){
 			emit_cw((codeword_t *) strlen(st));
 			emit_cw(coreSearch("TOS", vocab));
         }else if((st = isString(tok)) != NULL){
-            // TODO should use reference count for strings
             // Push the string info, but don't print it
             codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
             emit_cw(cw_push_literal);

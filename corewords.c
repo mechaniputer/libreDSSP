@@ -388,8 +388,7 @@ void branch(){
 	}
 
 	intptr_t tempval = pop(dataStack);
-	// TODO Iterate over condition literals until we either find one that matches or is preceded by SKP1 instead of BR/SKP2
-	// This should be done by way of a pointer value comparison with skip2() function
+	// Iterate over condition literals until we either find one that matches or is preceded by SKP1 instead of BR/SKP2
 	// Once we find the correct word to execute (following the matched literal), set cmdbuf->ip to the index preceding it.
 	int offset = 0;
 	while(1){

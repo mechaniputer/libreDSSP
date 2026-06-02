@@ -27,7 +27,6 @@ cmdbuffer * newCmdBuffer(){
 	new_cmdbuf->array = malloc(10*sizeof(codeword_t*));
 	new_cmdbuf->capacity = 10;
 	new_cmdbuf->size = 0;
-	new_cmdbuf->status = 0;
 	new_cmdbuf->ip = 0;
 
 	// NULL sentinel to end codeword array
@@ -41,7 +40,6 @@ cmdbuffer * newCmdBuffer(){
 //       In addition, if we are reading a code file, we should halt and go to the prompt on an error.
 void cmdClear(cmdbuffer * cmdbuf) {
 	cmdbuf->size = 0;
-	cmdbuf->status = 0;
 	// NULL sentinel at index 0 will cleanly do nothing
 	if(cmdbuf->capacity > 0) cmdbuf->array[0] = NULL;
 	return;
@@ -58,39 +56,4 @@ void cmdGrow(cmdbuffer * cmdbuf){
 	cmdbuf->capacity = 2 * (cmdbuf->capacity);
 	cmdbuf->array = realloc(cmdbuf->array, (cmdbuf->capacity)*sizeof(codeword_t*));
 	return;
-}
-
-
-// FIXME: These one-use codewords are not the DSSP way!
-//        Currently phasing them out
-
-codeword_t * newVarDecl(char * name){
-	codeword_t *cw = malloc(sizeof(codeword_t));
-	cw->xt = declareVar;
-	cw->data = (intptr_t) malloc(1+strlen(name));
-	strcpy((char *)cw->data, name);
-	cw->name = "(var decl)";
-	cw->text = NULL;
-	cw->user = 0; // Not user-defined word
-	return cw;
-}
-
-codeword_t * newVarAsgn(variable_t * dest) {
-	codeword_t *cw = malloc(sizeof(codeword_t));
-	cw->xt = assignVar;
-	cw->data = (intptr_t) dest;
-	cw->name = "(var asgn)";
-	cw->text = NULL;
-	cw->user = 0; // Not user-defined word
-	return cw;
-}
-
-codeword_t * newVarPush(variable_t * var){
-	codeword_t *cw = malloc(sizeof(codeword_t));
-	cw->xt = pushVar;
-	cw->data = (intptr_t) var;
-	cw->name = "(var push)";
-	cw->text = NULL;
-	cw->user = 0; // Not user-defined word
-	return cw;
 }

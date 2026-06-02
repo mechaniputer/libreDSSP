@@ -57,8 +57,6 @@ typedef struct variable_t variable_t;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
-// TODO add GC table
-
 struct undefined_word {
 	char *name;                    // name of undefined word
 	codeword_t ** references;       // array of pointers to codewords that reference this
