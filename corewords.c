@@ -256,7 +256,7 @@ void base10(){
 }
 
 void ifplus(){
-	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
@@ -270,7 +270,7 @@ void ifplus(){
 }
 
 void ifzero(){
-	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient operands for IF0\n");
 		cmdClear(cmdbuf);
 		return;
@@ -284,7 +284,7 @@ void ifzero(){
 }
 
 void ifminus(){
-	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
+	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient operands for IF-\n");
 		cmdClear(cmdbuf);
 		return;
@@ -303,13 +303,6 @@ void ifminus(){
 // If taken, do nothing.
 // If not taken, ip+=2
 void branchminus(){
-	//printf("In branchminus()\n");
-	if((cmdbuf->size - cmdbuf->ip) < 2){
-			fprintf(stderr,"ERR: Insufficient branch outcomes for BR-\n");
-		//debug();
-		cmdClear(cmdbuf);
-		return;
-	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR-\n");
 		//debug();
@@ -329,13 +322,6 @@ void branchminus(){
 // If taken, do nothing.
 // If not taken, ip+=2
 void branchzero(){
-	//printf("In branchzero()\n");
-	if((cmdbuf->size - cmdbuf->ip) < 2){
-		fprintf(stderr,"ERR: Insufficient branch outcomes for BR0\n");
-		//debug();
-		cmdClear(cmdbuf);
-		return;
-	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR0\n");
 		//debug();
@@ -355,13 +341,6 @@ void branchzero(){
 // If taken, do nothing.
 // If not taken, ip++
 void branchplus(){
-	//printf("In branchplus()\n");
-	if((cmdbuf->size - cmdbuf->ip) < 2){
-		fprintf(stderr,"ERR: Insufficient branch outcomes for BR+\n");
-		//debug();
-		cmdClear(cmdbuf);
-		return;
-	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR+\n");
 		//debug();
@@ -379,13 +358,6 @@ void branchplus(){
 // Example code:    BRS FOO BAR BAZ
 // Compiled result: BRS FOO SKP1 BAR SKP1 BAZ
 void branchsign(){
-	//printf("In branchsign()\n");
-	if((cmdbuf->size - cmdbuf->ip) < 3){
-		fprintf(stderr,"ERR: Insufficient branch outcomes for BRS\n");
-		//debug();
-		cmdClear(cmdbuf);
-		return;
-	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BRS\n");
 		//debug();
@@ -500,11 +472,6 @@ void do_begin(){
 		cmdClear(cmdbuf);
 		return;
 	}
-	if((cmdbuf->size - cmdbuf->ip) < 1){
-		fprintf(stderr,"ERR: Insufficient command operands for DO\n");
-		cmdClear(cmdbuf);
-		return;
-	}
 
 	intptr_t tempval = pop(dataStack);
 	if(tempval > 0){
@@ -534,12 +501,6 @@ void do_loop(){
 }
 
 void rp_begin(){
-	if((cmdbuf->size - cmdbuf->ip) < 1){
-		fprintf(stderr,"ERR: Insufficient command operands for RP\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
 	// In RP, 1 means keep looping, 0 means stop.
 	push(loopStack, 1);
 	return;
@@ -805,28 +766,18 @@ void listDicts(){
 	return;
 }
 
-// The GROW command will use the data field of the current codeword to locate the subdict to grow.
-// If the subdict doesn't exist, it will be created. If the subdict is closed, it will be reopened.
+// Select a subdict for growth. If it doesn't exist yet, open it.
+// The next cell should contain a valid dictionary name (the parser has checked the format)
 void growSub(){
-	// The dictionary name is in the text field of the current codeword.
-	// The subdict must begin with a $ character, and it cannot be $PRIME.
-	if(strncmp(current_codeword->text,"$",1)){
-		fprintf(stderr,"ERR: subdictionary must begin with $ character\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-	if(!strcmp(current_codeword->text,"$PRIME")){
-		fprintf(stderr,"ERR: cannot alter $PRIME subvocabulary\n");
-		cmdClear(cmdbuf);
-		return;
-	}
+	cmdbuf->ip++; // Advance to data cell
+	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 
 	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open.
 	// If it doesn't exist, we need to create it and open it.
-	subdict * tempSub = findDict(current_codeword->text, vocab);
+	subdict * tempSub = findDict(name, vocab);
 
 	if(tempSub == NULL){ // We are making a new subdict
-		tempSub = newDict(current_codeword->text, vocab);
+		tempSub = newDict(name, vocab);
 	}
 
 	vocab->grow = tempSub;
@@ -834,54 +785,20 @@ void growSub(){
 	return;
 }
 
-// As with GROW, the SHUT command will use the data field of the current codeword to locate the subdict to shut.
-// If the subdict doesn't exist, an error is printed. If the subdict is already closed, nothing happens.
-// If the subdict is currently selected for growth, it will be deselected.
+// Shut a subdict, hiding all words defined therein
+// The next cell should contain a valid subdict *
 void shutSub(){
-	// The dictionary name is in the text field of the current codeword.
-	// The subdict must begin with a $ character, and it cannot be $PRIME.
-	if(strncmp(current_codeword->text,"$",1)){
-		fprintf(stderr,"ERR: subdictionary must begin with $ character\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-	if(!strcmp(current_codeword->text,"$PRIME")){
-		fprintf(stderr,"ERR: cannot shut $PRIME subvocabulary\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	subdict * tempSub = findDict(current_codeword->text, vocab);
-	if (tempSub == NULL){
-		fprintf(stderr,"ERR: subdictionary %s does not exist\n",current_codeword->text);
-		cmdClear(cmdbuf);
-		return;
-	}
+	cmdbuf->ip++; // Advance to data cell
+	subdict * tempSub =  (subdict *)(cmdbuf->array[cmdbuf->ip]);
 	tempSub->open = 0;
 	return;
 }
 
-// As with GROW, the OPEN command will use the data field of the current codeword to locate the subdict to open.
-// If the subdict doesn't exist, an error is printed. If the subdict is already open, nothing happens.
+// Open a subdict, revealing all words defiend therein
+// The next cell should contain a valid subdict *
 void openSub(){
-	// The dictionary name is in the text field of the current codeword.
-	// The subdict must begin with a $ character, and it cannot be $PRIME.
-	if(strncmp(current_codeword->text,"$",1)){
-		fprintf(stderr,"ERR: subdictionary must begin with $ character\n");
-		cmdClear(cmdbuf);
-		return;
-	}
-	if(!strcmp(current_codeword->text,"$PRIME")){
-		printf("Warning: $PRIME is always open\n");
-		return;
-	}
-
-	subdict * tempSub = findDict(current_codeword->text, vocab);
-	if (tempSub == NULL){
-		fprintf(stderr,"ERR: subdictionary %s does not exist\n",current_codeword->text);
-		cmdClear(cmdbuf);
-		return;
-	}
+	cmdbuf->ip++; // Advance to data cell
+	subdict * tempSub =  (subdict *)(cmdbuf->array[cmdbuf->ip]);
 	tempSub->open = 1;
 	return;
 }

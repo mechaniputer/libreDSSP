@@ -218,6 +218,7 @@ char * isPrint(char * tok){
 // Returns 1 if it's a valid dictionary name, otherwise 0.
 int isDict(const char *s) {
     if (!s || *s != '$') return 0;
+    if(!strcmp("$PRIME", s)) return 0; // Cannot touch $PRIME
     s++;
     if (!isalpha((unsigned char)*s)) return 0;
     for (; *s; s++) {
@@ -302,7 +303,9 @@ int parse_tokens(char * tok){
     codeword_t * dict_entry = NULL;
     variable_t * var_lookup = NULL;
     undefined_word_t * uword = NULL;
+    subdict * sub = NULL;
     char * st; // For string buffers
+    char * namebuf; // For buffers that we detach into the dictionary
 
     // TODO if compiling == 1, add token to word def
 
@@ -382,8 +385,10 @@ int parse_tokens(char * tok){
                 PARSE_ENTER_STATE(PARSE_VAR_S0);
             }else if(!strcmp(tok,"!")){
                 PARSE_ENTER_STATE(PARSE_ASGN_S0);
-            }else if(!strcmp(tok,"GROW") || !strcmp(tok,"SHUT") || !strcmp(tok,"USE")){
-                PARSE_ENTER_STATE(PARSE_DICT_S0);
+            }else if(!strcmp(tok,"GROW")){
+                PARSE_ENTER_STATE(PARSE_DICT_NEW);
+            }else if(!strcmp(tok,"SHUT") || !strcmp(tok,"USE")){
+                PARSE_ENTER_STATE(PARSE_DICT_EXIST);
             }
         }else if(!strcmp(tok,":")){
                 compiling = 1;
@@ -411,7 +416,7 @@ int parse_tokens(char * tok){
         }else if((var_lookup = varSearch(tok, vocab)) != NULL){
                 emit_cw(coreSearch("PUSHVAR", vocab));
                 emit_cw((codeword_t *) var_lookup);
-        }else{
+        }else if (isValidWordVarName(tok)){
             // It must be a user word, possibly undefined
             dict_entry = wordSearch(tok, vocab);
             if((dict_entry = wordSearch(tok, vocab)) != NULL){
@@ -425,6 +430,9 @@ int parse_tokens(char * tok){
                 add_reference(uword, newWordDictEntry); // Make the undef word record point here
                 emit_cw(uword->placeholder);
             }
+        }else{
+            printf("ERR: Unexpected %s\n",tok);
+            assert(0);
         }
         break;
     case PARSE_IF_S0:
@@ -531,7 +539,7 @@ int parse_tokens(char * tok){
             assert(0);
         }
         // the VAR command was already emitted. We just emit a char * here.
-        char * namebuf = malloc((strlen(tok)+1) * sizeof(char));
+        namebuf = malloc((strlen(tok)+1) * sizeof(char));
         strcpy(namebuf, tok);
         emit_cw((codeword_t *) namebuf);
         PARSE_EXIT_STATE
@@ -541,17 +549,34 @@ int parse_tokens(char * tok){
         // Easily checked with varSearch
         if((var_lookup = varSearch(tok, vocab)) == NULL){
             printf("ERR: Unknown variable %s\n",tok);
+            assert(0);
         }
         // The ! command was already emitted. We just emit a variable_t * here
         emit_cw((codeword_t *) var_lookup);
         PARSE_EXIT_STATE
         break;
-    case PARSE_DICT_S0:
-        // Expecting a valid dictionary name
+    case PARSE_DICT_NEW:
+        // Expecting a valid new dictionary name
         // Easily checked with isDict().
-        // We also create it as soon as we parse it, so we can compile a direct pointer to it in the next cell.
-        // If we get it, PARSE_EXIT_STATE
-        // Otherwise we need to error out of the parser
+        if(!isDict(tok)){
+            printf("ERR: Cannot name dictionary %s\n",tok);
+            assert(0);
+        }
+        // the GROW command was already emitted. We just emit a char * here.
+        namebuf = malloc((strlen(tok)+1) * sizeof(char));
+        strcpy(namebuf, tok);
+        emit_cw((codeword_t *) namebuf);
+        PARSE_EXIT_STATE
+        break;
+    case PARSE_DICT_EXIST:
+        // Expecting a valid prior dictionary name
+        // Easily checked with findDict().
+        if((sub = findDict(tok, vocab)) == NULL){
+            printf("ERR: Unknown dictionary %s\n",tok);
+            assert(0);
+        }
+        emit_cw((codeword_t *) sub);
+        PARSE_EXIT_STATE
         break;
     default:
         printf("ERR: In unrecognized state %ld\n",parser_state);
