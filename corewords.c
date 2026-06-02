@@ -369,7 +369,7 @@ void branchsign(){
 	// If it's <0 we do nothing and the next word runs
 	if(temp == 0){ // Do the second thing
 		cmdbuf->ip += 2;
-	}else{ // Do the third thing
+	}else if(temp>0){ // Do the third thing
 		cmdbuf->ip += 4;
 	}
 	return;
@@ -380,12 +380,6 @@ void branchsign(){
 void branch(){
 	//printf("In branch()\n");
 	//debug();
-	if((cmdbuf->size - cmdbuf->ip) < 4){
-		fprintf(stderr,"ERR: Insufficient branch outcomes for BR\n");
-		//debug();
-		cmdClear(cmdbuf);
-		return;
-	}
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR\n");
 		//debug();

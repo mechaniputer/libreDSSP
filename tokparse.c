@@ -285,7 +285,7 @@ void emit_word_by_name(char * name){
     }else{
         // New undef word
         if(!isValidWordVarName(name)){
-            printf("ERR: Unknown symbol %s is not a valid word name", name);
+            printf("ERR: Symbol %s is not a valid word name\n", name);
             assert(0);
         }
         uword = create_undefined_word(name, vocab);
