@@ -28,71 +28,13 @@
 #include "stack.h"
 #include "cmdbuf.h"
 
-// Globals to define word across potentially several parser invocations
-char *newWordNameOld;
-char *newWordTextOld;
-int newWordTextLenOld;
-int newWordTextCapOld;
-codeword_t **newWordCodeOld;
-int newWordCodeLenOld;
-int newWordCodeCapOld;
-codeword_t * newWordDictEntryOld;
-
 // Global for the codeword currently being executed
 codeword_t *current_codeword = NULL;
 
 // Global return stack for nested word execution
 // (defined in dssp.c, used by word_enter() and word_exit())
 extern stack *returnStack;
-extern dict * vocab;
 
-#define INIT_STATEMENT_CAP (8)
-#define INIT_WORDCODE_CAP (16)
-#define INIT_WORDTEXT_CAP (32)
-
-#define ERR_FATAL 	assert(0);
-
-#define ERR_FORB_SYM_IN_WORD printf("Error: forbidden symbol inside word\n"); ERR_FATAL
-#define ERR_FORB_SEMICOLON   printf("Error: forbidden use of semicolon\n"); ERR_FATAL
-#define ERR_INC_PRINT        printf("Error: Incomplete print statement\n"); ERR_FATAL
-#define ERR_INC_STRING       printf("Error: Incomplete string literal\n"); ERR_FATAL
-#define ERR_NEST_COMMENT     printf("Error: comments cannot be nested\n"); ERR_FATAL
-#define ERR_NEST_DEF         printf("Error: definitions cannot be nested\n"); ERR_FATAL
-#define ERR_EMPTY_DEF        printf("Error: definitions must contain a name\n"); ERR_FATAL
-#define ERR_NO_DICT          printf("Error: No dictionary selected\n"); ERR_FATAL
-#define ERR_MISSING_CORE     printf("Error: missing word in core dictionary\n"); ERR_FATAL
-#define ERR_EXIT             printf("Error: ;S not found in core dictionary\n"); ERR_FATAL
-#define ERR_NAME_CONFLICT    printf("Error: Name conflict between var and word\n"); ERR_FATAL
-
-#define GROW_PARSE_BUFFER \
-	statement_cap += INIT_STATEMENT_CAP; \
-	char * newbuffer =  realloc(statement, statement_cap*sizeof(char)); \
-	assert(NULL != newbuffer); \
-	statement = newbuffer;
-
-#define NEW_PARSE_BUFFER \
-	statement_len = 0; \
-	statement_cap = INIT_STATEMENT_CAP; \
-	statement =  malloc(statement_cap*sizeof(char)); \
-	assert(NULL != statement); \
-	statement[0] = '\0';
-
-// Makes sure we can add another cell to a word
-#define CHECK_CAP_CODE                                                             \
-	if (newWordCodeLenOld >= newWordCodeCapOld)                                          \
-	{                                                                              \
-		newWordCodeCapOld *= 2;                                                       \
-		newWordCodeOld = realloc(newWordCodeOld, newWordCodeCapOld * sizeof(codeword_t *)); \
-	}
-
-// This takes a size param since we aren't just adding one char at a time and
-// must preallocate a known size.
-#define CHECK_CAP_TEXT(SZ)                                                 \
-	if (newWordTextLenOld + (SZ) >= newWordTextCapOld)                           \
-	{                                                                      \
-		newWordTextCapOld += (SZ);                                            \
-		newWordTextOld = realloc(newWordTextOld, newWordTextCapOld * sizeof(char)); \
-	}
 
 // Shows current ip, cmdbuf, and stack contents
 void debug(){
@@ -192,7 +134,6 @@ void word_next(){
 	return;
 }
 
-
 // AKA DO_COLON
 void word_enter(){
 	//printf("word_enter() entering %s\n", current_codeword->name);
@@ -244,12 +185,4 @@ char * prompt(int status){
 	}
 	if(strcmp(line, "")) add_history(line);
 	return line;
-}
-
-
-void add_cw_to_def_old(codeword_t * cw){
-	CHECK_CAP_CODE
-	newWordCodeOld[newWordCodeLenOld++] = cw;
-	CHECK_CAP_CODE
-	newWordCodeOld[newWordCodeLenOld] = NULL;
 }

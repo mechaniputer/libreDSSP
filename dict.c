@@ -27,7 +27,7 @@
 #include "corewords.h"
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
-// Should be used whenever defining a new variable to ensure that it doessn't mask a function
+// Should be used whenever defining a new variable to ensure that it doesn't mask a function
 // Should be used whenever defining a new word to ensure that it doesn't mask a variable.
 // Return 0: Nothing found
 // Return 1: Word found

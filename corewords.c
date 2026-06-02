@@ -28,8 +28,6 @@
 #include "cmdbuf.h"
 #include "util.h"
 
-extern void debug();
-
 extern codeword_t * current_codeword;
 extern stack * returnStack;
 extern stack * loopStack;
@@ -96,22 +94,26 @@ void minus(){
 }
 
 void divide(){
-	int temp1;
-	int temp2;
+	int divisor;
+	int dividend;
 	if(dataStack->top <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for /\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-	if(top(dataStack) == 0){
+
+	divisor = dataStack->array[dataStack->top];
+	dividend = dataStack->array[dataStack->top-1];
+	if(divisor == 0){
+		pop(dataStack);
+		pop(dataStack);
 		fprintf(stderr,"ERR: Division by zero\n");
 		cmdClear(cmdbuf);
-	}else{
-		temp1 = dataStack->array[dataStack->top];
-		temp2 = dataStack->array[dataStack->top-1];
-		dataStack->array[dataStack->top-1] = temp2 / temp1;
-		dataStack->array[dataStack->top] = temp2 % temp1;
+		return;
 	}
+	dataStack->array[dataStack->top-1] = dividend / divisor;
+	dataStack->array[dataStack->top] = dividend % divisor;
+
 	return;
 }
 
@@ -305,7 +307,6 @@ void ifminus(){
 void branchminus(){
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR-\n");
-		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -324,7 +325,6 @@ void branchminus(){
 void branchzero(){
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR0\n");
-		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -343,7 +343,6 @@ void branchzero(){
 void branchplus(){
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR+\n");
-		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -360,7 +359,6 @@ void branchplus(){
 void branchsign(){
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BRS\n");
-		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -378,11 +376,8 @@ void branchsign(){
 // Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
 // Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
 void branch(){
-	//printf("In branch()\n");
-	//debug();
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for BR\n");
-		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -800,7 +795,7 @@ void shutSub(){
 	return;
 }
 
-// Open a subdict, revealing all words defiend therein
+// Open a subdict, revealing all words defined therein
 // The next cell should contain a valid subdict *
 void openSub(){
 	cmdbuf->ip++; // Advance to data cell

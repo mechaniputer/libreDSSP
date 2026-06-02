@@ -25,7 +25,6 @@
 #include <ctype.h>
 #include <editline/readline.h>
 
-#include "util.h"
 #include "dict.h"
 #include "stack.h"
 

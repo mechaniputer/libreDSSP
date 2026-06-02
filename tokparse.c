@@ -26,7 +26,6 @@ int token_len;
 // Parser globals
 extern stack *parserStack;
 intptr_t parser_state = PARSE_NORMAL;
-intptr_t * wordDef; // Stand-in for a word definition
 int compiling; // 0-emit to cmdbuf 1-emit to newWordDef
 
 // Globals to define word across potentially several parser invocations
