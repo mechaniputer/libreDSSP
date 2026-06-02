@@ -222,7 +222,7 @@ subdict * findDict(char * name, dict * vocab){
 }
 
 undefined_word_t* undefSearch(char *name, dict *vocab){
-	printf("Looking for undefined word %s\n", name);
+	//printf("Looking for undefined word %s\n", name);
 	undefined_word_t * temp = vocab->undefined;
 	while(temp != NULL){
 		//printf("Traversal sees %s\n",temp->name);
@@ -234,7 +234,7 @@ undefined_word_t* undefSearch(char *name, dict *vocab){
 
 // Warning: Does not prevent adding duplicates
 undefined_word_t* create_undefined_word(char *name, dict *vocab){
-	printf("Creating undefined word %s\n",name);
+	//printf("Creating undefined word %s\n",name);
 	// Allocate and initialize
 	undefined_word_t * newUndef = malloc(sizeof(undefined_word_t));
 	newUndef->name = malloc(1+strlen(name));
@@ -259,7 +259,7 @@ undefined_word_t* create_undefined_word(char *name, dict *vocab){
 }
 
 void add_reference(undefined_word_t *undef, codeword_t *ref){
-	printf("In add_reference()\n");
+	//printf("In add_reference()\n");
 	if(undef->ref_count == undef->ref_capacity){
 		undef->ref_capacity += 4;
 		undef->references = realloc(undef->references, undef->ref_capacity * sizeof(codeword_t *));
@@ -269,9 +269,10 @@ void add_reference(undefined_word_t *undef, codeword_t *ref){
 }
 
 // WARNING: If the words that referenced this undefined word no longer exist, it can segfault.
+//          Currently, deleting words is not supported, but later it will be.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
 void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
-	printf("Resolving previously undefined %s\n", name);
+	//printf("Resolving previously undefined %s\n", name);
 	// First we need to find the word in the linked list.
 	// We need to keep a pointer to the previous word in the list.
 	undefined_word_t * curr = vocab->undefined;
@@ -302,33 +303,44 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 	for(int i=0; i<curr->ref_count ; i++){
 		// i denotes just one of our references
 		int num_words = curr->references[i]->size;
-		printf("num_words is %d\n", num_words);
+		//printf("num_words is %d\n", num_words);
 		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
-		print_codewords(dependent_array);
+		//print_codewords(dependent_array);
 
 		int loop_end_index=-1;
 
 		for(int j=0; j<num_words; j++){
-			printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
-			printf("See name %s \n", dependent_array[j]->name);
+			//printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
+			//printf("See name %s \n", dependent_array[j]->name);
 			if(!strcmp(name, dependent_array[j]->name)){
 				// Found a match
 				dependent_array[j] = def;
 			}
-			if(!strcmp(dependent_array[j]->name, "PUSHLIT")){
+			while(!strcmp(dependent_array[j]->name, "PUSHLIT") || !strcmp(dependent_array[j]->name, "PUSHVAR") || !strcmp(dependent_array[j]->name, "!")){
+				//printf("Skipping literal\n");
 				// Skip the literal
-				j++;
-			}
-			if(!strcmp(dependent_array[j]->name, "BR")){
-				for(loop_end_index = j+3; ; loop_end_index+=3){
-					printf("%ld\n",(intptr_t) dependent_array[loop_end_index]);
-					if(dependent_array[loop_end_index]->xt != skip2) break;
-				}
-				loop_end_index -= 2;
-				printf("Loop end index is %d\n",loop_end_index);
+				j+=2;
 			}
 
-			if(j < loop_end_index) j+=2; // Take double steps until we are out of the BR
+			//printf("array index is now %d\n",j);
+			// Example definition: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
+			if(!strcmp(dependent_array[j]->name, "BR")){
+				//printf("It's a BR\n");
+				// Find where the SKP1 is
+				for(loop_end_index = j+3; ; loop_end_index+=3){
+					//printf("loop_end_index=%d\n",loop_end_index);
+					//printf("See function %s\n",dependent_array[loop_end_index]->name);
+					if(dependent_array[loop_end_index]->xt == skip1) break;
+				}
+				// Should be the index of the branch targer before SKP1
+				loop_end_index -= 1;
+				//printf("Loop end index is %d\n",loop_end_index);
+				// Remember that the loop adds 1 also. By adding one here we land on BR+2
+				j += 1;
+			}else if(j < loop_end_index){
+				// Remember that the loop adds 1 also. By adding 2 here we take triple steps.
+				j+=2;
+			}
 		}
 	}
 

@@ -192,7 +192,7 @@ int main(int argc, char *argv[]){
 		char * line = prompt(status);
 		status = process_line(line);
 		free(line);
-		print_codewords(cmdbuf->array);
+		//print_codewords(cmdbuf->array);
 		word_next();
 		cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
 		cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel

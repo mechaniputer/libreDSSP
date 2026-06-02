@@ -7,12 +7,16 @@ To our knowledge this is the only maintained DSSP implementation, and the first 
 
 libreDSSP uses an indirect threaded design and avoids any inline assembly for maximum portability. DSSP provides a somewhat larger set of core words than most FORTH-style languages. We consider this a strength, because memory is abundant on modern platforms (at least relative to our needs). Having more complex core words also eases development and improves performance by leveraging compiler optimizations.
 
+
 ## Getting started
+I have successfully built libreDSSP on a few Linux distros, and it probably builds fine on many *nix platforms.
+You'll need make, gcc, and libedit-dev.
 Run 'make' to build it. You may wish to use the included tutorial by running './dssp examples/TUTOR.DSP'.
 Vim source highlighting files are included in vim/.
 
+
 ## Contributing
-Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue with instructions to reproduce it.
+Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue with instructions (ideally DSSP code) to reproduce it.
 
 Before contributing you may want to search for documents about prior implementations of DSSP. Documentation is scarce, is often fragmentary, and is usually written in Russian. To add confusion, there have also been several dialects of DSSP with various differences. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them. Note that we are not pursuing ternary support and only target 64-bit and 32-bit hardware.
 
@@ -36,8 +40,8 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
 - =, <, >
 - NEG, ABS
-- BYE, ..(show stack), .(show top of stack)
-- DO
+- ..(show stack), .(show top of stack)
+- DO, RP (but the latter has limited use without EX*)
 - IF+, IF0, IF-
 - BR+, BR0, BR-, BRS, BR
 - D (drop), C (copy), DS (drop entire stack)
@@ -49,20 +53,22 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - TIN, TON (Not sure if correct behavior)
 - SP, CR
 - ."hello" printing
+- Push address and len of string literal
 - [comments]
 - Editline support (Also works with GNU readline)
 - Load and run code from file at startup
 - B10 (as a placeholder since we currently only support base 10 I/O)
 - GROW, USE, SHUT, ?$
 - WORDS (This is a FORTH loanword. Currently unsure if DSSP had an equivalent.)
+- BYE
 
 
 ## What doesn't work yet
-- Push address of string
+- EX, EX-, EX0, EX+, EXT
+- References to undefined vars
+- Arrays, fixed variables, etc
 - SAVE, LOAD
 - ONLY, CANCEL, FORGET, CLEAR
-- Arrays, fixed variables, etc
-- RP, EX, EX-, EX0, EX+, EXT
 - SGN, NOT
 - SORT, SPIN, MAX, MIN
 - T0, T1
@@ -85,6 +91,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 ## Possible future goals
 - Full documentation and in-shell interactive tutorial
 - Floating point math
-- External libraries for special or platform-specific uses
-- Portability improvements including embedded devices
-- Multithreading support by spawning additional kernels?
+- External libraries for platform-specific uses (graphics, networking, GPIO)
+- Ports to additional OSes and embedded devices
+- Multithreading support, callbacks
+- Ability to generate tiny standalone executables

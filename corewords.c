@@ -387,15 +387,28 @@ void branch(){
 		return;
 	}
 
-	//intptr_t tempval = pop(dataStack);
-
-	// TODO Iterate over condition literals until we either find one that matches or isn't followed immediately by SKP2
-	// This should be done by way of a pointer value comparison with skip2
-	// It is critical that we do not check whether a possible comparison value is an "ELSE" type marker since there can be a value collision with an actual number.
-	// Every third address after BR is a value and we only use those as values.
-	// Every third address after the first outcome is a SKP2 or an outcome word (which cannot be SKP2) and that's how we find the implicit ELSE.
-	printf("BR not working right now\n");
-	assert(0);
+	intptr_t tempval = pop(dataStack);
+	// TODO Iterate over condition literals until we either find one that matches or is preceded by SKP1 instead of BR/SKP2
+	// This should be done by way of a pointer value comparison with skip2() function
+	// Once we find the correct word to execute (following the matched literal), set cmdbuf->ip to the index preceding it.
+	int offset = 0;
+	while(1){
+		//printf("offset: %d\n",offset);
+		// Check for end of BR-ELSE
+		if(cmdbuf->array[cmdbuf->ip + offset]->xt == skip1){
+			//printf("Reached end of loop with no match.");
+			cmdbuf->ip += offset; // Now points to SKP1, will be incremented again by word_next()
+			break;
+		}
+		offset += 1;
+		// Check for literal match
+		if((intptr_t) cmdbuf->array[cmdbuf->ip + offset] == tempval){
+			//printf("Found match at offset %d\n",offset);
+			cmdbuf->ip += offset; // Now points to literal, will be incremented again by word_next()
+			break;
+		}
+		offset += 2;
+	}
 	return;
 }
 
@@ -684,7 +697,7 @@ void _undefined(){
 // Next cell should contain a constant literal
 void pushLiteral(){
 	intptr_t operand = (intptr_t) cmdbuf->array[cmdbuf->ip+1];
-	printf("Pushing %ld\n",operand);
+	//printf("Pushing %ld\n",operand);
 	push(dataStack, operand);
 	cmdbuf->ip++; // Skip data cell
 	return;
@@ -712,14 +725,14 @@ void declareVar(){
 	tempVar->value = 0;
 	tempVar->next = vocab->grow->varlist;
 	vocab->grow->varlist = tempVar;
-	printf("Declared variable %s\n",varname);
+	//printf("Declared variable %s\n",varname);
 	return;
 }
 
 // Assign top of stack to a variable
 // The next cell should contain the address of the correct variable struct
 void assignVar(){
-	printf("In assignvar()\n");
+	//printf("In assignvar()\n");
 	if(dataStack->top < 0){
 		fprintf(stderr,"ERR: Insufficient data operands for !\n");
 		cmdClear(cmdbuf);

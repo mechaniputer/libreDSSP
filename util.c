@@ -117,12 +117,12 @@ void print_codewords(codeword_t ** array){
 
 		// The condition above determines whether we are looking at a literal value
 		if((i <= loop_end_index) && ((loop_end_index-i) % 3 == 0)){
-			printf("%d) %p LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
+			printf("%d) %p: LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
 			i++;
 		}
 
 		// If we were pointing at a literal before, we incremented i and should see a named word.
-		printf("%d) %p CMD %s\n", i, (void*)&array[i], array[i]->name);
+		printf("%d) %p: CMD %s\n", i, (void*)&array[i], array[i]->name);
 		if(!strcmp("PUSHLIT", array[i]->name)){
 			// PUSHLIT is followed by a literal that we don't want to dereference
 			i++;
@@ -144,13 +144,12 @@ void print_codewords(codeword_t ** array){
 			// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
 			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
 			for(loop_end_index = i+3; ; loop_end_index+=3){
-				printf("%ld\n",(intptr_t) array[loop_end_index]);
 				if(array[loop_end_index]->xt != skip2) break;
 			}
 			// loop_end_index now points to ERG in the example above (position 9)
 			// We want it to point to the last literal (position 7):
 			loop_end_index -= 2;
-			printf("Loop end index is %d\n",loop_end_index);
+			//printf("Loop end index is %d\n",loop_end_index);
 		}
 		i++;
 	}
@@ -189,14 +188,14 @@ void word_next(){
 		(*current_codeword->xt)();
 		cmdbuf->ip++;
 	}
-	printf("word_next() finished looping\n");
+	//printf("word_next() finished looping\n");
 	return;
 }
 
 
 // AKA DO_COLON
 void word_enter(){
-	printf("word_enter() entering %s\n", current_codeword->name);
+	//printf("word_enter() entering %s\n", current_codeword->name);
 
 	// Push former context
 	push(returnStack, (intptr_t) cmdbuf->ip);

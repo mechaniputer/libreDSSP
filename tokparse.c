@@ -194,7 +194,7 @@ char * isString(char * tok){
         if((tok[0] == '\"') && (tok[len-1] == '\"')){
             char * st = malloc((len+1) * sizeof(char));
             int toklen = strlen(tok);
-            strncpy(st, tok+2, toklen-2);
+            strncpy(st, tok+1, toklen-2);
             return st;
         }
     }
@@ -228,13 +228,19 @@ int isDict(const char *s) {
 }
 
 // Returns 1 if it's a valid word/var name, otherwise 0.
+// Word/var names must be alphanumeric, contain at least one letter, and may contain underscores.
 int isValidWordVarName(const char *s) {
-    if (!isalpha((unsigned char)*s)) return 0;
+    int has_letter = 0;
+    if (!s || !*s) return 0;
     for (; *s; s++) {
-        if (!isalpha((unsigned char)*s)) return 0;
+        unsigned char c = (unsigned char)*s;
+        if (isalpha(c)) has_letter = 1;
+        else if (isdigit(c) || c == '_') continue;
+        else return 0;
     }
-    return 1;
+    return has_letter;
 }
+
 
 void start_new_def(){
     // Prepare vars to build definition
@@ -260,7 +266,7 @@ void add_cw_to_def(codeword_t * cw){
 
 // Depending on whether we are in compile mode, emits to the appropriate buffer.
 void emit_cw(codeword_t * cw){
-    printf("emit(%ld)\n",(intptr_t) cw);
+    //printf("emit(%ld)\n",(intptr_t) cw);
 	if(compiling){
 		add_cw_to_def(cw);
 	}else{
@@ -280,6 +286,7 @@ void emit_word_by_name(char * name){
         /// User word
         emit_cw(dict_entry);
     }else if((uword = undefSearch(name, vocab)) != NULL){
+        add_reference(uword, newWordDictEntry); // Make the undef word record point here
         // Previously known undef word
         emit_cw(uword->placeholder);
     }else{
@@ -332,7 +339,7 @@ int parse_tokens(char * tok){
     case PARSE_COMPILE_S1:
         if(!strcmp(tok,";")){
             emit_cw(coreSearch(";S", vocab));
-            printf("Definition of %s complete\n", newWordName);
+            //printf("Definition of %s complete\n", newWordName);
 
             // Populate the dictionary entry
 			newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer
@@ -342,10 +349,7 @@ int parse_tokens(char * tok){
             // Check if this was a previously undefined word
 			undefined_word_t * entry = undefSearch(newWordName, vocab);
 			if(NULL != entry){
-				// This word was on someone's wishlist!
 				resolve_undefined_word(newWordName, newWordDictEntry, vocab);
-			}else{
-				printf("This was word was not previously referenced.\n");
 			}
 
 			// Detach
@@ -414,8 +418,9 @@ int parse_tokens(char * tok){
             emit_cw(coreSearch("PUSHLIT", vocab));
             emit_cw((codeword_t *) atol(tok));
         }else if((var_lookup = varSearch(tok, vocab)) != NULL){
-                emit_cw(coreSearch("PUSHVAR", vocab));
-                emit_cw((codeword_t *) var_lookup);
+            // FIXME can we use emit_word_by_name() here instead?
+            emit_cw(coreSearch("PUSHVAR", vocab));
+            emit_cw((codeword_t *) var_lookup);
         }else if (isValidWordVarName(tok)){
             // It must be a user word, possibly undefined
             dict_entry = wordSearch(tok, vocab);
@@ -423,6 +428,7 @@ int parse_tokens(char * tok){
                 emit_cw(dict_entry);
             }else if((uword = undefSearch(tok, vocab)) != NULL){
                 // Previously known undef word
+                add_reference(uword, newWordDictEntry); // Make the undef word record point here
                 emit_cw(uword->placeholder);
             }else{
                 // New undef word
@@ -445,6 +451,7 @@ int parse_tokens(char * tok){
         // Expecting first of two branch targets
         // This might be a core word, a user word, or an undefined word (nothing else)
         emit_word_by_name(tok);
+        emit_cw(coreSearch("SKP1", vocab));
         PARSE_CHANGE_STATE(PARSE_BR2_S1)
         break;
     case PARSE_BR2_S1:
@@ -583,12 +590,12 @@ int parse_tokens(char * tok){
         assert(0);
         break;
     }
-    printf("Parse state %ld\n",parser_state);
+    //printf("Parse state %ld\n",parser_state);
     return 0;
 }
 
 int process_line(char * line){
-    printf("*** Tokenizing line: ***\n>> %s", line);
+    //printf("*** Tokenizing line: ***\n>> %s", line);
     tokenizer_start_line(line);
 
     while(1){
@@ -596,10 +603,10 @@ int process_line(char * line){
         if(st == NULL){
             break;
         }else{
-            printf("Parsing token %s\n",st);
+            //printf("Parsing token %s\n",st);
             parse_tokens(st);
         }
     }
-    printf("\n\n");
+    //printf("\n\n");
     return parser_state;
 }
