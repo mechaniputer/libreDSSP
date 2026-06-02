@@ -399,6 +399,7 @@ int parse_tokens(char * tok){
                 start_new_def();
                 PARSE_ENTER_STATE(PARSE_COMPILE_S0);
         }else if((st = isPrint(tok)) != NULL){
+            // TODO should use reference count for strings
             // Push the string info, and print it
             codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
             emit_cw(cw_push_literal);
@@ -407,6 +408,7 @@ int parse_tokens(char * tok){
 			emit_cw((codeword_t *) strlen(st));
 			emit_cw(coreSearch("TOS", vocab));
         }else if((st = isString(tok)) != NULL){
+            // TODO should use reference count for strings
             // Push the string info, but don't print it
             codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
             emit_cw(cw_push_literal);
@@ -605,6 +607,7 @@ int process_line(char * line){
         }else{
             //printf("Parsing token %s\n",st);
             parse_tokens(st);
+            free(st);
         }
     }
     //printf("\n\n");

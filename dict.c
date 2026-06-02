@@ -344,6 +344,9 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 		}
 	}
 
-	// TODO frees
+	free(curr->name);
+	free(curr->placeholder);
+	free(curr->references);
+	free(curr);
 	return;
 }
