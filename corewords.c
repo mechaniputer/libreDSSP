@@ -59,7 +59,7 @@ void plus(){
 	int temp;
 	// -1 indicates empty dataStack
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for +\n");
+		fprintf(stderr,"ERR: Insufficient operands for +\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -72,7 +72,7 @@ void multiply(){
 	int temp1;
 	int temp2;
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for *\n");
+		fprintf(stderr,"ERR: Insufficient operands for *\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -86,7 +86,7 @@ void minus(){
 	int temp;
 	// -1 indicates empty dataStack
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for -\n");
+		fprintf(stderr,"ERR: Insufficient operands for -\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -99,12 +99,12 @@ void divide(){
 	int temp1;
 	int temp2;
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for /\n");
+		fprintf(stderr,"ERR: Insufficient operands for /\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(top(dataStack) == 0){
-		fprintf(stderr,"ERROR: Division by zero\n");
+		fprintf(stderr,"ERR: Division by zero\n");
 		cmdClear(cmdbuf);
 	}else{
 		temp1 = dataStack->array[dataStack->top];
@@ -117,7 +117,7 @@ void divide(){
 
 void negate(){
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
+		fprintf(stderr,"ERR: Insufficient operands for NEG\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -127,7 +127,7 @@ void negate(){
 
 void absval(){
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
+		fprintf(stderr,"ERR: Insufficient operands for ABS\n");
 		cmdClear(cmdbuf);
 		return;
 	} else if(top(dataStack) < 0) {
@@ -139,7 +139,7 @@ void absval(){
 void plus1(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 1+\n");
+		fprintf(stderr,"ERR: Insufficient operands for 1+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -150,7 +150,7 @@ void plus1(){
 void plus2(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 2+\n");
+		fprintf(stderr,"ERR: Insufficient operands for 2+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -161,7 +161,7 @@ void plus2(){
 void plus3(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 3+\n");
+		fprintf(stderr,"ERR: Insufficient operands for 3+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -172,7 +172,7 @@ void plus3(){
 void plus4(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 4+\n");
+		fprintf(stderr,"ERR: Insufficient operands for 4+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -183,7 +183,7 @@ void plus4(){
 void minus1(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 1-\n");
+		fprintf(stderr,"ERR: Insufficient operands for 1-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -194,7 +194,7 @@ void minus1(){
 void minus2(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 2-\n");
+		fprintf(stderr,"ERR: Insufficient operands for 2-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -205,7 +205,7 @@ void minus2(){
 void minus3(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 3-\n");
+		fprintf(stderr,"ERR: Insufficient operands for 3-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -216,7 +216,7 @@ void minus3(){
 void minus4(){
 	// -1 indicates empty dataStack
 	if(dataStack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 4-\n");
+		fprintf(stderr,"ERR: Insufficient operands for 4-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -257,7 +257,7 @@ void base10(){
 
 void ifplus(){
 	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
+		fprintf(stderr,"ERR: Insufficient operands for IF+\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -271,7 +271,7 @@ void ifplus(){
 
 void ifzero(){
 	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
+		fprintf(stderr,"ERR: Insufficient operands for IF0\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -285,7 +285,7 @@ void ifzero(){
 
 void ifminus(){
 	if(((cmdbuf->size - cmdbuf->ip) < 2) || (dataStack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF-\n");
+		fprintf(stderr,"ERR: Insufficient operands for IF-\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -305,13 +305,13 @@ void ifminus(){
 void branchminus(){
 	//printf("In branchminus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
-			fprintf(stderr,"ERROR: Insufficient branch outcomes for BR-\n");
+			fprintf(stderr,"ERR: Insufficient branch outcomes for BR-\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for BR-\n");
+		fprintf(stderr,"ERR: Insufficient data operands for BR-\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
@@ -331,13 +331,13 @@ void branchminus(){
 void branchzero(){
 	//printf("In branchzero()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
-		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR0\n");
+		fprintf(stderr,"ERR: Insufficient branch outcomes for BR0\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for BR0\n");
+		fprintf(stderr,"ERR: Insufficient data operands for BR0\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
@@ -357,13 +357,13 @@ void branchzero(){
 void branchplus(){
 	//printf("In branchplus()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 2){
-		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR+\n");
+		fprintf(stderr,"ERR: Insufficient branch outcomes for BR+\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for BR+\n");
+		fprintf(stderr,"ERR: Insufficient data operands for BR+\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
@@ -381,13 +381,13 @@ void branchplus(){
 void branchsign(){
 	//printf("In branchsign()\n");
 	if((cmdbuf->size - cmdbuf->ip) < 3){
-		fprintf(stderr,"ERROR: Insufficient branch outcomes for BRS\n");
+		fprintf(stderr,"ERR: Insufficient branch outcomes for BRS\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for BRS\n");
+		fprintf(stderr,"ERR: Insufficient data operands for BRS\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
@@ -409,13 +409,13 @@ void branch(){
 	//printf("In branch()\n");
 	//debug();
 	if((cmdbuf->size - cmdbuf->ip) < 4){
-		fprintf(stderr,"ERROR: Insufficient branch outcomes for BR\n");
+		fprintf(stderr,"ERR: Insufficient branch outcomes for BR\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for BR\n");
+		fprintf(stderr,"ERR: Insufficient data operands for BR\n");
 		//debug();
 		cmdClear(cmdbuf);
 		return;
@@ -437,7 +437,7 @@ void branch(){
 void equality(){
 	// -1 indicates empty dataStack
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for =\n");
+		fprintf(stderr,"ERR: Insufficient operands for =\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -454,7 +454,7 @@ void equality(){
 void greaterthan(){
 	// -1 indicates empty dataStack
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for >\n");
+		fprintf(stderr,"ERR: Insufficient operands for >\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -471,7 +471,7 @@ void greaterthan(){
 void lessthan(){
 	// -1 indicates empty dataStack
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for <\n");
+		fprintf(stderr,"ERR: Insufficient operands for <\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -496,12 +496,12 @@ void lessthan(){
 void do_begin(){
 	//printf("In doloop()\n");
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for DO\n");
+		fprintf(stderr,"ERR: Insufficient data operands for DO\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	if((cmdbuf->size - cmdbuf->ip) < 1){
-		fprintf(stderr,"ERROR: Insufficient command operands for DO\n");
+		fprintf(stderr,"ERR: Insufficient command operands for DO\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -521,7 +521,7 @@ void do_begin(){
 void do_loop(){
 	//printf("In loop()\n");
 	if(loopStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient loop stack operands for DO_LOOP\n");
+		fprintf(stderr,"ERR: Insufficient loop stack operands for DO_LOOP\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -535,7 +535,7 @@ void do_loop(){
 
 void rp_begin(){
 	if((cmdbuf->size - cmdbuf->ip) < 1){
-		fprintf(stderr,"ERROR: Insufficient command operands for RP\n");
+		fprintf(stderr,"ERR: Insufficient command operands for RP\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -548,7 +548,7 @@ void rp_begin(){
 void rp_loop(){
 	//printf("in rp_loop()\n");
 	if(loopStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient loop stack operands for RP_LOOP\n");
+		fprintf(stderr,"ERR: Insufficient loop stack operands for RP_LOOP\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -560,7 +560,7 @@ void rp_loop(){
 		// EX/EX-/EX0/EX+/EXT has been run, making the count 0.
 		pop(loopStack);
 	}else{
-		fprintf(stderr, "ERROR: Unexpected value %ld on return stack in rp_loop()\n",tempval);
+		fprintf(stderr, "ERR: Unexpected value %ld on return stack in rp_loop()\n",tempval);
 		exit(-1);
 	}
 	return;
@@ -578,7 +578,7 @@ void loop_exit(){
 // Stack manipulation
 void exch2(){
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for E2\n");
+		fprintf(stderr,"ERR: Insufficient operands for E2\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -589,7 +589,7 @@ void exch2(){
 }
 void exch3(){
 	if(dataStack->top <= 1){
-		fprintf(stderr,"ERROR: Insufficient operands for E3\n");
+		fprintf(stderr,"ERR: Insufficient operands for E3\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -600,7 +600,7 @@ void exch3(){
 }
 void exch4(){
 	if(dataStack->top <= 2){
-		fprintf(stderr,"ERROR: Insufficient operands for E4\n");
+		fprintf(stderr,"ERR: Insufficient operands for E4\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -611,19 +611,19 @@ void exch4(){
 }
 void exchdepth(){
 	if(dataStack->top <= 0){ // There need to be two or more operands
-		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
+		fprintf(stderr,"ERR: Insufficient operands for ET\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	int depth = pop(dataStack);
 	if (depth == 1) return;
 	if(dataStack->top <= depth-2){
-		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
+		fprintf(stderr,"ERR: Insufficient operands for ET\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(depth <= 0){
-		fprintf(stderr,"ERROR: Can only exchange from positive depth\n");
+		fprintf(stderr,"ERR: Can only exchange from positive depth\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -635,7 +635,7 @@ void exchdepth(){
 
 void copy(){
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for C\n");
+		fprintf(stderr,"ERR: Insufficient operands for C\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -645,7 +645,7 @@ void copy(){
 
 void copy2(){
 	if(dataStack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for C2\n");
+		fprintf(stderr,"ERR: Insufficient operands for C2\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -654,7 +654,7 @@ void copy2(){
 }
 void copy3(){
 	if(dataStack->top <= 1){
-		fprintf(stderr,"ERROR: Insufficient operands for C3\n");
+		fprintf(stderr,"ERR: Insufficient operands for C3\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -663,7 +663,7 @@ void copy3(){
 }
 void copy4(){
 	if(dataStack->top <= 2){
-		fprintf(stderr,"ERROR: Insufficient operands for C4\n");
+		fprintf(stderr,"ERR: Insufficient operands for C4\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -672,18 +672,18 @@ void copy4(){
 }
 void copydepth(){
 	if(dataStack->top <= 0){ // There need to be two or more operands
-		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
+		fprintf(stderr,"ERR: Insufficient operands for CT\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	int depth = pop(dataStack);
 	if(dataStack->top <= depth-2){
-		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
+		fprintf(stderr,"ERR: Insufficient operands for CT\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(depth <= 0){
-		fprintf(stderr,"ERROR: Can only copy from positive depth\n");
+		fprintf(stderr,"ERR: Can only copy from positive depth\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -693,7 +693,7 @@ void copydepth(){
 
 void drop(){
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for D\n");
+		fprintf(stderr,"ERR: Insufficient operands for D\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -726,67 +726,52 @@ void _undefined(){
 	exit(0);
 }
 
+// Next cell should contain a constant literal
 void pushLiteral(){
 	intptr_t operand = (intptr_t) cmdbuf->array[cmdbuf->ip+1];
 	printf("Pushing %ld\n",operand);
 	push(dataStack, operand);
-	cmdbuf->ip++;
+	cmdbuf->ip++; // Skip data cell
 	return;
 }
 
-// current_codeword->data should point to a variable struct
+// Push the current value of a variable
+// The next cell should contain the address of the correct variable struct
 void pushVar(){
-	variable_t * var = (variable_t *)current_codeword->data;
-	intptr_t val = var->value;
-	push(dataStack, val);
+	push(dataStack, ((variable_t *)(cmdbuf->array[cmdbuf->ip+1]))->value);
+	cmdbuf->ip++; // Skip data cell
+	return;
 }
 
 // Declare the existence of a named variable
-// The data field of the current codeword should contain the address of the desired (char *) name of the variable
+// The next cell should contain the address of the desired (char *) name of the variable
 // We initialize variables to 0. Not sure whether original DSSP did this.
-// FIXME: Variables should be placed in subdicts, not separately. They should share the same namespace as words.
 void declareVar(){
-	char * varname = (char *) current_codeword->data;
-
-	// See if it is a core word
-	 if(coreSearch(varname, vocab)){
-		fprintf(stderr,"ERROR: Cannot name variable %s. Name conflict with core dictionary word.\n",varname);
-		cmdClear(cmdbuf);
-		return;
-	}
-
-	// Make sure the name isn't already used in vocab->grow
-	int used = growSearch(varname, vocab);
-	if(1== used){
-		fprintf(stderr,"ERROR: Cannot name variable %s. Name conflict with user dictionary word.\n",varname);
-		cmdClear(cmdbuf);
-		return;
-	}else if(2 == used){
-		fprintf(stderr,"ERROR: Cannot name variable %s. Name conflict with prior variable.\n",varname);
-		cmdClear(cmdbuf);
-		return;
-	}
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
 
 	// No problems. Declare the var.
 	variable_t * tempVar = malloc(sizeof(variable_t));
-	tempVar->name = malloc(1+strlen(varname));
-	strcpy(tempVar->name, varname);
+	tempVar->name = varname; // The parser allocated this buffer and we can keep it
 	tempVar->value = 0;
 	tempVar->next = vocab->grow->varlist;
 	vocab->grow->varlist = tempVar;
 	printf("Declared variable %s\n",varname);
+	return;
 }
 
 // Assign top of stack to a variable
-// The data field of the current codeword should contain the address of the correct variable struct
+// The next cell should contain the address of the correct variable struct
 void assignVar(){
+	printf("In assignvar()\n");
 	if(dataStack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient data operands for !\n");
+		fprintf(stderr,"ERR: Insufficient data operands for !\n");
 		cmdClear(cmdbuf);
 		return;
 	}
-
-	((variable_t *)(current_codeword->data))->value = pop(dataStack);
+	cmdbuf->ip++; // Advance to data cell
+	((variable_t *)(cmdbuf->array[cmdbuf->ip]))->value = pop(dataStack);
 	return;
 }
 
@@ -826,12 +811,12 @@ void growSub(){
 	// The dictionary name is in the text field of the current codeword.
 	// The subdict must begin with a $ character, and it cannot be $PRIME.
 	if(strncmp(current_codeword->text,"$",1)){
-		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
+		fprintf(stderr,"ERR: subdictionary must begin with $ character\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(!strcmp(current_codeword->text,"$PRIME")){
-		fprintf(stderr,"ERROR: cannot alter $PRIME subvocabulary\n");
+		fprintf(stderr,"ERR: cannot alter $PRIME subvocabulary\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -856,19 +841,19 @@ void shutSub(){
 	// The dictionary name is in the text field of the current codeword.
 	// The subdict must begin with a $ character, and it cannot be $PRIME.
 	if(strncmp(current_codeword->text,"$",1)){
-		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
+		fprintf(stderr,"ERR: subdictionary must begin with $ character\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 	if(!strcmp(current_codeword->text,"$PRIME")){
-		fprintf(stderr,"ERROR: cannot shut $PRIME subvocabulary\n");
+		fprintf(stderr,"ERR: cannot shut $PRIME subvocabulary\n");
 		cmdClear(cmdbuf);
 		return;
 	}
 
 	subdict * tempSub = findDict(current_codeword->text, vocab);
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",current_codeword->text);
+		fprintf(stderr,"ERR: subdictionary %s does not exist\n",current_codeword->text);
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -882,7 +867,7 @@ void openSub(){
 	// The dictionary name is in the text field of the current codeword.
 	// The subdict must begin with a $ character, and it cannot be $PRIME.
 	if(strncmp(current_codeword->text,"$",1)){
-		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
+		fprintf(stderr,"ERR: subdictionary must begin with $ character\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -893,7 +878,7 @@ void openSub(){
 
 	subdict * tempSub = findDict(current_codeword->text, vocab);
 	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",current_codeword->text);
+		fprintf(stderr,"ERR: subdictionary %s does not exist\n",current_codeword->text);
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -907,7 +892,7 @@ void termInNum(){
 	if(dataStack->top > -1){ // Requires one operand
 		int len = pop(dataStack);
 		if(len < 0){
-			fprintf(stderr,"ERROR: TIN requires non-negative operand\n");
+			fprintf(stderr,"ERR: TIN requires non-negative operand\n");
 			cmdClear(cmdbuf);
 			return;
 		}
@@ -920,12 +905,12 @@ void termInNum(){
 				push(dataStack, atoi(line));
 			}
 		}else{
-			fprintf(stderr,"ERROR: TIN could not read line\n");
+			fprintf(stderr,"ERR: TIN could not read line\n");
 			cmdClear(cmdbuf);
 			return;
 		}
 	}else{
-		fprintf(stderr,"ERROR: Insufficient operands for TIN\n");
+		fprintf(stderr,"ERR: Insufficient operands for TIN\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -955,7 +940,7 @@ void termOutNum(){
 
 		free(toPrint);
 	}else{
-		fprintf(stderr,"ERROR: Insufficient operands for TON\n");
+		fprintf(stderr,"ERR: Insufficient operands for TON\n");
 		cmdClear(cmdbuf);
 		return;
 	}
@@ -965,7 +950,7 @@ void termOutNum(){
 void termOutString(){
 	// Requires two operands. The top of the stack is a count and below that is a pointer to the string.
 	if(dataStack->top < 1){
-		fprintf(stderr,"ERROR: Insufficient stack operands for TOS\n");
+		fprintf(stderr,"ERR: Insufficient stack operands for TOS\n");
 		cmdClear(cmdbuf);
 		return;
 	}

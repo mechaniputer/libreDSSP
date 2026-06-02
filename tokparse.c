@@ -226,8 +226,8 @@ int isDict(const char *s) {
     return 1;
 }
 
-// Returns 1 if it's a valid word name, otherwise 0.
-int isWordname(const char *s) {
+// Returns 1 if it's a valid word/var name, otherwise 0.
+int isValidWordVarName(const char *s) {
     if (!isalpha((unsigned char)*s)) return 0;
     for (; *s; s++) {
         if (!isalpha((unsigned char)*s)) return 0;
@@ -283,7 +283,10 @@ void emit_word_by_name(char * name){
         emit_cw(uword->placeholder);
     }else{
         // New undef word
-        if(!isWordname(name)) assert(0);
+        if(!isValidWordVarName(name)){
+            printf("ERR: Unknown symbol %s is not a valid word name", name);
+            assert(0);
+        }
         uword = create_undefined_word(name, vocab);
         add_reference(uword, newWordDictEntry); // Make the undef word record point here
         emit_cw(uword->placeholder);
@@ -294,6 +297,7 @@ void emit_word_by_name(char * name){
 // Updates the parse state while emitting code to the appropriate buffer
 // Return 0: good
 // Return -1: Error, must reset the parser
+// TODO: Currently only undef words are supported, but it would be good to allow undef vars as well
 int parse_tokens(char * tok){
     codeword_t * dict_entry = NULL;
     variable_t * var_lookup = NULL;
@@ -304,8 +308,8 @@ int parse_tokens(char * tok){
 
     switch(parser_state){
     case PARSE_COMPILE_S0:
-        // Next token should be a valid user word name (alphanumeric, not in core)
-        if(isWordname(tok) && (NULL == coreSearch(tok, vocab))){
+        // Next token should be a valid user word name (alphanumeric, not in core or vars)
+        if(isValidWordVarName(tok) && (NULL == coreSearch(tok, vocab)) && (NULL == varSearch(tok, vocab))){
             newWordName = malloc((1+strlen(tok))*sizeof(char));
 			strcpy(newWordName, tok);
             newWordDictEntry = wordDefine(newWordName, vocab);
@@ -318,7 +322,7 @@ int parse_tokens(char * tok){
 			newWordTextLen = strlen(newWordText);
             PARSE_CHANGE_STATE(PARSE_COMPILE_S1)
         }else{
-            printf("Word name %s not allowed\n",tok);
+            printf("ERR: Word name %s not allowed\n",tok);
             assert(0);
         }
         break;        
@@ -350,7 +354,7 @@ int parse_tokens(char * tok){
             compiling = 0;
             break;
         }else if(!strcmp(tok,":")){
-            printf("Error: Definitions cannot be nested\n");
+            printf("ERR: Definitions cannot be nested\n");
             assert(0);
         }
         // FALL-THROUGH
@@ -405,7 +409,7 @@ int parse_tokens(char * tok){
             emit_cw(coreSearch("PUSHLIT", vocab));
             emit_cw((codeword_t *) atol(tok));
         }else if((var_lookup = varSearch(tok, vocab)) != NULL){
-                // TODO emit codeword to retrieve and push var_lookup->value
+                emit_cw(coreSearch("PUSHVAR", vocab));
                 emit_cw((codeword_t *) var_lookup);
         }else{
             // It must be a user word, possibly undefined
@@ -469,6 +473,7 @@ int parse_tokens(char * tok){
             emit_cw((codeword_t *) atol(tok));
             PARSE_CHANGE_STATE(PARSE_BR_S2)
         }else{
+            printf("Unexpected symbol %s in BR\n", tok);
             assert(0);
         }
         break;
@@ -485,6 +490,7 @@ int parse_tokens(char * tok){
             // No emit
             PARSE_CHANGE_STATE(PARSE_BR_S3)
         }else{
+            printf("ERR: Unexpected symbol %s in BR\n", tok);
             assert(0);
         }
         break;
@@ -517,15 +523,28 @@ int parse_tokens(char * tok){
         break;
     case PARSE_VAR_S0:
         // Expecting a variable name
-        // This must not be a core word or existing/undefined user word, and must be alphanumeric
+        // This must not be a core word or existing/undefined user word/var, and must be alphanumeric
         // If we get it, PARSE_EXIT_STATE
         // Otherwise we need to error out of the parser
+        if(!isValidWordVarName(tok) || coreSearch(tok, vocab) || growSearch(tok,vocab) || undefSearch(tok, vocab)){
+            printf("ERR: Variable name %s not allowed\n",tok);
+            assert(0);
+        }
+        // the VAR command was already emitted. We just emit a char * here.
+        char * namebuf = malloc((strlen(tok)+1) * sizeof(char));
+        strcpy(namebuf, tok);
+        emit_cw((codeword_t *) namebuf);
+        PARSE_EXIT_STATE
         break;
     case PARSE_ASGN_S0:
         // Expecting the name of a previously declared variable
         // Easily checked with varSearch
-        // If we get it, PARSE_EXIT_STATE
-        // Otherwise we need to error out of the parser
+        if((var_lookup = varSearch(tok, vocab)) == NULL){
+            printf("ERR: Unknown variable %s\n",tok);
+        }
+        // The ! command was already emitted. We just emit a variable_t * here
+        emit_cw((codeword_t *) var_lookup);
+        PARSE_EXIT_STATE
         break;
     case PARSE_DICT_S0:
         // Expecting a valid dictionary name
@@ -535,7 +554,7 @@ int parse_tokens(char * tok){
         // Otherwise we need to error out of the parser
         break;
     default:
-        printf("In unrecognized state %ld\n",parser_state);
+        printf("ERR: In unrecognized state %ld\n",parser_state);
         assert(0);
         break;
     }

@@ -101,6 +101,7 @@ void pushLiteral();
 void pushVar();
 void declareVar();
 void assignVar();
+void pushVar();
 void printNewline();
 void printSpace();
 void listDicts();

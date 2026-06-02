@@ -127,6 +127,14 @@ void print_codewords(codeword_t ** array){
 			// PUSHLIT is followed by a literal that we don't want to dereference
 			i++;
 			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
+		}else if(!strcmp("VAR", array[i]->name)){
+			// VAR is followed by a char * containing a variable name
+			i++;
+			printf("%d) %p: STR %s\n", i, (void*) &array[i], (char *) array[i]);
+		}else if(!strcmp("PUSHVAR", array[i]->name) || !strcmp("!", array[i]->name)){
+			// PUSHVAR/! are followed by a pointer to a variable struct
+			i++;
+			printf("%d) %p: VAR %s\n", i, (void*) &array[i], ((variable_t *) array[i])->name);
 		}else if(!strcmp(array[i]->name, "BR")){
 			// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
 			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG

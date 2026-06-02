@@ -119,6 +119,7 @@ int main(int argc, char *argv[]){
 	defCore("NOP", noop, vocab);
 	defCore("VAR", declareVar, vocab);
 	defCore("!", assignVar, vocab);
+	defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
 	defCore("?$", listDicts, vocab);
