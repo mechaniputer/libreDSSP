@@ -19,6 +19,8 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include <stdint.h>
+
 typedef struct variable_t variable_t;
 typedef struct subdict subdict;
 typedef struct dict dict;
@@ -27,15 +29,15 @@ typedef struct stack stack;
 
 struct stack
 {
-	long * array;
+	intptr_t * array;
 	int capacity;
 	int top;
 };
 
 stack * newStack();
-long top(stack * stack);
-long pop(stack * stack);
-void push(stack * stack, long value);
+intptr_t top(stack * stack);
+intptr_t pop(stack * stack);
+void push(stack * stack, intptr_t value);
 void grow(stack * stack);
 
 #endif

@@ -14,9 +14,17 @@
 
 #	You should have received a copy of the GNU General Public License \
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
-CFLAGS = -I/usr/local/include -L/usr/local/lib -Wall -ggdb
+CFLAGS = -I/usr/local/include -L/usr/local/lib -Wall -O2
+DEBUG ?= 
+CFLAGS += $(DEBUG)
 LDLIBS = -ledit -lncurses
+
+.PHONY: all debug clean
+
 all: dssp
+
+debug: DEBUG = -ggdb
+debug: dssp
 dssp: stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o
 	cc $(CFLAGS) dssp.c -o dssp stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o $(LDLIBS)
 stack.o: stack.c stack.h

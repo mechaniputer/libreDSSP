@@ -18,29 +18,30 @@
 #include <malloc.h>
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 #include "stack.h"
 
 stack * newStack() {
 	stack * new_stack = malloc(sizeof(stack));
-	new_stack->array = malloc(10*sizeof(long));
+	new_stack->array = malloc(10*sizeof(intptr_t));
 	new_stack->capacity = 10;
 	new_stack->top = -1; // -1 indicates empty stack
 	return new_stack;
 }
 
 // If stack is empty, do not use!
-long top(stack * stack) {
+intptr_t top(stack * stack) {
 	assert(stack->top > -1);
 	return (stack->array[stack->top]);
 }
 
 // If stack is empty, do not use!
-long pop(stack * stack) {
+intptr_t pop(stack * stack) {
 	assert(stack->top > -1);
 	return (stack->array[(stack->top)--]);
 }
 
-void push(stack * stack, long value) {
+void push(stack * stack, intptr_t value) {
 	(stack->top)++;
 	stack->array[stack->top] = value;
 	if((stack->capacity) == ((stack->top)+1)) grow(stack);
@@ -49,6 +50,6 @@ void push(stack * stack, long value) {
 
 void grow(stack * stack){
 	stack->capacity = 2 * (stack->capacity);
-	stack->array = realloc(stack->array, (stack->capacity)*sizeof(long));
+	stack->array = realloc(stack->array, (stack->capacity)*sizeof(intptr_t));
 }
 

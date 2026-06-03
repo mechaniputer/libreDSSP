@@ -194,6 +194,7 @@ char * isString(char * tok){
             char * st = malloc((len+1) * sizeof(char));
             int toklen = strlen(tok);
             strncpy(st, tok+1, toklen-2);
+            st[toklen-2] = '\0';
             return st;
         }
     }
@@ -208,6 +209,7 @@ char * isPrint(char * tok){
             char * st = malloc((len+1) * sizeof(char));
             int toklen = strlen(tok);
             strncpy(st, tok+2, toklen-3);
+            st[toklen-3] = '\0';
             return st;
         }
     }
@@ -250,6 +252,7 @@ void start_new_def(){
 	newWordCodeCap = INIT_WORDCODE_CAP;
 	newWordName = NULL;
 	newWordText = malloc(INIT_WORDTEXT_CAP * sizeof(char)); // allocate definition text array
+    newWordText[0] = '\0';
 	newWordTextCap = INIT_WORDTEXT_CAP;
 	newWordTextLen = 0;
 	newWordCodeLen = 0;
