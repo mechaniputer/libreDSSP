@@ -326,11 +326,12 @@ void emit_word_by_name(char * name){
 	}else if((dict_entry = wordSearch(name, vocab)) != NULL){
 		/// User word
 		emit_cw(dict_entry);
-	}else if((uword = undefSearch(name, vocab)) != NULL){
-		add_reference(uword, newWordDictEntry); // Make the undef word record point here
+	}else if(compiling && (uword = undefSearch(name, vocab)) != NULL){
 		// Previously known undef word
+		// Don't add a ref if not in compiling mode! It will be a NULL ref!
+		add_reference(uword, newWordDictEntry); // Make the undef word record point here
 		emit_cw(uword->placeholder);
-	}else{
+	}else if(compiling){
 		// New undef word
 		if(!isValidWordVarName(name)){
 			printf("ERR: Symbol %s is not a valid word name\n", name);
@@ -340,6 +341,12 @@ void emit_word_by_name(char * name){
 		uword = create_undefined_word(name, vocab);
 		add_reference(uword, newWordDictEntry); // Make the undef word record point here
 		emit_cw(uword->placeholder);
+	}else{
+		// We are not compiling, so whatever we emit will be run immediately.
+		// There's no point in emitting anything undefined.
+		printf("ERR: Symbol %s is not an executable word\n", name);
+		abortExecution();
+		return;
 	}
 }
 
@@ -483,15 +490,21 @@ int parse_tokens(char * tok){
 			dict_entry = wordSearch(tok, vocab);
 			if((dict_entry = wordSearch(tok, vocab)) != NULL){
 				emit_cw(dict_entry);
-			}else if((uword = undefSearch(tok, vocab)) != NULL){
+			}else if(compiling && ((uword = undefSearch(tok, vocab)) != NULL)){
 				// Previously known undef word
 				add_reference(uword, newWordDictEntry); // Make the undef word record point here
 				emit_cw(uword->placeholder);
-			}else{
+			}else if(compiling){
 				// New undef word
 				uword = create_undefined_word(tok, vocab);
 				add_reference(uword, newWordDictEntry); // Make the undef word record point here
 				emit_cw(uword->placeholder);
+			}else{
+				// We are not compiling, so whatever we emit will be run immediately.
+				// There's no point in emitting anything undefined.
+				printf("ERR: Symbol %s is not an executable word\n", tok);
+				abortExecution();
+				return 0;
 			}
 		}else{
 			printf("ERR: Unexpected %s\n",tok);

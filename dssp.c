@@ -149,6 +149,7 @@ int main(int argc, char *argv[]){
 
 	// Copyright notice
 	printf("Copyright (C) 2026  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	int status = 0;
 
 	if(argc >= 2){
 		printf("Attempting to open %s... ",argv[1]);
@@ -163,8 +164,8 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				process_line(bufptr);
-				word_next();
+				status = process_line(bufptr);
+				if(status == 0) word_next();
 				free(bufptr);
 				bufsize = 0;
 				cmdbuf->size = 0;
@@ -174,7 +175,6 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	int status = 0;
 	while(1){
 		assert(-1 == returnStack->top); // Ensure we have an empty return stack
 		abort_requested = 0;
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]){
 		status = process_line(line);
 		free(line);
 		//print_codewords(cmdbuf->array);
-		word_next();
+		if(status == 0) word_next();
 		cmdbuf->size = 0;
 		cmdbuf->array[0] = NULL;
 	}

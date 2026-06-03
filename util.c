@@ -158,7 +158,7 @@ void word_next(){
 	cmdbuf->ip = 0;
 	// TODO Consider using the size as a bound instead of a NULL sentinel (fewer loads)
 	while(cmdbuf->array[cmdbuf->ip] != NULL){
-		//debug();
+		//debug(); getchar(); // For single-step debugging
 		current_codeword = cmdbuf->array[cmdbuf->ip];
 		(*current_codeword->xt)();
 		cmdbuf->ip++;

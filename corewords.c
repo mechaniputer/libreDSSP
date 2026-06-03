@@ -69,7 +69,8 @@ void plus(){
 	intptr_t temp_data;
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for +\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	temp_data = pop(dataStack);
@@ -83,7 +84,8 @@ void multiply(){
 	intptr_t temp2;
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for *\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	temp1 = pop(dataStack);
@@ -97,7 +99,8 @@ void minus(){
 	intptr_t temp;
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for -\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	temp = pop(dataStack);
@@ -111,7 +114,8 @@ void divide(){
 	intptr_t dividend;
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for /\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -123,7 +127,8 @@ void divide(){
 		pop(dataStack);
 		pop(dataStack);
 		fprintf(stderr,"ERR: Division by zero\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	temp_stack_arr[dataStack->top-1] = dividend / divisor;
@@ -136,7 +141,8 @@ void negate(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for NEG\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND = -TOP_FROM_IND;
@@ -147,7 +153,8 @@ void absval(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for ABS\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	} else if(TOP_FROM_IND < 0) {
 		TOP_FROM_IND = -TOP_FROM_IND;
@@ -159,7 +166,8 @@ void plus1(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 1+\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND += 1;
@@ -170,7 +178,8 @@ void plus2(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 2+\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND += 2;
@@ -181,7 +190,8 @@ void plus3(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 3+\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND += 3;
@@ -192,7 +202,8 @@ void plus4(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 4+\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND += 4;
@@ -203,7 +214,8 @@ void minus1(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 1-\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND -= 1;
@@ -214,7 +226,8 @@ void minus2(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 2-\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND -= 2;
@@ -225,7 +238,8 @@ void minus3(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 3-\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND -= 3;
@@ -236,7 +250,8 @@ void minus4(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for 4-\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	TOP_FROM_IND -= 4;
@@ -278,7 +293,8 @@ void ifplus(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for IF+\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -293,7 +309,8 @@ void ifzero(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for IF0\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -308,7 +325,8 @@ void ifminus(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for IF-\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -328,7 +346,8 @@ void branchminus(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for BR-\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -347,7 +366,8 @@ void branchzero(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for BR0\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -366,7 +386,8 @@ void branchplus(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for BR+\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -383,7 +404,8 @@ void branchsign(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for BRS\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -403,7 +425,8 @@ void branch(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for BR\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -436,7 +459,8 @@ void equality(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for =\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t a = pop(dataStack);
@@ -453,7 +477,8 @@ void greaterthan(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for >\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t a = pop(dataStack);
@@ -470,7 +495,8 @@ void lessthan(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for <\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t a = pop(dataStack);
@@ -495,7 +521,8 @@ void do_begin(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for DO\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
@@ -515,7 +542,8 @@ void do_loop(){
 	FETCH_LOOP_TOP_IND
 	if(LOOP_STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient loop stack operands for DO_LOOP\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	FETCH_LOOP_TOP_PTR
@@ -537,7 +565,8 @@ void rp_loop(){
 	FETCH_LOOP_TOP_IND
 	if(LOOP_STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient loop stack operands for RP_LOOP\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	FETCH_LOOP_TOP_PTR
@@ -569,7 +598,8 @@ void exch2(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for E2\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t temp = dataStack->array[TOP_IND];
@@ -581,7 +611,8 @@ void exch3(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 1){
 		fprintf(stderr,"ERR: Insufficient operands for E3\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t temp = dataStack->array[TOP_IND];
@@ -593,7 +624,8 @@ void exch4(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 2){
 		fprintf(stderr,"ERR: Insufficient operands for E4\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t temp = dataStack->array[TOP_IND];
@@ -605,19 +637,22 @@ void exchdepth(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERR: Insufficient operands for ET\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t depth = pop(dataStack);
 	if (depth == 1) return;
 	if(dataStack->top <= depth-2){
 		fprintf(stderr,"ERR: Insufficient operands for ET\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	if(depth <= 0){
 		fprintf(stderr,"ERR: Can only exchange from positive depth\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t temp = top(dataStack);
@@ -630,7 +665,8 @@ void copy(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for C\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	push(dataStack,top(dataStack));
@@ -641,7 +677,8 @@ void copy2(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){
 		fprintf(stderr,"ERR: Insufficient operands for C2\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	push(dataStack, dataStack->array[TOP_IND - 1]);
@@ -651,7 +688,8 @@ void copy3(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 1){
 		fprintf(stderr,"ERR: Insufficient operands for C3\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	push(dataStack, dataStack->array[TOP_IND - 2]);
@@ -661,7 +699,8 @@ void copy4(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 2){
 		fprintf(stderr,"ERR: Insufficient operands for C4\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	push(dataStack, dataStack->array[TOP_IND - 3]);
@@ -671,18 +710,21 @@ void copydepth(){
 	FETCH_TOP_IND
 	if(TOP_IND <= 0){ // There need to be two or more operands
 		fprintf(stderr,"ERR: Insufficient operands for CT\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	intptr_t depth = pop(dataStack);
 	if((TOP_IND-1) <= depth-2){
 		fprintf(stderr,"ERR: Insufficient operands for CT\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	if(depth <= 0){
 		fprintf(stderr,"ERR: Can only copy from positive depth\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	push(dataStack, dataStack->array[dataStack->top - (depth - 1)]);
@@ -693,7 +735,8 @@ void drop(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient operands for D\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	pop(dataStack);
@@ -720,9 +763,10 @@ void noop(){
 }
 
 void _undefined(){
-	printf("Error: Undefined word %s called during execution\n", current_codeword->name);
-	// TODO clean return to prompt
-	exit(0);
+	printf("ERR: Undefined word %s called during execution\n", current_codeword->name);
+	abortExecution();
+	cmdbuf->ip = -1; // word_next increments this!
+	return;
 }
 
 // Next cell should contain a constant literal
@@ -766,7 +810,8 @@ void assignVar(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for !\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	cmdbuf->ip++; // Advance to data cell
@@ -848,7 +893,8 @@ void termInNum(){
 		intptr_t len = pop(dataStack);
 		if(len < 0){
 			fprintf(stderr,"ERR: TIN requires non-negative operand\n");
-			cmdClear(cmdbuf);
+			abortExecution();
+			cmdbuf->ip = -1; // word_next increments this!
 			return;
 		}
 		char * line = readline("");
@@ -861,12 +907,14 @@ void termInNum(){
 			}
 		}else{
 			fprintf(stderr,"ERR: TIN could not read line\n");
-			cmdClear(cmdbuf);
+			abortExecution();
+			cmdbuf->ip = -1; // word_next increments this!
 			return;
 		}
 	}else{
 		fprintf(stderr,"ERR: Insufficient operands for TIN\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	return;
@@ -896,7 +944,8 @@ void termOutNum(){
 		free(toPrint);
 	}else{
 		fprintf(stderr,"ERR: Insufficient operands for TON\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	return;
@@ -906,7 +955,8 @@ void termOutString(){
 	// Requires two operands. The top of the stack is a count and below that is a pointer to the string.
 	if(dataStack->top < 1){
 		fprintf(stderr,"ERR: Insufficient stack operands for TOS\n");
-		cmdClear(cmdbuf);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	// Pop the count and pointer from the stack
