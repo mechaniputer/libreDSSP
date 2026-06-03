@@ -132,13 +132,13 @@ codeword_t * wordDefine(char * name, dict * vocab){
 
 	if(vocab->grow == NULL){
 		// TODO This should be handled gracefully (free resources, return NULL, print error).
-		printf("Fatal Error: We are defining a word but no dictionary is selected\n");
-		assert(0);
+		printf("Error: We are defining a word but no dictionary is selected\n");
+		abortExecution();
 	}
 	if(vocab->grow->open == 0){
 		// TODO This should be handled gracefully (free resources, return NULL, print error).
-		printf("Fatal Error: We are defining a word in a closed dictionary\n");
-		assert(0);
+		printf("Error: We are defining a word in a closed dictionary\n");
+		abortExecution();
 	}
 	// If there is at least one word already
 	if(vocab->grow->wordlist != NULL){
@@ -162,7 +162,7 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	tempWord->name = malloc((1+strlen(name))*sizeof(char));
 	strcpy(tempWord->name, name);
 	tempWord->xt = word_enter; // User words always call word_enter
-	tempWord->userDef = 0;        // Will be set to code array pointer later
+	tempWord->userDef = 0;     // Will be set to code array pointer later
 	tempWord->size = 0;        // Should correspond to number of elements in userDef[]
 	tempWord->text = NULL;     // Will be set by parser
 	// Regardless of initial state, now the word is named and present in the dictionary.
@@ -173,7 +173,7 @@ codeword_t * wordDefine(char * name, dict * vocab){
 void defCore(char * name, void (*func)(), dict * vocab){
 	if(strlen(name) > CORE_NAME_LEN-1){
 		printf("Fatal Error: Core word name %s exceeds %d characters\n",name,CORE_NAME_LEN-1);
-		assert(0);
+		assert(0); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
 	}
 	codeword_t * temp = malloc(sizeof(codeword_t));
 	temp->xt = func;

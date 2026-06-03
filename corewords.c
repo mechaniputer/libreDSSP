@@ -42,6 +42,7 @@ extern codeword_t * current_codeword;
 extern stack * returnStack;
 extern stack * loopStack;
 extern dict * vocab;
+extern int abort_requested;
 
 void push_zero(){
 	push(dataStack, 0);

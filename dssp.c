@@ -33,6 +33,7 @@ stack * loopStack;
 stack * tokenizerStack;
 stack * parserStack;
 dict * vocab; // Contains all recognized words, including core and user defined
+int abort_requested = 0;
 
 int main(int argc, char *argv[]){
 	cmdbuf = newCmdBuffer();
@@ -166,8 +167,8 @@ int main(int argc, char *argv[]){
 				word_next();
 				free(bufptr);
 				bufsize = 0;
-				cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
-				cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
+				cmdbuf->size = 0;
+				cmdbuf->array[0] = NULL;
 			}
 			fclose(file);
 		}
@@ -176,14 +177,15 @@ int main(int argc, char *argv[]){
 	int status = 0;
 	while(1){
 		assert(-1 == returnStack->top); // Ensure we have an empty return stack
+		abort_requested = 0;
 		// Show prompt, get line of input
 		char * line = prompt(status);
 		status = process_line(line);
 		free(line);
 		//print_codewords(cmdbuf->array);
 		word_next();
-		cmdbuf->size = 0; // Don't use cmdClear since it removes incomplete comment/definition status
-		cmdbuf->array[0] = NULL; // Prevent execution with NULL sentinel
+		cmdbuf->size = 0;
+		cmdbuf->array[0] = NULL;
 	}
 	return 0;
 }

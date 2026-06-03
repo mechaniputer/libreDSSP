@@ -28,6 +28,8 @@
 #include "dict.h"
 #include "stack.h"
 
+void abortExecution(void);
+void debug();
 void print_codewords(codeword_t ** array);
 int isNum(char * foo);
 void word_next();

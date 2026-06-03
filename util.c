@@ -27,14 +27,47 @@
 #include "dict.h"
 #include "stack.h"
 #include "cmdbuf.h"
+#include "tokparse.h" // For reset_tokenizer_parser_state();
 
 // Global for the codeword currently being executed
 codeword_t *current_codeword = NULL;
+
+extern int abort_requested;
 
 // Global return stack for nested word execution
 // (defined in dssp.c, used by word_enter() and word_exit())
 extern stack *returnStack;
 
+// Global return stack for nested word execution
+// (defined in dssp.c, used by loop-related core words)
+extern stack *loopStack;
+
+// Discards everything except existing defs, vars, and the data stack
+// word_next() will see the NULL sentinel and return to the prompt.
+void abortExecution(void){
+	reset_tokenizer_parser_state();
+
+	// We need to pop back out to the root cmdbuf before we can clear it
+	// Otherwise we may corrupt a dict entry and fail to prevent execution.
+	while(returnStack->top > -1){
+		cmdbuf->size = (int) pop(returnStack);
+		cmdbuf->array = (codeword_t **) pop(returnStack);
+		cmdbuf->ip = (int) pop(returnStack);
+	}
+	cmdbuf->ip = 0;
+	cmdbuf->size = 0;
+	cmdbuf->array[0] = NULL; // (sentinel)
+	current_codeword = cmdbuf->array[0];
+
+	// Empty the stacks. No more loops, no more word_exit().
+	returnStack->top = -1;
+	loopStack->top = -1;
+
+	// Will reset to 0 before prompt is shown
+	abort_requested = 1;
+	fprintf(stderr, "[Execution aborted]\n");
+	return;
+}
 
 // Shows current ip, cmdbuf, and stack contents
 void debug(){

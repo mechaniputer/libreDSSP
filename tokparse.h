@@ -29,6 +29,7 @@
 #define PARSE_COMPILE_S0    (17) // Awaiting word name
 #define PARSE_COMPILE_S1    (18) // Awaiting more commands or ;
 
+void reset_tokenizer_parser_state();
 int process_line(char * line);
 
 #endif
