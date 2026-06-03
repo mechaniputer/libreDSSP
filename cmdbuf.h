@@ -64,7 +64,6 @@ struct cmdbuffer_struct
 };
 
 cmdbuffer * newCmdBuffer();
-void cmdClear(cmdbuffer * cmdbuf);
 void add_cw_to_cmdbuf(cmdbuffer * cmdbuf, codeword_t * cw);
 void cmdGrow(cmdbuffer * cmdbuf);
 //codeword_t * newLiteral(intptr_t value);

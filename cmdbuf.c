@@ -35,16 +35,6 @@ cmdbuffer * newCmdBuffer(){
 	return new_cmdbuf;
 }
 
-// Empties command buffer and resets all statuses
-// FIXME changing the contents of the cmdbuf is incorrect because it may be a reference to a user word's definition.
-//       In addition, if we are reading a code file, we should halt and go to the prompt on an error.
-void cmdClear(cmdbuffer * cmdbuf) {
-	cmdbuf->size = 0;
-	// NULL sentinel at index 0 will cleanly do nothing
-	if(cmdbuf->capacity > 0) cmdbuf->array[0] = NULL;
-	return;
-}
-
 void add_cw_to_cmdbuf(cmdbuffer * cmdbuf, codeword_t * cw) {
 	if((cmdbuf->capacity) == (cmdbuf->size+1)) cmdGrow(cmdbuf);
 	cmdbuf->array[cmdbuf->size++] = cw;
