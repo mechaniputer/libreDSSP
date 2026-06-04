@@ -14,6 +14,7 @@
 
 #	You should have received a copy of the GNU General Public License \
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
+
 # Include the auto-generated configurations
 include config.mk
 
