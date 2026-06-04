@@ -1,66 +1,116 @@
 # libreDSSP
 ## A GPLv3 Licensed DSSP Interpreter
 
-libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was designed for the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. This implementation is not yet complete, but it is complete enough to experiment with. Work has resumed after a long delay but it will continue to be sporadic due to my busy schedule.
+libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was inspired by the architecture of the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.
 
-To our knowledge this is the only maintained DSSP implementation, and the first to be free software. It is lacking in many areas but progress is being made to add features and make it faster.
+DSSP provides a somewhat larger set of core words than most FORTH-style languages. We consider this a strength, because memory is abundant on modern platforms (at least relative to our needs). Having more specific core words also eases development and improves performance.
 
-The ultimate goal of this project is not to merely replicate DSSP as it once existed, but to improve on it where possible without betraying the philosophy of the language.
+To our knowledge this is the only maintained DSSP implementation, and the first to be free software (GPLv3 license).
+
+libreDSSP uses an indirect threaded design and avoids any inline assembly for maximum portability. At the moment we target every modern *nix system that we reasonably can, but most are untested. Longer term, embedded ports would certainly be nice to have.
 
 ## Getting started
-Run 'make' to build it. You may wish to use the included tutorial by running './dssp examples/TUTOR.DSP'.
+This project uses a lightweight, portable configuration framework that automatically detects and binds to either `libedit` (Editline) or GNU `readline`.
+Ensure you have a standard C compiler (`cc`, `gcc`, or `clang`), `make`, and one of the aforementioned editing libraries installed. The configure script prefers `libedit` by default since it results in lower memory usage at runtime.
+
+### Compilation Steps
+
+To build the executable, run the standard configuration and build sequence in your terminal:
+
+```bash
+./configure
+make
+```
+
+### Build Targets
+
+* `make` — Compiles the standard optimized production binary (`dssp`).
+* `make debug` — Compiles a debug version containing symbols (`-ggdb`) and activates AddressSanitizer (`-fsanitize=address`) for memory debugging and leak checking.
+* `make clean` — Removes generated binaries, object files, and temporary configurations to reset the build directory.
+
+
+### Other Helpful Stuff
+Some code examples are provided in the examples directory.
 Vim source highlighting files are included in vim/.
 
+
 ## Contributing
-Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue. You may want to search for documents about prior implementations of DSSP. Most of them are in Russian which makes it difficult to get a full understanding of the language, and there have also been several dialects of DSSP. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them.
+Pull requests with good style that solve actual problems are appreciated. When in doubt check the issues tab and feel free to comment for clarification or advice. If you find a way to crash the interpreter, make an issue with instructions (ideally DSSP code) to reproduce it.
+
+Before contributing you may want to search for documents about prior implementations of DSSP. Documentation is scarce, is often fragmentary, and is usually written in Russian. To add confusion, there have also been several dialects of DSSP with various differences. This project does not aim to precisely match any particular dialect but aims to have a high degree of compatibility with most of them. Note that we are not pursuing ternary support and only target 64-bit and 32-bit hardware.
+
+Contributions should preserve DSSP syntax, behavior, and approach, rather than simply following what is usually done in FORTH (although an understanding of FORTH can help fill gaps in information about DSSP).
 
 The libreDSSP tutor (TUTOR.DSP) does not yet cover all of the implemented language features. Pull requests to add or improve training steps are appreciated.
 
-One of our greatest challenges is finding unambiguous information about this obscure language. If you have anything that might help with that, let us know.
+Also let us know if you are interested in setting up other resources such as an irc channel or a website. We don't currently have the time to manage anything officially, but if someone sets one up, we can link to it here.
 
-Also let us know if you are interested in setting up other resources such as an irc channel or a website. I don't currently have the time to manage anything like that.
+## What is different from earlier DSSP dialects?
+The $PRIME subdictionary contains core words and cannot be modified. Instead, a $DEFAULT subdictionary exists for user-defined words, and more subdictionaries can be added.
+
+In addition, WORDS lists an inventory of all user-defined words in open subdictionaries. This is a loanword from FORTH that may or may not have had an equivalent in past dialects of DSSP.
+
 
 ## What works
-	* Basic math operations (+,*,-,/)
-	* 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
-	* =, <, >
-	* NEG, ABS
-	* BYE, ..(show stack), .(show top of stack)
-	* IF+, IF0, IF-
-	* BR+, BR0, BR-, BRS, BR
-	* DO
-	* D (drop), C (copy), DS (drop entire stack)
-	* DEEP (push height of stack)
-	* ET, E2, E3, E4
-	* CT, C2, C3, C4
-	* Function declarations
-	* GROW, USE, SHUT, ?$
-	* Integer variables
-	* TIN, TON
-	* ."hello" printing, SP, CR
-	* [comments]
-	* GNU readline support
-	* Read from file at start
-	* B10 (as a placeholder since we currently only support base 10 I/O)
+- Top-down programming! (reference undefined words when defining words)
+- UNDEF (list undefined words)
+- Basic math operations (+,*,-,/)
+- VAR, !, push value of variable by name
+- 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
+- =, <, >
+- NEG, ABS
+- ..(show stack), .(show top of stack)
+- DO, RP (but the latter has limited use without EX*)
+- IF+, IF0, IF-
+- BR+, BR0, BR-, BRS, BR
+- D (drop), C (copy), DS (drop entire stack)
+- DEEP (push height of stack)
+- ET, E2, E3, E4
+- CT, C2, C3, C4
+- Function declarations
+- TOS
+- TIN, TON (Not sure if correct behavior)
+- SP, CR
+- ."hello" printing
+- Push address and len of string literal
+- [comments]
+- Editline support (Also works with GNU readline)
+- Load and run code from file at startup
+- B10 (as a placeholder since we currently only support base 10 I/O)
+- GROW, USE, SHUT, ?$
+- WORDS (This is a FORTH loanword. Currently unsure if DSSP had an equivalent.)
+- BYE
+
 
 ## What doesn't work yet
-	* SAVE, LOAD
-	* ONLY, CANCEL, FORGET, CLEAR
-	* Variable addresses using '
-	* Arrays, fixed variables, etc
-	* RP
-	* SGN, NOT
-	* EX, EX-, EX0, EX+, EXT
-	* SORT, SPIN, MAX, MIN
-	* T0, T1
-	* TRB, TOB, BASE@
-	* TIB, TIS
-	* B2, B8, B16
-	* SHL, SHR, other bitwise operations
-	* Everything unaccounted for in this README
+- EX, EX-, EX0, EX+, EXT
+- References to undefined vars
+- Arrays, fixed variables, etc
+- SAVE, LOAD
+- ONLY, CANCEL, FORGET, CLEAR
+- SGN, NOT
+- SORT, SPIN, MAX, MIN
+- T0, T1
+- TRB, TOB, BASE@
+- TIB, TIS
+- B2, B8, B16
+- SHL, SHR, other bitwise operations
+- ' (push address of var)
+- '' (push address of function)
+- @ (dereference top of stack and push result)
+- !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
+- EXEC (execute function from address on stack)
+- TEXEC (execute text)
+- BELL
+- LPSP, LPCR, LPS, LPT, LPFF
+- INT, TRAP, ON, EON
+- Everything unaccounted for in this README
+
 
 ## Possible future goals
-	* Full documentation
-	* Floating point math
-	* DSSP Compiler
-	* Multithreading support
+- Full documentation and in-shell interactive tutorial
+- Floating point math
+- External libraries for platform-specific uses (graphics, networking, GPIO)
+- Ports to additional OSes and embedded devices
+- Multithreading support, callbacks
+- Ability to generate tiny standalone executables

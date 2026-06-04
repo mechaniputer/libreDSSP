@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -20,23 +20,36 @@
 #define UTIL_H
 
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
-#include "util.h"
+#if defined(HAVE_LIBEDIT)
+#	if defined(__NetBSD__)
+#	include <readline/readline.h>
+#	include <readline/history.h>
+#	else
+// Linux/macOS/FreeBSD libedit port path
+#	include <editline/readline.h>
+#	include <editline/history.h>
+#	endif
+#elif defined(HAVE_READLINE)
+// Standard GNU Readline path
+#  include <readline/readline.h>
+#  include <readline/history.h>
+#else
+#	error "No command-line editing library defined!"
+#endif
+
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
 
-void textPrint(char * text);
+void abortExecution(void);
+void debug();
+void print_codewords(codeword_t ** array);
 int isNum(char * foo);
-void run(stack * stack, cmdstack * cmdstack, dict * vocab);
-void stackInput(char * line, cmdstack * cmdstack);
-char * prompt(int unfinished);
-// Searches dictionaries, runs a word if possible
-void wordRun(cmdstack * cmdstack, stack * stack, dict * vocab);
+void word_next();
+void word_enter();
+void word_exit();
+char * prompt(int ready);
 
 #endif

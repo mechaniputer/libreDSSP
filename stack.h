@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -19,63 +19,25 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "elem.h"
+#include <stdint.h>
 
-typedef struct variable variable;
-typedef struct word word;
-typedef struct coreword coreword;
+typedef struct variable_t variable_t;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
 typedef struct stack stack;
-typedef struct cmdstack cmdstack;
-typedef struct command command;
 
 struct stack
 {
+	intptr_t * array;
 	int capacity;
 	int top;
-	int * array;
 };
-
-struct cmdstack
-{
-	int capacity;
-	int top;
-	int unfinished_comment;
-	int unfinished_func;
-	elem * incomplete_tail;
-	command * array;
-};
-
-struct command
-{
-	// What to put here?
-	// Need to account for:
-	// * builtin function pointers
-	void (*func)(stack *, cmdstack *, dict *);
-	// * defined words
-	// * literals
-	// * strings ."hello"
-	// * anything that can be split by spaces
-	char * text;
-};
-
 
 stack * newStack();
-int top(stack * stack);
-int pop(stack * stack);
-void push(stack * stack, int value);
+intptr_t top(stack * stack);
+intptr_t pop(stack * stack);
+void push(stack * stack, intptr_t value);
 void grow(stack * stack);
-
-cmdstack * newCmdStack();
-command * cmdTop(cmdstack * cmdstack);
-command * cmdPop(cmdstack * cmdstack);
-void cmdDrop(cmdstack * cmdstack);
-void cmdFree(command* to_free);
-void cmdClear(cmdstack * cmdstack);
-void cmdPush(cmdstack * cmdstack, command * cmd);
-void cmdGrow(cmdstack * cmdstack);
-void newCommand(command * oldcmd, command ** newcmd);
 
 #endif

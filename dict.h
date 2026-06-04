@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -19,82 +19,98 @@
 #ifndef DICT_H
 #define DICT_H
 
-#include "elem.h"
+#define CORE_NAME_LEN 8
+
 #include "stack.h"
+#include "cmdbuf.h"
 #include "corewords.h"
 
 /*	DICTIONARY HIERARCHY:
+	Core words are stored in a linked list in the dict struct. They are always present.
+	User words and variables are stored in subdicts, which are linked together in a linked list in the dict struct.
+	One subdict at a time can be selected for new word definitions and variable declarations
+	Individual subdicts can be open or closed to lookups.
 
-        dict --- variable --- variable --- variable
-       /    \
-      /     subdict --- subdict --- subdict
-  coreword     |           |           |
-     |        word        word        word
-  coreword     |           |           |
-     |        word        word        word
-  coreword     |           |           |
-     |        word        word        word
-  coreword
+
+                      variable    variable    variable
+                        /           /           /
+                    variable    variable    variable
+                      /           /           /
+                     /           /           /
+         dict --- subdict --- subdict --- subdict
+        /            \           \           \
+       /              \           \           \
+  codeword_t       codeword_t  codeword_t  codeword_t
+      |                \           \           \
+  codeword_t        codeword_t  codeword_t  codeword_t
+      |                 \           \           \
+  codeword_t         codeword_t  codeword_t  codeword_t
+      |
+  codeword_t
 
 */
 
-typedef struct variable variable;
-typedef struct word word;
-typedef struct coreword coreword;
+typedef struct undefined_word undefined_word_t;
+
+typedef struct codeword codeword_t;
+typedef struct variable_t variable_t;
 typedef struct subdict subdict;
 typedef struct dict dict;
 
-struct variable
+struct undefined_word {
+	char *name;                    // name of undefined word
+	codeword_t ** references;       // array of pointers to codewords that reference this
+	codeword_t * placeholder;      // The word that all of the refs point to
+	undefined_word_t *next;        // next entry in linked list
+	int ref_count;                 // number of references
+	int ref_capacity;              // allocated space for references array
+};
+
+struct variable_t
 {
-	char name[16];
+	char * name;
+	variable_t * next;
 	int value;
-	variable * next;
-};
-
-// TODO: array of commands
-struct word
-{
-	char name[16];
-	int length;
-	int capacity;
-	command * array; // TODO: Make dynamic
-	word * next;
-};
-
-struct coreword
-{
-	char name[8];
-	coreword * next;
-	void (*func)(stack *, cmdstack *, dict *);
 };
 
 struct subdict
 {
 	char * name;
-	int open;
-	word * wordlist;
 	subdict * next;
+	codeword_t * wordlist;
+	variable_t * varlist;
+	int open;
 };
 
 struct dict
 {
-	coreword * core;
+	codeword_t * core;
 	subdict * sub;
 	subdict * grow;
-	variable * var;
+	undefined_word_t * undefined;
 };
 
+// Check if a name is already used for a word/var
+int growSearch(char * name, dict * vocab);
 // Looks for defined variables
-variable * varSearch(char * name, dict * vocab);
+variable_t * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined
-word * wordSearch(char * name, dict * vocab);
+codeword_t * wordSearch(char * name, dict * vocab);
 // Looks for core words to see if they are defined
-coreword * coreSearch(char * name, dict * vocab);
+codeword_t * coreSearch(char * name, dict * vocab);
 // Attempts to define a new function
-void defWord(cmdstack * cmdstack, dict * vocab);
-void growWord(word * word, char * com, dict * vocab);
+codeword_t * wordDefine(char * name, dict * vocab);
 // Defines built-in functions
-void defCore(char * name, void (*func)(stack *, cmdstack *, dict *), dict * vocab);
-subdict * newDict(dict * vocab, char * name);
+void defCore(char * name, void (*func)(), dict * vocab);
+// Creates a new sub-dictionary
+subdict * newDict(char * name, dict * vocab);
+// Finds a sub-dictionary by name, returns NULL if not found
+subdict * findDict(char * name, dict * vocab);
+
+// Utility functions for undefined word table
+undefined_word_t* undefSearch(char *name, dict *vocab);
+undefined_word_t* create_undefined_word(char *name, dict *vocab);
+void add_reference(undefined_word_t *undef, codeword_t *ref);
+void resolve_undefined_word(char *name, codeword_t *def, dict *vocab);
 
 #endif

@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -17,22 +17,44 @@
 */
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
+#include <assert.h>
 
+#include "tokparse.h"
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
 #include "corewords.h"
 #include "util.h"
 
-int main(int argc, char *argv[]){
-	stack * workStack = newStack();
-	cmdstack * cmdstack = newCmdStack();
+cmdbuffer *cmdbuf;
+stack *dataStack;
+stack *returnStack;
+stack * loopStack;
+stack * tokenizerStack;
+stack * parserStack;
+dict * vocab; // Contains all recognized words, including core and user defined
+int abort_requested = 0;
 
-	dict * vocab = malloc(sizeof(dict)); // Contains all recognized words
+int main(int argc, char *argv[]){
+	cmdbuf = newCmdBuffer();
+	dataStack = newStack();
+	returnStack = newStack();
+	loopStack = newStack();
+	tokenizerStack = newStack();
+	parserStack = newStack();
+
+	vocab = malloc(sizeof(dict));
 	vocab->core = NULL;
 	vocab->grow = NULL;
-	vocab->var = NULL;
+	vocab->undefined = NULL;
+
+	// Most common literals
+	defCore("0", push_zero, vocab);
+	defCore("1", push_one, vocab);
+	defCore("2", push_two, vocab);
+	defCore("4", push_four, vocab);
+	defCore("8", push_eight, vocab);
 
 	// Arithmetic
 	defCore("+", plus, vocab);
@@ -70,7 +92,11 @@ int main(int argc, char *argv[]){
 	defCore("<", lessthan, vocab);
 
 	// Looping and flow control
-	defCore("DO", doloop, vocab);
+	defCore("DO", do_begin, vocab);
+	defCore("DO_LOOP", do_loop, vocab); // Not to be used directly
+	defCore("RP", rp_begin, vocab);
+	defCore("RP_LOOP", rp_loop, vocab); // Not to be used directly
+	defCore("EX", loop_exit, vocab);
 
 	// Stack manipulation
 	defCore("E2", exch2, vocab);
@@ -86,7 +112,16 @@ int main(int argc, char *argv[]){
 	defCore("DS", dropStack, vocab);
 
 	// Misc
-	defCore("!", defVar, vocab);
+	// TODO for special functions we should just use references instead of the dictionary.
+	defCore("PUSHLIT", pushLiteral, vocab);
+	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
+	defCore(";S", word_exit, vocab); // Not to be used directly
+	defCore("SKP1", skip1, vocab); // Not to be used directly
+	defCore("SKP2", skip2, vocab); // Not to be used directly
+	defCore("NOP", noop, vocab);
+	defCore("VAR", declareVar, vocab);
+	defCore("!", assignVar, vocab);
+	defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
 	defCore("?$", listDicts, vocab);
@@ -95,7 +130,11 @@ int main(int argc, char *argv[]){
 	defCore("USE", openSub, vocab);
 	defCore("TIN", termInNum, vocab);
 	defCore("TON", termOutNum, vocab);
+	defCore("TOS", termOutString, vocab);
 	defCore("DEEP", stackDepth, vocab);
+	defCore("UNDEF",inventoryUndefined, vocab);
+	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
+	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
 
 	// Sub-Dictionaries
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
@@ -103,13 +142,15 @@ int main(int argc, char *argv[]){
 	vocab->sub->open = 1;
 	vocab->sub->next = NULL;
 	vocab->sub->wordlist = NULL;
+	vocab->sub->varlist = NULL;
 	vocab->grow = vocab->sub; // We will grow this dictionary by default
 
 	// Version
-	printf("\nlibreDSSP, version 0.5.0\n");
+	printf("\nlibreDSSP, version 0.6.0-dev\n");
 
 	// Copyright notice
-	printf("Copyright (C) 2019  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	printf("Copyright (C) 2026  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	int status = 0;
 
 	if(argc >= 2){
 		printf("Attempting to open %s... ",argv[1]);
@@ -124,19 +165,29 @@ int main(int argc, char *argv[]){
 			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				stackInput(bufptr, cmdstack);
-				run(workStack, cmdstack, vocab);
+				status = process_line(bufptr);
+				if(status == 0) word_next();
 				free(bufptr);
+				bufptr = NULL;
 				bufsize = 0;
+				cmdbuf->size = 0;
+				cmdbuf->array[0] = NULL;
 			}
 			fclose(file);
 		}
 	}
 
 	while(1){
+		assert(-1 == returnStack->top); // Ensure we have an empty return stack
+		abort_requested = 0;
 		// Show prompt, get line of input
-		stackInput(prompt(cmdstack->unfinished_comment || cmdstack->unfinished_func), cmdstack);
-		run(workStack, cmdstack, vocab);
+		char * line = prompt(status);
+		status = process_line(line);
+		free(line);
+		//print_codewords(cmdbuf->array);
+		if(status == 0) word_next();
+		cmdbuf->size = 0;
+		cmdbuf->array[0] = NULL;
 	}
 	return 0;
 }

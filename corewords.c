@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -16,771 +16,901 @@
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <readline/readline.h>
 
 #include "corewords.h"
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
+#include "util.h"
 
-// In utils.h
-void run(stack * stack, cmdstack * cmdstack, dict * vocab);
+#define FETCH_TOP_IND        int top_ind = dataStack->top;
+#define TOP_IND              (top_ind)
+#define TOP_FROM_IND         (dataStack->array[top_ind])
+#define STACKEMPTY           (top_ind == -1)
 
-void plus(stack * stack, cmdstack * cmdstack, dict * vocab){
-	int temp;
-	// -1 indicates empty stack
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for +\n");
-		cmdClear(cmdstack);
+#define FETCH_LOOP_TOP_IND   int loop_top_ind = loopStack->top;
+#define LOOP_STACKEMPTY      (loop_top_ind == -1)
+#define FETCH_LOOP_TOP_PTR   intptr_t * loop_top_ptr = &loopStack->array[loop_top_ind];
+#define DEREF_LOOP_TOP_PTR   (*loop_top_ptr)
+
+extern codeword_t * current_codeword;
+extern stack * returnStack;
+extern stack * loopStack;
+extern dict * vocab;
+extern int abort_requested;
+
+void push_zero(){
+	push(dataStack, 0);
+}
+
+void push_one(){
+	push(dataStack, 1);
+}
+
+void push_two(){
+	push(dataStack, 2);
+}
+
+void push_four(){
+	push(dataStack, 4);
+}
+
+void push_eight(){
+	push(dataStack, 8);
+}
+
+void plus(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for +\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	temp = pop(stack);
-	stack->array[stack->top] += temp;
+	temp_data = pop(dataStack);
+	dataStack->array[dataStack->top] += temp_data;
 	return;
 }
 
-void multiply(stack * stack, cmdstack * cmdstack, dict * vocab){
-	int temp1;
-	int temp2;
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for *\n");
-		cmdClear(cmdstack);
+void multiply(){
+	FETCH_TOP_IND
+	intptr_t temp1;
+	intptr_t temp2;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for *\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	temp1 = pop(stack);
-	temp2 = top(stack);
-	stack->array[stack->top] = temp1 * temp2;
+	temp1 = pop(dataStack);
+	temp2 = top(dataStack);
+	dataStack->array[dataStack->top] = temp1 * temp2;
 	return;
 }
 
-void minus(stack * stack, cmdstack * cmdstack, dict * vocab){
-	int temp;
-	// -1 indicates empty stack
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for -\n");
-		cmdClear(cmdstack);
+void minus(){
+	FETCH_TOP_IND
+	intptr_t temp;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for -\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	temp = pop(stack);
-	stack->array[stack->top] -= temp;
+	temp = pop(dataStack);
+	dataStack->array[dataStack->top] -= temp;
 	return;
 }
 
-void divide(stack * stack, cmdstack * cmdstack, dict * vocab){
-	int temp1;
-	int temp2;
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for /\n");
-		cmdClear(cmdstack);
+void divide(){
+	FETCH_TOP_IND
+	intptr_t divisor;
+	intptr_t dividend;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for /\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	temp1 = pop(stack);
-	temp2 = top(stack);
-	stack->array[stack->top] = temp2 / temp1;
+
+	intptr_t * temp_stack_arr = dataStack->array;
+
+	divisor = temp_stack_arr[TOP_IND];
+	dividend = temp_stack_arr[TOP_IND-1];
+	if(divisor == 0){
+		pop(dataStack);
+		pop(dataStack);
+		fprintf(stderr,"ERR: Division by zero\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_stack_arr[dataStack->top-1] = dividend / divisor;
+	temp_stack_arr[dataStack->top] = dividend % divisor;
+
 	return;
 }
 
-void negate(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for NEG\n");
-		cmdClear(cmdstack);
+void negate(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for NEG\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] = -(stack->array[stack->top]);
+	TOP_FROM_IND = -TOP_FROM_IND;
 	return;
 }
 
-void absval(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for ABS\n");
-		cmdClear(cmdstack);
+void absval(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for ABS\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
-	} else if(top(stack) < 0) {
-		stack->array[stack->top] = -(stack->array[stack->top]);
+	} else if(TOP_FROM_IND < 0) {
+		TOP_FROM_IND = -TOP_FROM_IND;
 	}
 	return;
 }
 
-void plus1(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 1+\n");
-		cmdClear(cmdstack);
+void plus1(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 1+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] += 1;
+	TOP_FROM_IND += 1;
 	return;
 }
 
-void plus2(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 2+\n");
-		cmdClear(cmdstack);
+void plus2(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 2+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] += 2;
+	TOP_FROM_IND += 2;
 	return;
 }
 
-void plus3(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 3+\n");
-		cmdClear(cmdstack);
+void plus3(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 3+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] += 3;
+	TOP_FROM_IND += 3;
 	return;
 }
 
-void plus4(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 4+\n");
-		cmdClear(cmdstack);
+void plus4(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 4+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] += 4;
+	TOP_FROM_IND += 4;
 	return;
 }
 
-void minus1(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 1-\n");
-		cmdClear(cmdstack);
+void minus1(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 1-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] -= 1;
+	TOP_FROM_IND -= 1;
 	return;
 }
 
-void minus2(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 2-\n");
-		cmdClear(cmdstack);
+void minus2(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 2-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] -= 2;
+	TOP_FROM_IND -= 2;
 	return;
 }
 
-void minus3(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 3-\n");
-		cmdClear(cmdstack);
+void minus3(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 3-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] -= 3;
+	TOP_FROM_IND -= 3;
 	return;
 }
 
-void minus4(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top == -1){
-		fprintf(stderr,"ERROR: Insufficient operands for 4-\n");
-		cmdClear(cmdstack);
+void minus4(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for 4-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	stack->array[stack->top] -= 4;
+	TOP_FROM_IND -= 4;
 	return;
 }
 
-void bye(stack * stack, cmdstack * cmdstack, dict * vocab){
+void bye(){
 	printf("Exiting libreDSSP\n");
 	exit(0);
 }
 
 // TODO This will need to be modified to support multiple output modes
-// Current mode will be readable from a var in vocab
-void showTop(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top > -1) printf("%d\n",top(stack));
+// Current mode will be readable from a flag in cmdbuf?
+void showTop(){
+	if(dataStack->top > -1){
+		printf("%ld\n",top(dataStack));
+	}else{
+		printf("(NIL)\n");
+	}
 	return;
 }
 
-void showStack(stack * stack, cmdstack * cmdstack, dict * vocab){
-	int i;
-	if(stack->top < 0){
-		printf("[]\n");
-		return;
-	}
-
+void showStack(){
 	printf("[");
-	for(i=0; i<=(stack->top); i++){
-		printf(" %d",stack->array[i]);
+	for(int i=0; i<=(dataStack->top); i++){
+		if(i != 0) printf(" ");
+		printf("%ld",dataStack->array[i]);
 	}
 	printf("]\n");
 	return;
 }
 
 // FIXME Placeholder because B10 is currently the only mode we support!
-void base10(stack * stack, cmdstack * cmdstack, dict * vocab){
+void base10(){
 	return;
 }
 
-void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 0) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
-		cmdClear(cmdstack);
+void ifplus(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for IF+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
-	if(pop(stack) <= 0){
-		cmdDrop(cmdstack);
+	if(pop(dataStack) <= 0){
+		cmdbuf->ip += 1; // Skip the first thing
+	}
+
+	return;
+}
+
+void ifzero(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for IF0\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) != 0){
+		cmdbuf->ip += 1; // Skip the first thing
+	}
+
+	return;
+}
+
+void ifminus(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for IF-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) >= 0){
+		cmdbuf->ip += 1; // Skip the first thing
+	}
+
+	return;
+}
+
+
+// Example code:    BR- FOO BAR
+// Compiled result: BR- FOO SKP1 BAR
+// If taken, do nothing.
+// If not taken, ip+=2
+void branchminus(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for BR-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) >= 0){
+		cmdbuf->ip += 2;
+	}
+
+	return;
+}
+
+// Example code:    BR0 FOO BAR
+// Compiled result: BR0 FOO SKP1 BAR
+// If taken, do nothing.
+// If not taken, ip+=2
+void branchzero(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for BR0\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) != 0){
+		cmdbuf->ip += 2;
+	}
+
+	return;
+}
+
+// Example code:    BR+ FOO BAR
+// Compiled result: BR+ FOO SKP1 BAR
+// If taken, do nothing.
+// If not taken, ip++
+void branchplus(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for BR+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) <= 0){
+		cmdbuf->ip += 2;
+	}
+
+	return;
+}
+
+// Example code:    BRS FOO BAR BAZ
+// Compiled result: BRS FOO SKP1 BAR SKP1 BAZ
+void branchsign(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for BRS\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	intptr_t temp = pop(dataStack);
+	// If it's <0 we do nothing and the next word runs
+	if(temp == 0){ // Do the second thing
+		cmdbuf->ip += 2;
+	}else if(temp>0){ // Do the third thing
+		cmdbuf->ip += 4;
 	}
 	return;
 }
 
-void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 0) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF0\n");
-		cmdClear(cmdstack);
+// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
+// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
+void branch(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for BR\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 
-	if(pop(stack) != 0){
-		cmdDrop(cmdstack);
-	}
-	return;
-}
-
-void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 0) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for IF+\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(pop(stack) >= 0){
-		cmdDrop(cmdstack);
-	}
-	return;
-}
-
-void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 1) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR-\n");
-		cmdClear(cmdstack);
-		return;
-	}
-	if(pop(stack) < 0){ // Do the first thing
-		command * temp = cmdPop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdPush(cmdstack, temp);
-	}else{ // Do the second thing
-		cmdDrop(cmdstack);
-	}
-	return;
-}
-
-void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 1) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
-		cmdClear(cmdstack);
-		return;
-	}
-	if(pop(stack) == 0){ // Do the first thing
-		command * temp = cmdPop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdPush(cmdstack, temp);
-	}else{ // Do the second thing
-		cmdDrop(cmdstack);
-	}
-	return;
-}
-
-void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 1) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR+\n");
-		cmdClear(cmdstack);
-		return;
-	}
-	if(pop(stack) > 0){ // Do the first thing
-		command * temp = cmdPop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdPush(cmdstack, temp);
-	}else{ // Do the second thing
-		cmdDrop(cmdstack);
-	}
-	return;
-}
-
-void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if((cmdstack->top < 1) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR0\n");
-		cmdClear(cmdstack);
-		return;
-	}
-	if(top(stack) < 0){ // Do the first thing
-		command * temp = cmdPop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdPush(cmdstack, temp);
-	}else if(top(stack) == 0){ // Do the second thing
-		cmdDrop(cmdstack);
-		command * temp = cmdPop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdPush(cmdstack, temp);
-	}else{ // Do the third thing
-		cmdDrop(cmdstack);
-		cmdDrop(cmdstack);
-	}
-	pop(stack);
-	return;
-}
-
-void branch(stack * stack, cmdstack * cmdstack, dict * vocab){
-	command *tempcmd;
-	command *branchCom = malloc(sizeof(struct command));
-	branchCom->text = malloc(3*sizeof(char));
-	strcpy(branchCom->text, "BR");
-	branchCom->func = NULL; // TODO This can be made faster with threading
-
-	if((cmdstack->top < 0) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for BR\n");
-		cmdClear(cmdstack);
-		return;
-	}
-	int temp = top(stack);
-
-	if(!strcmp("ELSE", cmdTop(cmdstack)->text)){
-		pop(stack);
-		cmdDrop(cmdstack);
-	}else if(temp == atoi(cmdTop(cmdstack)->text)){
-		if((cmdstack->top < 3) || (stack->top < 0)){
-			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
-			cmdClear(cmdstack);
-			return;
+	intptr_t tempval = pop(dataStack);
+	// Iterate over condition literals until we either find one that matches or is preceded by SKP1 instead of BR/SKP2
+	// Once we find the correct word to execute (following the matched literal), set cmdbuf->ip to the index preceding it.
+	intptr_t offset = 0;
+	while(1){
+		//printf("offset: %d\n",offset);
+		// Check for end of BR-ELSE
+		if(cmdbuf->array[cmdbuf->ip + offset]->xt == skip1){
+			//printf("Reached end of loop with no match.");
+			cmdbuf->ip += offset; // Now points to SKP1, will be incremented again by word_next()
+			break;
 		}
-		pop(stack);
-		cmdDrop(cmdstack);
-		tempcmd = cmdPop(cmdstack);
-		while(strcmp("ELSE", cmdPop(cmdstack)->text));
-		cmdPop(cmdstack); // FIXME Why is it not safe to free this?
-		cmdPush(cmdstack, tempcmd);
-	}else{
-		if((cmdstack->top < 3) || (stack->top < 0)){
-			free(branchCom);
-			fprintf(stderr,"ERROR: Insufficient operands for BR\n");
-			cmdClear(cmdstack);
-			return;
+		offset += 1;
+		// Check for literal match
+		if((intptr_t) cmdbuf->array[cmdbuf->ip + offset] == tempval){
+			//printf("Found match at offset %d\n",offset);
+			cmdbuf->ip += offset; // Now points to literal, will be incremented again by word_next()
+			break;
 		}
-		cmdDrop(cmdstack);
-		cmdDrop(cmdstack);
-		cmdPush(cmdstack, branchCom);
+		offset += 2;
 	}
 	return;
 }
 
-void equality(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for =\n");
-		cmdClear(cmdstack);
+
+void equality(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for =\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int a = pop(stack);
-	int b = pop(stack);
+	intptr_t a = pop(dataStack);
+	intptr_t b = pop(dataStack);
 	if(b == a){
-		push(stack,1);
+		push(dataStack,1);
 	}else{
-		push(stack,0);
+		push(dataStack,0);
 	}
 	return;
 }
 
-void greaterthan(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for >\n");
-		cmdClear(cmdstack);
+void greaterthan(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for >\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int a = pop(stack);
-	int b = pop(stack);
+	intptr_t a = pop(dataStack);
+	intptr_t b = pop(dataStack);
 	if(b > a){
-		push(stack,1);
+		push(dataStack,1);
 	}else{
-		push(stack,0);
+		push(dataStack,0);
 	}
 	return;
 }
 
-void lessthan(stack * stack, cmdstack * cmdstack, dict * vocab){
-	// -1 indicates empty stack
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for <\n");
-		cmdClear(cmdstack);
+void lessthan(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for <\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int a = pop(stack);
-	int b = pop(stack);
+	intptr_t a = pop(dataStack);
+	intptr_t b = pop(dataStack);
 	if(b < a){
-		push(stack,1);
+		push(dataStack,1);
 	}else{
-		push(stack,0);
+		push(dataStack,0);
 	}
 	return;
 }
 
-// FIXME frees are tricky here.
-// FIXME If the stack grows then any prior references to commands on the stack become invalid.
-// FIXME This problem could result in bugs literally anywhere in the interpreter!!!
-// FIXME However those problems seem to manifest here especially because it is one of the only core words where the stack is likely to grow a lot.
-// TODO There are definitely bugs present in this function which sometimes cause the interpreter to crash.
-void doloop(stack * stack, cmdstack * cmdstack, dict * vocab){
-	int i;
-	if((cmdstack->top < 0) || (stack->top < 0)){
-		fprintf(stderr,"ERROR: Insufficient operands for DO\n");
-		cmdClear(cmdstack);
+
+// This coreword requires one data stack operand [n] and one word operand (the next word in the command buffer).
+// The data operand [n] is popped. The command operand is executed n times.
+// Here's how it works:
+// Pop the data stack. If it's >0, decrement it and push it to the loop stack.
+// Then simply return and let word_next() advance into the following word.
+// That word is followed by LOOP, which will handle repetition.
+// If the data stack is <=0, skip the loop (like what BR+ would do)
+void do_begin(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for DO\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	command *repeat; // This one will be the master copy
-	command *to_free = cmdPop(cmdstack); // We must free this before the stack gets a chance to grow
-	newCommand(to_free, &repeat); // This produces a local copy that can't get realloced away if the cmdstack decides to grow
-	cmdFree(to_free);
 
-	int reps = pop(stack);
-
-	for(i = 0; i < reps; i++){
-		cmdPush(cmdstack, repeat);
+	intptr_t tempval = pop(dataStack);
+	if(tempval > 0){
+		push(loopStack, tempval-1);
+	}else{
+		cmdbuf->ip += 1; // Skip the following word, which should be LOOP
 	}
+	return;
+}
+
+// Pop the counter from the return stack.
+// If it's 0 go to the next word (as normal).
+// If it's >0, decrement it, push it, and re-execute the previous word.
+void do_loop(){
+	FETCH_LOOP_TOP_IND
+	if(LOOP_STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient loop stack operands for DO_LOOP\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	FETCH_LOOP_TOP_PTR
+	intptr_t tempval = DEREF_LOOP_TOP_PTR;
+	if(tempval > 0){
+		DEREF_LOOP_TOP_PTR -= 1;
+		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
+	}
+	return;
+}
+
+void rp_begin(){
+	// In RP, 1 means keep looping, 0 means stop.
+	push(loopStack, 1);
+	return;
+}
+
+void rp_loop(){
+	FETCH_LOOP_TOP_IND
+	if(LOOP_STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient loop stack operands for RP_LOOP\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	FETCH_LOOP_TOP_PTR
+	intptr_t tempval = DEREF_LOOP_TOP_PTR;
+	if(tempval == 1){
+		// Keep looping
+		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
+	}else if(tempval == 0){
+		// EX/EX-/EX0/EX+/EXT has been run, making the count 0.
+		pop(loopStack);
+	}else{
+		fprintf(stderr, "ERR: Unexpected value %ld on return stack in rp_loop()\n",tempval);
+		exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
+	}
+	return;
+}
+
+// First replace the top of loopStack with 0
+// Then exit words until we are back at the loop level (rp_loop or do_loop will end the loop)
+void loop_exit(){
+	printf("In loop_exit()\n");
+	getchar();
+	// TODO
 	return;
 }
 
 // Stack manipulation
-void exch2(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for E2\n");
-		cmdClear(cmdstack);
+void exch2(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for E2\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - 1];
-	stack->array[stack->top - 1] = temp;
+	intptr_t temp = dataStack->array[TOP_IND];
+	dataStack->array[TOP_IND] = dataStack->array[TOP_IND - 1];
+	dataStack->array[TOP_IND - 1] = temp;
 	return;
 }
-void exch3(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 1){
-		fprintf(stderr,"ERROR: Insufficient operands for E3\n");
-		cmdClear(cmdstack);
+void exch3(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 1){
+		fprintf(stderr,"ERR: Insufficient operands for E3\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - 2];
-	stack->array[stack->top - 2] = temp;
+	intptr_t temp = dataStack->array[TOP_IND];
+	dataStack->array[TOP_IND] = dataStack->array[TOP_IND - 2];
+	dataStack->array[TOP_IND - 2] = temp;
 	return;
 }
-void exch4(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 2){
-		fprintf(stderr,"ERROR: Insufficient operands for E4\n");
-		cmdClear(cmdstack);
+void exch4(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 2){
+		fprintf(stderr,"ERR: Insufficient operands for E4\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - 3];
-	stack->array[stack->top - 3] = temp;
+	intptr_t temp = dataStack->array[TOP_IND];
+	dataStack->array[TOP_IND] = dataStack->array[TOP_IND - 3];
+	dataStack->array[TOP_IND - 3] = temp;
 	return;
 }
-void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 0){ // There need to be two elements or more
-		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
-		cmdClear(cmdstack);
+void exchdepth(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){ // There need to be two or more operands
+		fprintf(stderr,"ERR: Insufficient operands for ET\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int depth = pop(stack);
+	intptr_t depth = pop(dataStack);
 	if (depth == 1) return;
-	if(stack->top <= depth-2){
-		fprintf(stderr,"ERROR: Insufficient operands for ET\n");
-		cmdClear(cmdstack);
+	if(dataStack->top <= depth-2){
+		fprintf(stderr,"ERR: Insufficient operands for ET\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	if(depth <= 0){
-		fprintf(stderr,"ERROR: Can only exchange from positive depth\n");
-		cmdClear(cmdstack);
+		fprintf(stderr,"ERR: Can only exchange from positive depth\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int temp = top(stack);
-	stack->array[stack->top] = stack->array[stack->top - (depth - 1)];
-	stack->array[stack->top - (depth - 1)] = temp;
+	intptr_t temp = top(dataStack);
+	dataStack->array[dataStack->top] = dataStack->array[dataStack->top - (depth - 1)];
+	dataStack->array[dataStack->top - (depth - 1)] = temp;
 	return;
 }
 
-void copy(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for C\n");
-		cmdClear(cmdstack);
+void copy(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for C\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	push(stack,top(stack));
+	push(dataStack,top(dataStack));
 	return;
 }
 
-void copy2(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 0){
-		fprintf(stderr,"ERROR: Insufficient operands for C2\n");
-		cmdClear(cmdstack);
+void copy2(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for C2\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	push(stack, stack->array[stack->top - 1]);
+	push(dataStack, dataStack->array[TOP_IND - 1]);
 	return;
 }
-void copy3(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 1){
-		fprintf(stderr,"ERROR: Insufficient operands for C3\n");
-		cmdClear(cmdstack);
+void copy3(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 1){
+		fprintf(stderr,"ERR: Insufficient operands for C3\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	push(stack, stack->array[stack->top - 2]);
+	push(dataStack, dataStack->array[TOP_IND - 2]);
 	return;
 }
-void copy4(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 2){
-		fprintf(stderr,"ERROR: Insufficient operands for C4\n");
-		cmdClear(cmdstack);
+void copy4(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 2){
+		fprintf(stderr,"ERR: Insufficient operands for C4\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	push(stack, stack->array[stack->top - 3]);
+	push(dataStack, dataStack->array[TOP_IND - 3]);
 	return;
 }
-void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top <= 0){ // There need to be two elements or more
-		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
-		cmdClear(cmdstack);
+void copydepth(){
+	FETCH_TOP_IND
+	if(TOP_IND <= 0){ // There need to be two or more operands
+		fprintf(stderr,"ERR: Insufficient operands for CT\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	int depth = pop(stack);
-	if(stack->top <= depth-2){
-		fprintf(stderr,"ERROR: Insufficient operands for CT\n");
-		cmdClear(cmdstack);
+	intptr_t depth = pop(dataStack);
+	if((TOP_IND-1) <= depth-2){
+		fprintf(stderr,"ERR: Insufficient operands for CT\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	if(depth <= 0){
-		fprintf(stderr,"ERROR: Can only copy from positive depth\n");
-		cmdClear(cmdstack);
+		fprintf(stderr,"ERR: Can only copy from positive depth\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	push(stack, stack->array[stack->top - (depth - 1)]);
+	push(dataStack, dataStack->array[dataStack->top - (depth - 1)]);
 	return;
 }
 
-void drop(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for D\n");
-		cmdClear(cmdstack);
+void drop(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for D\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	pop(stack);
+	pop(dataStack);
 	return;
 }
 
-void dropStack(stack * stack, cmdstack * cmdstack, dict * vocab){
-	stack->top = -1;
+void dropStack(){
+	dataStack->top = -1;
 	return;
 }
 
-// Attempts to define a new variable
-void defVar(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for !\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(cmdstack->top < 0){
-		fprintf(stderr,"ERROR: Insufficient operands for !\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	command * name = cmdPop(cmdstack);
-	int value = pop(stack);
-	variable * temp;
-
-	assert(vocab != NULL);
-
-	// See if it is a core word
-	if(coreSearch(name->text, vocab)){
-		fprintf(stderr,"ERROR: %s is in core dictionary\n",name->text);
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(wordSearch(name->text, vocab) != NULL){
-		fprintf(stderr,"ERROR: %s is in dictionary\n",name->text);
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(vocab->var == NULL){
-		vocab->var = malloc(sizeof(variable));
-		temp = vocab->var;
-		strcpy(temp->name, name->text);
-		temp->next = NULL;
-	}else{
-		temp = varSearch(name->text, vocab);
-		if(temp == NULL){
-			temp = vocab->var;
-			while(temp->next != NULL) temp = temp->next;
-			temp->next = malloc(sizeof(variable));
-			temp = temp->next;
-			strcpy(temp->name, name->text);
-			temp->next = NULL;
-		}
-	}
-
-	temp->value = value;
+void skip1(){
+	cmdbuf->ip += 1;
 	return;
 }
 
-void printNewline(stack * stack, cmdstack * cmdstack, dict * vocab){
+void skip2(){
+	cmdbuf->ip += 2;
+	return;
+}
+
+void noop(){
+	return;
+}
+
+void _undefined(){
+	printf("ERR: Undefined word %s called during execution\n", current_codeword->name);
+	abortExecution();
+	cmdbuf->ip = -1; // word_next increments this!
+	return;
+}
+
+// Next cell should contain a constant literal
+void pushLiteral(){
+	intptr_t operand = (intptr_t) cmdbuf->array[cmdbuf->ip+1];
+	//printf("Pushing %ld\n",operand);
+	push(dataStack, operand);
+	cmdbuf->ip++; // Skip data cell
+	return;
+}
+
+// Push the current value of a variable
+// The next cell should contain the address of the correct variable struct
+void pushVar(){
+	push(dataStack, ((variable_t *)(cmdbuf->array[cmdbuf->ip+1]))->value);
+	cmdbuf->ip++; // Skip data cell
+	return;
+}
+
+// Declare the existence of a named variable
+// The next cell should contain the address of the desired (char *) name of the variable
+// We initialize variables to 0. Not sure whether original DSSP did this.
+void declareVar(){
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// No problems. Declare the var.
+	variable_t * tempVar = malloc(sizeof(variable_t));
+	tempVar->name = varname; // The parser allocated this buffer and we can keep it
+	tempVar->value = 0;
+	tempVar->next = vocab->grow->varlist;
+	vocab->grow->varlist = tempVar;
+	//printf("Declared variable %s\n",varname);
+	return;
+}
+
+// Assign top of stack to a variable
+// The next cell should contain the address of the correct variable struct
+void assignVar(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient data operands for !\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	cmdbuf->ip++; // Advance to data cell
+	((variable_t *)(cmdbuf->array[cmdbuf->ip]))->value = pop(dataStack);
+	return;
+}
+
+void printNewline(){
 	printf("\n");
 	return;
 }
-void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab){
+void printSpace(){
 	printf(" ");
 	return;
 }
 
-void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab){
-	assert(vocab != NULL);
+void listDicts(){
 	subdict * tempSub = vocab->sub;
+	if(vocab->grow == NULL || vocab->grow->open == 0){
+		printf("Warning: no dictionary selected for expansion\n");
+		printf("%s CLOSED\n",vocab->grow->name);
+	}else{
+		printf("%s OPEN\n",vocab->grow->name);
+	}
 	printf("$PRIME OPEN\n");
 	while(tempSub != NULL){
-		printf("%s",tempSub->name);
-		if(tempSub->open) printf(" OPEN\n");
-		else printf(" CLOSED\n");
+		if(tempSub != vocab->grow){
+			printf("%s",tempSub->name);
+			if(tempSub->open) printf(" OPEN\n");
+			else printf(" CLOSED\n");
+		}
 		tempSub = tempSub->next;
 	}
 	return;
 }
 
-void growSub(stack * stack, cmdstack * cmdstack, dict * vocab){
-	subdict * tempSub = vocab->sub;
+// Select a subdict for growth. If it doesn't exist yet, open it.
+// The next cell should contain a valid dictionary name (the parser has checked the format)
+void growSub(){
+	cmdbuf->ip++; // Advance to data cell
+	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 
-	if(cmdstack->top < 0){
-		fprintf(stderr,"ERROR: Must specify a subvocabulary name\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(strncmp(cmdTop(cmdstack)->text,"$",1)){
-		fprintf(stderr,"ERROR: subdictionary must begin with $ character\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(!strcmp(cmdTop(cmdstack)->text,"$PRIME")){
-		fprintf(stderr,"ERROR: cannot alter $PRIME subvocabulary\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	while(tempSub != NULL){
-		if(!strcmp(cmdTop(cmdstack)->text, tempSub->name)) {
-			break;
-		}
-		tempSub = tempSub->next;
-	}
+	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open.
+	// If it doesn't exist, we need to create it and open it.
+	subdict * tempSub = findDict(name, vocab);
 
 	if(tempSub == NULL){ // We are making a new subdict
-		tempSub = newDict(vocab, cmdTop(cmdstack)->text);
+		tempSub = newDict(name, vocab);
 	}
 
 	vocab->grow = tempSub;
 	tempSub->open = 1;
-	cmdDrop(cmdstack);
 	return;
 }
 
-void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab){
-	subdict * tempSub = vocab->sub;
-
-	if(cmdstack->top < 0){
-		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	if(!strcmp(cmdTop(cmdstack)->text,"$PRIME")){
-		fprintf(stderr,"ERROR: cannot shut $PRIME subvocabulary\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	while(tempSub != NULL){
-		if(!strcmp(tempSub->name, cmdTop(cmdstack)->text)) break;
-		tempSub = tempSub->next;
-	}
-
-	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdTop(cmdstack)->text);
-		cmdClear(cmdstack);
-		return;
-	}
+// Shut a subdict, hiding all words defined therein
+// The next cell should contain a valid subdict *
+void shutSub(){
+	cmdbuf->ip++; // Advance to data cell
+	subdict * tempSub =  (subdict *)(cmdbuf->array[cmdbuf->ip]);
 	tempSub->open = 0;
-	vocab->grow = NULL;
-	cmdDrop(cmdstack);
 	return;
 }
 
-void openSub(stack * stack, cmdstack * cmdstack, dict * vocab){
-	subdict * tempSub = vocab->sub;
-
-	if(cmdstack->top < 0){
-		fprintf(stderr,"ERROR: Must specify a subvocabulary\n");
-		cmdClear(cmdstack);
-		return;
-	}
-
-	while(tempSub != NULL){
-		if(!strcmp(tempSub->name, cmdTop(cmdstack)->text)) break;
-		tempSub = tempSub->next;
-	}
-
-	if (tempSub == NULL){
-		fprintf(stderr,"ERROR: subdictionary %s does not exist\n",cmdTop(cmdstack)->text);
-		cmdClear(cmdstack);
-		return;
-	}
+// Open a subdict, revealing all words defined therein
+// The next cell should contain a valid subdict *
+void openSub(){
+	cmdbuf->ip++; // Advance to data cell
+	subdict * tempSub =  (subdict *)(cmdbuf->array[cmdbuf->ip]);
 	tempSub->open = 1;
-	cmdDrop(cmdstack);
 	return;
 }
 
 // TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
-void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top > -1){ // Requires one operand
-		int len = pop(stack);
+void termInNum(){
+	if(dataStack->top > -1){ // Requires one operand
+		intptr_t len = pop(dataStack);
 		if(len < 0){
-			fprintf(stderr,"ERROR: TIN requires non-negative operant\n");
-			cmdClear(cmdstack);
+			fprintf(stderr,"ERR: TIN requires non-negative operand\n");
+			abortExecution();
+			cmdbuf->ip = -1; // word_next increments this!
 			return;
 		}
 		char * line = readline("");
 		if(line){
 			int maxlen = strlen(line);
 			if(len < maxlen){
-				push(stack, atoi(line + ((maxlen-len)*sizeof(char))));
+				push(dataStack, atoi(line + ((maxlen-len)*sizeof(char))));
 			}else{
-				push(stack, atoi(line));
+				push(dataStack, atoi(line));
 			}
 		}else{
-			fprintf(stderr,"ERROR: TIN could not read line\n");
-			cmdClear(cmdstack);
+			fprintf(stderr,"ERR: TIN could not read line\n");
+			abortExecution();
+			cmdbuf->ip = -1; // word_next increments this!
 			return;
 		}
 	}else{
-		fprintf(stderr,"ERROR: Insufficient operands for TIN\n");
-		cmdClear(cmdstack);
+		fprintf(stderr,"ERR: Insufficient operands for TIN\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	return;
@@ -788,13 +918,13 @@ void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 // TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
-void termOutNum(stack * stack, cmdstack * cmdstack, dict * vocab){
-	if(stack->top > 0){ // Requires two operands
-		int len = pop(stack);
-		int num = pop(stack);
-		int maxlen = snprintf( NULL, 0, "%d", num );
+void termOutNum(){
+	if(dataStack->top > 0){ // Requires two operands
+		intptr_t len = pop(dataStack);
+		intptr_t num = pop(dataStack);
+		int maxlen = snprintf( NULL, 0, "%ld", num );
 		char *toPrint = malloc( maxlen + 1 );
-		snprintf( toPrint, maxlen + 1, "%d", num );
+		snprintf( toPrint, maxlen + 1, "%ld", num );
 
 
 		if(maxlen > len){
@@ -809,14 +939,62 @@ void termOutNum(stack * stack, cmdstack * cmdstack, dict * vocab){
 
 		free(toPrint);
 	}else{
-		fprintf(stderr,"ERROR: Insufficient operands for TON\n");
-		cmdClear(cmdstack);
+		fprintf(stderr,"ERR: Insufficient operands for TON\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
 	return;
 }
 
-void stackDepth(stack * stack, cmdstack * cmdstack, dict * vocab){
-	push(stack, (stack->top)+1);
+void termOutString(){
+	// Requires two operands. The top of the stack is a count and below that is a pointer to the string.
+	if(dataStack->top < 1){
+		fprintf(stderr,"ERR: Insufficient stack operands for TOS\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	// Pop the count and pointer from the stack
+	intptr_t len = pop(dataStack);
+	char * str = (char *) pop(dataStack);
+	// Print exactly the specified number of characters from the string
+	for(int i=0; i<len; i++){
+		printf("%c", str[i]);
+	}
+	return;
+}
+
+void stackDepth(){
+	push(dataStack, (dataStack->top)+1);
+	return;
+}
+
+// Lists all undefined words
+void inventoryUndefined(){
+	undefined_word_t * temp = vocab->undefined;
+	while(temp != NULL){
+		//printf("Traversal sees %s\n",temp->name);
+		printf("%s\n",temp->name);
+		temp = temp->next;
+	}
+}
+
+// Lists user-defined words in open subdicts.
+void inventoryWords(){
+	subdict * tempSub = vocab->sub;
+	codeword_t * tempWord;
+	while(tempSub != NULL){
+		if(tempSub->open){
+			printf("Subdict: %s\n",tempSub->name);
+			tempWord = tempSub->wordlist;
+			while(tempWord != NULL){
+				printf("  %s",tempWord->name);
+				printf("  %s\n",tempWord->text);
+				tempWord = tempWord->next;
+			}
+		}
+		tempSub = tempSub->next;
+	}
 	return;
 }

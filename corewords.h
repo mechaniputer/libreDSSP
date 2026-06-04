@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -20,74 +20,100 @@
 #define COREWORDS_H
 
 #include <stdlib.h>
-#include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
+
+extern stack *dataStack;
+extern cmdbuffer *cmdbuf;
+extern stack *returnStack;
+extern codeword_t *current_codeword;
 
 typedef struct dict dict;
 
 // Arithmetic
-void plus(stack * stack, cmdstack * cmdstack, dict * vocab);
-void multiply(stack * stack, cmdstack * cmdstack, dict * vocab);
-void minus(stack * stack, cmdstack * cmdstack, dict * vocab);
-void divide(stack * stack, cmdstack * cmdstack, dict * vocab);
-void negate(stack * stack, cmdstack * cmdstack, dict * vocab);
-void absval(stack * stack, cmdstack * cmdstack, dict * vocab);
+void push_zero();
+void push_one();
+void push_two();
+void push_four();
+void push_eight();
+void plus();
+void multiply();
+void minus();
+void divide();
+void negate();
+void absval();
 
-void plus1(stack * stack, cmdstack * cmdstack, dict * vocab);
-void plus2(stack * stack, cmdstack * cmdstack, dict * vocab);
-void plus3(stack * stack, cmdstack * cmdstack, dict * vocab);
-void plus4(stack * stack, cmdstack * cmdstack, dict * vocab);
+void plus1();
+void plus2();
+void plus3();
+void plus4();
 
-void minus1(stack * stack, cmdstack * cmdstack, dict * vocab);
-void minus2(stack * stack, cmdstack * cmdstack, dict * vocab);
-void minus3(stack * stack, cmdstack * cmdstack, dict * vocab);
-void minus4(stack * stack, cmdstack * cmdstack, dict * vocab);
+void minus1();
+void minus2();
+void minus3();
+void minus4();
 
 // Display and interpreter
-void bye(stack * stack, cmdstack * cmdstack, dict * vocab);
-void showTop(stack * stack, cmdstack * cmdstack, dict * vocab);
-void showStack(stack * stack, cmdstack * cmdstack, dict * vocab);
-void base10(stack * stack, cmdstack * cmdstack, dict * vocab);
+void bye();
+void showTop();
+void showStack();
+void base10();
 
 // Conditionals
-void ifplus(stack * stack, cmdstack * cmdstack, dict * vocab);
-void ifzero(stack * stack, cmdstack * cmdstack, dict * vocab);
-void ifminus(stack * stack, cmdstack * cmdstack, dict * vocab);
-void branchminus(stack * stack, cmdstack * cmdstack, dict * vocab);
-void branchzero(stack * stack, cmdstack * cmdstack, dict * vocab);
-void branchplus(stack * stack, cmdstack * cmdstack, dict * vocab);
-void branchsign(stack * stack, cmdstack * cmdstack, dict * vocab);
-void branch(stack * stack, cmdstack * cmdstack, dict * vocab);
-void equality(stack * stack, cmdstack * cmdstack, dict * vocab);
-void greaterthan(stack * stack, cmdstack * cmdstack, dict * vocab);
-void lessthan(stack * stack, cmdstack * cmdstack, dict * vocab);
+void ifplus();
+void ifzero();
+void ifminus();
+void branchminus();
+void branchzero();
+void branchplus();
+void branchsign();
+void branch();
+void equality();
+void greaterthan();
+void lessthan();
 
 // Looping
-void doloop(stack * stack, cmdstack * cmdstack, dict * vocab);
+void do_begin();
+void do_loop();
+void rp_begin();
+void rp_loop();
+void loop_exit();
 
 // Stack manipulation
-void exch2(stack * stack, cmdstack * cmdstack, dict * vocab);
-void exch3(stack * stack, cmdstack * cmdstack, dict * vocab);
-void exch4(stack * stack, cmdstack * cmdstack, dict * vocab);
-void exchdepth(stack * stack, cmdstack * cmdstack, dict * vocab);
-void copy(stack * stack, cmdstack * cmdstack, dict * vocab);
-void copy2(stack * stack, cmdstack * cmdstack, dict * vocab);
-void copy3(stack * stack, cmdstack * cmdstack, dict * vocab);
-void copy4(stack * stack, cmdstack * cmdstack, dict * vocab);
-void copydepth(stack * stack, cmdstack * cmdstack, dict * vocab);
-void drop(stack * stack, cmdstack * cmdstack, dict * vocab);
-void dropStack(stack * stack, cmdstack * cmdstack, dict * vocab);
+void exch2();
+void exch3();
+void exch4();
+void exchdepth();
+void copy();
+void copy2();
+void copy3();
+void copy4();
+void copydepth();
+void drop();
+void dropStack();
 
 // Misc
-void defVar(stack * stack, cmdstack * cmdstack, dict * vocab);
-void printNewline(stack * stack, cmdstack * cmdstack, dict * vocab);
-void printSpace(stack * stack, cmdstack * cmdstack, dict * vocab);
-void listDicts(stack * stack, cmdstack * cmdstack, dict * vocab);
-void growSub(stack * stack, cmdstack * cmdstack, dict * vocab);
-void shutSub(stack * stack, cmdstack * cmdstack, dict * vocab);
-void openSub(stack * stack, cmdstack * cmdstack, dict * vocab);
-void termInNum(stack * stack, cmdstack * cmdstack, dict * vocab);
-void termOutNum(stack * stack, cmdstack * cmdstack, dict * vocab);
-void stackDepth(stack * stack, cmdstack * cmdstack, dict * vocab);
+void skip1();
+void skip2();
+void noop();
+void _undefined();
+void pushLiteral();
+void pushVar();
+void declareVar();
+void assignVar();
+void pushVar();
+void printNewline();
+void printSpace();
+void listDicts();
+void growSub();
+void shutSub();
+void openSub();
+void termInNum();
+void termOutNum();
+void termOutString();
+void stackDepth();
+void inventoryUndefined();
+void inventoryWords();
+
 
 #endif

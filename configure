@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# Default output file
+CONFIG_FILE="config.mk"
+rm -f "$CONFIG_FILE"
+
+echo "Configuring dssp..."
+
+# 1. Detect Compiler
+if [ -z "$CC" ]; then
+	if command -v cc >/dev/null 2>&1; then CC="cc"; else CC="gcc"; fi
+fi
+echo "Using compiler: $CC"
+
+# Helper function to test compilation/linking
+test_link() {
+	# $1 = flags/libs to test
+	echo "int main(void) { return 0; }" > .test.c
+	$CC $1 .test.c -o .test.out >/dev/null 2>&1
+	RET=$?
+	rm -f .test.c .test.out
+	return $RET
+}
+
+# 2. Check for libedit or readline
+FOUND_LIB=0
+CFLAGS_LIB=""
+LDLIBS_LIB=""
+
+# Strategy A: Use pkg-config if available
+if command -v pkg-config >/dev/null 2>&1; then
+	if pkg-config --exists libedit 2>/dev/null; then
+		echo "Found libedit via pkg-config"
+		CFLAGS_LIB=$(pkg-config --cflags libedit)
+		LDLIBS_LIB=$(pkg-config --libs libedit)
+		FOUND_LIB=1
+	elif pkg-config --exists readline 2>/dev/null; then
+		echo "Found readline via pkg-config"
+		CFLAGS_LIB=$(pkg-config --cflags readline)
+		LDLIBS_LIB=$(pkg-config --libs readline)
+		FOUND_LIB=2
+	fi
+fi
+
+# Strategy B: Manual fallback probing (if pkg-config isn't used or missed dependencies)
+if [ $FOUND_LIB -eq 0 ]; then
+	# Array-like matching using a loop for standard sh compatibility
+	for lib in "-ledit" "-ledit -lterminfo" "-ledit -lncurses" "-lreadline" "-lreadline -lterminfo" "-lreadline -lncurses" "-lreadline -ltermcap"; do
+		if test_link "$lib"; then
+			LDLIBS_LIB="$lib"
+			case "$lib" in
+				*edit*) echo "Found libedit via probing ($lib)"; FOUND_LIB=1 ;;
+				*read*) echo "Found readline via probing ($lib)"; FOUND_LIB=2 ;;
+			esac
+			break
+		fi
+	done
+fi
+
+if [ $FOUND_LIB -eq 0 ]; then
+	echo "ERROR: Neither libedit nor GNU readline could be found on this system." >&2
+	exit 1
+fi
+
+# 3. Write config.mk
+{
+	echo "# Generated automatically by ./configure"
+	echo "CC = $CC"
+	echo "CFLAGS_LIB = $CFLAGS_LIB"
+	echo "LDLIBS_LIB = $LDLIBS_LIB"
+	if [ $FOUND_LIB -eq 1 ]; then
+		echo "CFLAGS += -DHAVE_LIBEDIT"
+	else
+		echo "CFLAGS += -DHAVE_READLINE"
+	fi
+} > "$CONFIG_FILE"
+
+echo "Configuration successful. Written to $CONFIG_FILE"
+

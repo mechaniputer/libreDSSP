@@ -1,6 +1,6 @@
 /*	This file is part of libreDSSP.
 
-	Copyright 2019 Alan Beadle
+	Copyright 2026 Alan Beadle
 
 	libreDSSP is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -17,290 +17,220 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <stdint.h>
+
+#if defined(HAVE_LIBEDIT)
+#	if defined(__NetBSD__)
+#	include <readline/readline.h>
+#	include <readline/history.h>
+#	else
+// Linux/macOS/FreeBSD libedit port path
+#	include <editline/readline.h>
+#	include <editline/history.h>
+#	endif
+#elif defined(HAVE_READLINE)
+// Standard GNU Readline path
+#  include <readline/readline.h>
+#  include <readline/history.h>
+#else
+#	error "No command-line editing library defined!"
+#endif
 
 #include "util.h"
 #include "dict.h"
-#include "elem.h"
 #include "stack.h"
+#include "cmdbuf.h"
+#include "tokparse.h" // For reset_tokenizer_parser_state();
 
-// Deals with ."hello" print statements
-void textPrint(char * text){
-	assert(text != NULL);
-	int i;
-	int len = strlen(text) - 1;
+// Global for the codeword currently being executed
+codeword_t *current_codeword = NULL;
 
-	for(i = 2; i < len; i++){
-		printf("%c", text[i]);
+extern int abort_requested;
+
+// Global return stack for nested word execution
+// (defined in dssp.c, used by word_enter() and word_exit())
+extern stack *returnStack;
+
+// Global return stack for nested word execution
+// (defined in dssp.c, used by loop-related core words)
+extern stack *loopStack;
+
+// Discards everything except existing defs, vars, and the data stack
+// word_next() will see the NULL sentinel and return to the prompt.
+void abortExecution(void){
+	reset_tokenizer_parser_state();
+
+	// We need to pop back out to the root cmdbuf before we can clear it
+	// Otherwise we may corrupt a dict entry and fail to prevent execution.
+	while(returnStack->top > -1){
+		cmdbuf->size = (int) pop(returnStack);
+		cmdbuf->array = (codeword_t **) pop(returnStack);
+		cmdbuf->ip = (int) pop(returnStack);
 	}
+	cmdbuf->ip = 0;
+	cmdbuf->size = 0;
+	cmdbuf->array[0] = NULL; // (sentinel)
+	current_codeword = cmdbuf->array[0];
+
+	// Empty the stacks. No more loops, no more word_exit().
+	returnStack->top = -1;
+	loopStack->top = -1;
+
+	// Will reset to 0 before prompt is shown
+	abort_requested = 1;
+	fprintf(stderr, "[Execution aborted]\n");
 	return;
 }
 
-int isNum(char * foo){
+// Shows current ip, cmdbuf, and stack contents
+void debug(){
+	printf("*** DEBUG INFO ***\n");
+	printf("IP = %d\n",cmdbuf->ip);
+	print_codewords(cmdbuf->array);
+	printf("Data Stack: ");
+	showStack();
+	printf("*** END ***\n");
+}
+
+// Takes a pointer to any NULL-terminated array of codewords
+// Displays the contents/meaning of each one in sequence
+// Essentially a DSSP decompiler
+void print_codewords(codeword_t ** array){
+	// Note: This hack is necessary to avoid segfaulting on codewords containing literal values
+	int loop_end_index = -1;
+
+	int i=0;
+	while((array[i] != NULL) || (i < loop_end_index)){
+		// Either we are looking at a BR literal or we are not at the NULL sentinel yet
+
+		// The condition above determines whether we are looking at a literal value
+		if((i <= loop_end_index) && ((loop_end_index-i) % 3 == 0)){
+			printf("%d) %p: LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
+			i++;
+		}
+
+		// If we were pointing at a literal before, we incremented i and should see a named word.
+		printf("%d) %p: CMD %s\n", i, (void*)&array[i], array[i]->name);
+		if(!strcmp("PUSHLIT", array[i]->name)){
+			// PUSHLIT is followed by a literal that we don't want to dereference
+			i++;
+			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
+		}else if(!strcmp("VAR", array[i]->name) || !strcmp("GROW", array[i]->name)){
+			// VAR is followed by a char * containing a variable name
+			// GROW is followed by a char * containing a dict name
+			i++;
+			printf("%d) %p: STR %s\n", i, (void*) &array[i], (char *) array[i]);
+		}else if(!strcmp("PUSHVAR", array[i]->name) || !strcmp("!", array[i]->name)){
+			// PUSHVAR/! are followed by a pointer to a variable struct
+			i++;
+			printf("%d) %p: VAR %s\n", i, (void*) &array[i], ((variable_t *) array[i])->name);
+		}else if(!strcmp("SHUT", array[i]->name) || !strcmp("USE", array[i]->name)){
+			// SHUT/USE are followed by a pointer to a variable struct
+			i++;
+			printf("%d) %p: DICT %s\n", i, (void*) &array[i], ((subdict *) array[i])->name);
+		}else if(!strcmp(array[i]->name, "BR")){
+			// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
+			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
+			for(loop_end_index = i+3; ; loop_end_index+=3){
+				if(array[loop_end_index]->xt != skip2) break;
+			}
+			// loop_end_index now points to ERG in the example above (position 9)
+			// We want it to point to the last literal (position 7):
+			loop_end_index -= 2;
+			//printf("Loop end index is %d\n",loop_end_index);
+		}
+		i++;
+	}
+}
+
+int isNum(char * st){
 	int i = 0;
 
-	if((foo == NULL) || (strlen(foo) == 0)) return 0;
+	if((st == NULL) || (strlen(st) == 0)) return 0;
 
 	// If first is minus, scan from beginning to see if all are digits
-	if((foo[0] == '-') && (strlen(foo) > 1)){
-		for (i=1; i < (strlen(foo)); i++){
-			if(!isdigit(foo[i])) return 0;
+	if((st[0] == '-') && (strlen(st) > 1)){
+		for (i=1; i < (strlen(st)); i++){
+			if(!isdigit(st[i])) return 0;
 		}
-	}else for (i=0; i < (strlen(foo)); i++){
-		if(!isdigit(foo[i])) return 0;
+	}else for (i=0; i < (strlen(st)); i++){
+		if(!isdigit(st[i])) return 0;
 	}
 	return 1;
 }
 
-// Looks at cmdTop(cmdstack), decides what to do until cmdstack is empty
-void run(stack * workStack, cmdstack * cmdstack, dict * vocab){
-	if(cmdstack->unfinished_comment || cmdstack->unfinished_func) return;
-	command *temp;
-
-	if((cmdstack->top) > -1) do{
-		temp = cmdTop(cmdstack);
-		assert(temp != NULL);
-
-		//TODO: Deepen threading support
-		if((temp->func) != NULL){
-			cmdPop(cmdstack); // We still need temp to exist for a little while
-			temp->func(workStack, cmdstack, vocab);
-			//cmdFree(temp); // FIXME Why is it not safe to free this?
-		}else if(isNum(temp->text)){ // Numerical constant
-			push(workStack, atoi(temp->text));
-			cmdDrop(cmdstack); // This frees temp
-
-		}else if (!strcmp(temp->text, ":")){ // Function declaration
-			defWord(cmdstack,vocab);
-
-		}else if (temp->text[0] == '['){ // Comment
-			cmdDrop(cmdstack);
-
-		}else if (!strncmp(temp->text, ".\"", 2)){
-			textPrint(temp->text);
-			cmdDrop(cmdstack);
-
-		}else wordRun(cmdstack, workStack, vocab); // word or variable
-
-	}while((cmdstack->top)>=0);
+// Executes code in cmdbuf->array until we hit a NULL sentinel codeword
+// Each element is a codeword_t struct with an execution token (xt)
+void word_next(){
+	// Since the NULL sentinel already terminates a word, we might consider
+	// removing word_exit() from word definitions and conditionally calling it
+	// in this loop (based on whether we just ran a user word vs a string of
+	// commands from the prompt or a file. It might be better for branch
+	// prediction on modern CPUs, plus it would save some memory in user words.
+	// We would also need to revise looping corewords with this change.
+	cmdbuf->ip = 0;
+	// TODO Consider using the size as a bound instead of a NULL sentinel (fewer loads)
+	while(cmdbuf->array[cmdbuf->ip] != NULL){
+		//debug(); getchar(); // For single-step debugging
+		current_codeword = cmdbuf->array[cmdbuf->ip];
+		(*current_codeword->xt)();
+		cmdbuf->ip++;
+	}
+	//printf("word_next() finished looping\n");
 	return;
 }
 
-// Takes command line and splits it by spaces or tabs, pushes it onto stack in reverse order
-// This function is in desperate need of being rewritten.
-// It is difficult to read but the goal is fairly straightforward.
-// A line is given as input, and it must be split into commands which may be comments, print statements, function definitions, or anything else.
-// The hard part is parsing to find the boundaries between these types of things.
-void stackInput(char * line, cmdstack * cmdstack){
-	char ch;
-	int i = 0;
-	int j = 0;
-	elem * seqprev;
-	elem * seqtail;
-	command * newcom;
+// AKA DO_COLON
+void word_enter(){
+	//printf("word_enter() entering %s\n", current_codeword->name);
 
-	if(cmdstack->unfinished_comment){
-		assert(cmdstack->incomplete_tail != NULL);
-		seqtail = cmdstack->incomplete_tail;
-		i = strlen(seqtail->chars);
-	}else if (cmdstack->unfinished_func){
-		seqtail = malloc(sizeof(elem));
-		seqtail->next = cmdstack->incomplete_tail;
-	}else{
-		seqtail = malloc(sizeof(elem));
-		seqtail->next = NULL;
-	}
+	// Push former context
+	push(returnStack, (intptr_t) cmdbuf->ip);
+	push(returnStack, (intptr_t) cmdbuf->array);
+	push(returnStack, (intptr_t) cmdbuf->size);
+	//printf("word_enter() pushed return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+	//printf("Return stack height is %d\n",returnStack->top);
 
-	// TODO Not safe or efficient
-	// Handles comments, ."hello" printing, general command strings
-	while(line[j] != '\0'){
-		ch = line[j++];
+	// Load the new context
+	cmdbuf->array = (codeword_t **) (current_codeword->userDef);
+	cmdbuf->size = current_codeword->size;
+	cmdbuf->ip = -1; // The loop in word_next() will increment this to 0 before executing the first codeword in the new array
+	//printf("This word has size %d\n",cmdbuf->size);
+	//debug();
 
-		if(cmdstack->unfinished_comment == 1){ // unfinished (potentially multiline) comment
-			if(i>160){
-				fprintf(stderr,"ERROR: Maximum expression length exceeded\n");
-				cmdClear(cmdstack);
-				free(seqtail); // FIXME free entire sequence to prevent memory leak
-				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
-			}
-
-			if (ch == ']'){
-				seqtail->chars[i++] = ch;
-				cmdstack->unfinished_comment = 0;
-				cmdstack->incomplete_tail = NULL;
-			}else{ // Not the terminating char but still belongs in the comment
-				seqtail->chars[i++] = ch;
-			}
-		}else if (ch == '[') {
-			if(i>160){
-				fprintf(stderr,"ERROR: Maximum expression length exceeded\n");
-				cmdClear(cmdstack);
-				free(seqtail); // FIXME free entire sequence to prevent memory leak
-				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
-			}
-			seqtail->chars[i++] = ch;
-			cmdstack->unfinished_comment = 1; // 1 indicates an unfinished comment, possibly spanning several lines
-			cmdstack->incomplete_tail = seqtail;
-		} else if((line[j-1] =='.') && (line[j] == '\"')) {
-			j++;
-			seqtail->chars[i++] = '.';
-			seqtail->chars[i++] = '\"';
-			while((ch = line[j++]) != '\"'){
-				if(ch == '\0') break;
-				if(i>160){
-					cmdClear(cmdstack);
-					free(seqtail); // FIXME free entire sequence to prevent memory leak
-					return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
-				}
-				seqtail->chars[i++] = ch;
-			}
-			if (ch == '\"'){
-				seqtail->chars[i++] = ch;
-			}else{
-				fprintf(stderr,"ERROR: Print statement missing endquote\n");
-				cmdClear(cmdstack);
-				free(seqtail); // FIXME free entire sequence to prevent memory leak
-				return;
-			}
-
-		} else if((ch != ' ') && (ch != '\t')) { // All normal characters outside comments and print statements
-			if(i>160){
-				cmdClear(cmdstack);
-				free(seqtail); // FIXME free entire sequence to prevent memory leak
-				return; // TODO This limits a word or comment to 160 chars due to fixed size in struct
-			}
-			seqtail->chars[i++] = ch;
-			if (ch == ':'){ // Beginning of a function definition
-				cmdstack->unfinished_func++; // There might be several nested function declarations! We can't fill the cmdstack until all of them are complete.
-			}else if (cmdstack->unfinished_func && (ch == ';')){
-				cmdstack->unfinished_func--;
-			}
-
-		} else if (((ch == ' ') || (ch == '\t')) && (i != 0)) { // If (i == 0) then it's either an extra space or it follows a comment or ."hello" style print
-			// Time to append a new sequence element
-			seqtail->chars[i] = '\0';
-			seqprev = seqtail;
-			seqtail = malloc(sizeof(elem));
-			seqtail->next = seqprev; // New tail points to prev to make reverse list
-			i=0;
-		}
-	}
-
-	if(cmdstack->unfinished_comment){
-		seqtail->chars[i] =  '\0';
-		return;
-	}else if(cmdstack->unfinished_func){
-		if(i > 0){ // The current seqtail has stuff
-			seqtail->chars[i] =  '\0';
-			cmdstack->incomplete_tail = seqtail;
-		}else{
-			cmdstack->incomplete_tail = seqtail->next;
-			free(seqtail);
-		}
-		return;
-	}
-
-	// Get rid of pesky empty element
-	if(i > 0){
-		seqtail->chars[i] =  '\0';
-	}else{
-		seqprev = seqtail;
-		seqtail = seqtail->next;
-		free(seqprev);
-	}
-
-	// Now we push it all onto the cmdstack in reverse order
-	while(seqtail != NULL){
-
-		// Construct a new command
-		newcom = malloc(sizeof(struct command));
-		newcom->text = malloc((strlen(seqtail->chars)+1)*sizeof(char)); // This is bad
-		strcpy(newcom->text, seqtail->chars);
-		newcom->func = NULL;
-
-		cmdPush(cmdstack, newcom);
-		seqprev = seqtail;
-		seqtail = seqtail->next;
-		free(seqprev);
-
-		// FIXME once the cmdstack is rewritten as a queue these frees will be deprecated hopefully
-		// Currently they are needed because we cannot directly use the text field in the command stack or else stuff gets weird
-		free(newcom->text);
-		free(newcom);
-	}
-	return;
+	return; // to word_next() or a loop coreword
 }
 
-char * prompt(int unfinished){
+// AKA ;S
+// Not the same as SEMICOLON, which will finalize a new word definition
+void word_exit(){
+	//printf("In word_exit()\n");
+	//printf("Return stack height is %d\n",returnStack->top);
+
+	// Restore earlier context
+	cmdbuf->size = (int) pop(returnStack);
+	cmdbuf->array = (codeword_t **) pop(returnStack);
+	cmdbuf->ip = (int) pop(returnStack);
+	//printf("word_exit() popped return IP: %d cmdbuf->array: %p\n", (int) cmdbuf->ip, (void*)cmdbuf->array);
+
+	return; // to word_next() or a loop coreword
+}
+
+char * prompt(int status){
 	char *line;
-	if(unfinished){
-		line = readline ("? ");
-	}else{
+	if(0 == status){
 		line = readline ("* ");
+	}else{
+		line = readline ("? ");
 	}
 	//Check for EOF.
 	if (!line){
 		printf("\n");
-		return "BYE";
+		line = (char*) malloc(4*sizeof(char));
+		strcpy(line, "BYE");
 	}
 	if(strcmp(line, "")) add_history(line);
 	return line;
 }
-
-// If top of cmdstack is a word (or a variable), this function knows what to do
-void wordRun(cmdstack * cmdstack, stack * workStack, dict * vocab){
-	int i;
-	command * cmdName = cmdPop(cmdstack);
-	coreword * tempCore;
-	word * tempWord;
-	variable * tempVar;
-
-	if(cmdName->text[0] == '\0'){
-		fprintf(stderr,"ERROR: command stack contains empty string. Please file a libreDSSP bug report because this should never happen.\n");
-		if(cmdName->text != NULL) cmdFree(cmdName);
-		cmdClear(cmdstack);
-		return;
-	}
-
-	// Search core dict first
-	tempCore = coreSearch(cmdName->text, vocab);
-	if(tempCore != NULL){
-		// Run built-in function. cmdstack provided so that conditionals can conditionally pop next command{s}
-		tempCore->func(workStack, cmdstack, vocab);
-		// TODO Cannot free this because the function we are calling might change what this reference refers to due to the array-based stack.
-		// TODO The only fix is to rewrite the cmdstack as a dynamic queue
-		//cmdFree(cmdName);
-		return;
-	}
-
-	// Now search all other dicts
-	tempWord = wordSearch(cmdName->text, vocab);
-	if(tempWord != NULL){
-		// Push programmed word onto stack in reverse-order
-		for(i = tempWord->length; i >= 0; i--){
-			stackInput(tempWord->array[i].text, cmdstack);
-			cmdstack->array[cmdstack->top].func = tempWord->array[i].func;
-		}
-		// TODO Cannot free this because the function we are calling might change what this reference refers to due to the array-based stack.
-		// TODO The only fix is to rewrite the cmdstack as a dynamic queue
-		//cmdFree(cmdName);
-		return;
-	}
-
-	tempVar = varSearch(cmdName->text, vocab);
-	if (tempVar != NULL){ // It's a variable
-		push(workStack,tempVar->value);
-		if(cmdName->text != NULL) cmdFree(cmdName);
-		return;
-	}else{
-		fprintf(stderr,"ERROR: %s unrecognized\n",cmdName->text);
-		cmdClear(cmdstack);
-		if(cmdName->text != NULL) cmdFree(cmdName);
-		return;
-	}
-}
-
