@@ -22,10 +22,10 @@
 #include <stdint.h>
 
 #if defined(HAVE_LIBEDIT)
-#	if defined(__NetBSD__)
+#	if defined(__NetBSD__) || defined(__FreeBSD__)
 #	include <readline/readline.h>
 #	include <readline/history.h>
-#	elif defined(__APPLE__) || defined(__FreeBSD__)
+#	elif defined(__APPLE__)
 #	include <editline/readline.h>
 #	else // Linux/other
 #	include <editline/readline.h>
