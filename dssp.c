@@ -168,6 +168,7 @@ int main(int argc, char *argv[]){
 				status = process_line(bufptr);
 				if(status == 0) word_next();
 				free(bufptr);
+				bufptr = NULL;
 				bufsize = 0;
 				cmdbuf->size = 0;
 				cmdbuf->array[0] = NULL;
