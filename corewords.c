@@ -584,9 +584,15 @@ void rp_loop(){
 // First replace the top of loopStack with 0
 // Then exit words until we are back at the loop level (rp_loop or do_loop will end the loop)
 void loop_exit(){
-	printf("In loop_exit()\n");
-	getchar();
-	// TODO
+	// So that the loop repeating word won't repeat the loop
+	loopStack->array[loopStack->top] = 0;
+
+	// Back out to the looping words
+	while((cmdbuf->array[cmdbuf->ip+1]->xt != rp_loop) && (cmdbuf->array[cmdbuf->ip+1]->xt != do_loop)){
+		cmdbuf->size = (int) pop(returnStack);
+		cmdbuf->array = (codeword_t **) pop(returnStack);
+		cmdbuf->ip = (int) pop(returnStack);
+	}
 	return;
 }
 
