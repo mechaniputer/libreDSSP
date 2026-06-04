@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <readline/readline.h>
 
 #include "corewords.h"
 #include "dict.h"
@@ -579,7 +578,7 @@ void rp_loop(){
 		pop(loopStack);
 	}else{
 		fprintf(stderr, "ERR: Unexpected value %ld on return stack in rp_loop()\n",tempval);
-		assert(0);
+		exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
 	}
 	return;
 }
@@ -587,11 +586,11 @@ void rp_loop(){
 // First replace the top of loopStack with 0
 // Then exit words until we are back at the loop level (rp_loop or do_loop will end the loop)
 void loop_exit(){
-	//printf("In loop_exit()\n");
+	printf("In loop_exit()\n");
+	getchar();
 	// TODO
 	return;
 }
-
 
 // Stack manipulation
 void exch2(){
@@ -829,7 +828,6 @@ void printSpace(){
 }
 
 void listDicts(){
-	assert(vocab != NULL);
 	subdict * tempSub = vocab->sub;
 	if(vocab->grow == NULL || vocab->grow->open == 0){
 		printf("Warning: no dictionary selected for expansion\n");
