@@ -25,8 +25,9 @@
 #	if defined(__NetBSD__)
 #	include <readline/readline.h>
 #	include <readline/history.h>
-#	else
-// Linux/macOS/FreeBSD libedit port path
+#	elif defined(__APPLE__) || defined(__FreeBSD__)
+#	include <editline/readline.h>
+#	else // Linux/other
 #	include <editline/readline.h>
 #	include <editline/history.h>
 #	endif
