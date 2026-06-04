@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-#include <malloc.h>
 #include <stdlib.h>
 
 
@@ -218,7 +217,7 @@ char *get_next_token() {
 
 		default:
 			printf("Fatal Error: Unknown tokenizer state\n");
-			assert(0); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
+			exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
 			break;
 		}
 		scan_ptr++;
@@ -686,7 +685,7 @@ int parse_tokens(char * tok){
 		break;
 	default:
 		printf("Fatal Error: Unknown tokenizer state\n");
-		assert(0); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
+		exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
 		break;
 	}
 	//printf("Parse state %ld\n",parser_state);

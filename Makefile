@@ -14,26 +14,37 @@
 
 #	You should have received a copy of the GNU General Public License \
 	along with libreDSSP.  If not, see <http://www.gnu.org/licenses/>.
-CFLAGS = -I/usr/local/include -L/usr/local/lib -Wall -O2
+# Include the auto-generated configurations
+include config.mk
+
+# Core user/developer flags
+CFLAGS += -I/usr/local/include -Wall -O2
 DEBUG ?= 
 CFLAGS += $(DEBUG)
-LDLIBS = -ledit -lncurses
+
+OBJS = stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o
 
 .PHONY: all debug clean
 
 all: dssp
 
-debug: DEBUG = -ggdb
-debug: dssp
-dssp: stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o
-	cc $(CFLAGS) dssp.c -o dssp stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o $(LDLIBS)
+debug:
+	$(MAKE) all DEBUG="-ggdb -fsanitize=address -fno-omit-frame-pointer"
+
+dssp: dssp.c $(OBJS)
+	$(CC) $(CFLAGS) $(CFLAGS_LIB) -L/usr/local/lib dssp.c -o dssp $(OBJS) $(LDLIBS_LIB)
+
+# Explicit header dependencies
 stack.o: stack.c stack.h
-stack.o: tokparse.c tokparse.h
+tokparse.o: tokparse.c tokparse.h
 cmdbuf.o: cmdbuf.c cmdbuf.h
 dict.o: dict.c dict.h
 corewords.o: corewords.c corewords.h
 util.o: util.c util.h
+
 clean:
-	rm -f dssp *.o
+	rm -f dssp *.o config.mk
+
+.SUFFIXES: .c .o
 .c.o:
-	cc $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(CFLAGS_LIB) -c $< -o $@

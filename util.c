@@ -17,11 +17,26 @@
 */
 
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-#include <editline/readline.h>
+
+#if defined(HAVE_LIBEDIT)
+#	if defined(__NetBSD__)
+#	include <readline/readline.h>
+#	include <readline/history.h>
+#	else
+// Linux/macOS/FreeBSD libedit port path
+#	include <editline/readline.h>
+#	include <editline/history.h>
+#	endif
+#elif defined(HAVE_READLINE)
+// Standard GNU Readline path
+#  include <readline/readline.h>
+#  include <readline/history.h>
+#else
+#	error "No command-line editing library defined!"
+#endif
 
 #include "util.h"
 #include "dict.h"

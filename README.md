@@ -1,17 +1,36 @@
 # libreDSSP
 ## A GPLv3 Licensed DSSP Interpreter
 
-libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was designed for the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.
+libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was inspired by the architecture of the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.
+
+DSSP provides a somewhat larger set of core words than most FORTH-style languages. We consider this a strength, because memory is abundant on modern platforms (at least relative to our needs). Having more specific core words also eases development and improves performance.
 
 To our knowledge this is the only maintained DSSP implementation, and the first to be free software (GPLv3 license).
 
-libreDSSP uses an indirect threaded design and avoids any inline assembly for maximum portability. DSSP provides a somewhat larger set of core words than most FORTH-style languages. We consider this a strength, because memory is abundant on modern platforms (at least relative to our needs). Having more complex core words also eases development and improves performance by leveraging compiler optimizations.
-
+libreDSSP uses an indirect threaded design and avoids any inline assembly for maximum portability. At the moment we target every modern *nix system that we reasonably can, but most are untested. Longer term, embedded ports would certainly be nice to have.
 
 ## Getting started
-I have successfully built libreDSSP on a few Linux distros, and it probably builds fine on many *nix platforms.
-You'll need make, gcc, and libedit-dev.
-Run 'make' to build it. You may wish to use the included tutorial by running './dssp examples/TUTOR.DSP'.
+This project uses a lightweight, portable configuration framework that automatically detects and binds to either `libedit` (Editline) or GNU `readline`.
+Ensure you have a standard C compiler (`cc`, `gcc`, or `clang`), `make`, and one of the aforementioned editing libraries installed. The configure script prefers `libedit` by default since it results in lower memory usage at runtime.
+
+### Compilation Steps
+
+To build the executable, run the standard configuration and build sequence in your terminal:
+
+```bash
+./configure
+make
+```
+
+### Build Targets
+
+* `make` — Compiles the standard optimized production binary (`dssp`).
+* `make debug` — Compiles a debug version containing symbols (`-ggdb`) and activates AddressSanitizer (`-fsanitize=address`) for memory debugging and leak checking.
+* `make clean` — Removes generated binaries, object files, and temporary configurations to reset the build directory.
+
+
+### Other Helpful Stuff
+Some code examples are provided in the examples directory.
 Vim source highlighting files are included in vim/.
 
 

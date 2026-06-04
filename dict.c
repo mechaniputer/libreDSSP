@@ -173,7 +173,7 @@ codeword_t * wordDefine(char * name, dict * vocab){
 void defCore(char * name, void (*func)(), dict * vocab){
 	if(strlen(name) > CORE_NAME_LEN-1){
 		printf("Fatal Error: Core word name %s exceeds %d characters\n",name,CORE_NAME_LEN-1);
-		assert(0); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
+		exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
 	}
 	codeword_t * temp = malloc(sizeof(codeword_t));
 	temp->xt = func;
