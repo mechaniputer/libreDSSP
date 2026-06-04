@@ -115,12 +115,15 @@ VAR PREVDEPTH
 	." IF- IF0 IF+ BR+ BR0 BR- BRS BR" CR
 	." First we will learn about the three IF operators. These operators must be followed by at least one" CR
 	." word. Each type of IF statement has a different condition. If the condition is met then the word following" CR
-	." the IF statement is evaluated normally. If the condition is not met then the next word is skipped." CR
+	." the IF statement is evaluated normally. If the condition is not met then the next word is skipped." CR CR
+	." Note that condition outcomes must be either a builtin (core) word, or a user defined word. This means that" CR
+	." You cannot push literals or print strings unless you do so by calling a word. For convenience however, the" CR
+	." numbers 0, 1, 2, 4, and 8 are defined as core words rather than raw literals." CR CR
 	." The conditions for each of the IF statements are straightforward. IF+ evaluates the next word if the top" CR
 	." of the stack is a positive number and otherwise skips it. IF- does the opposite, evaluating the following" CR
 	." word only when the top of the stack is negative. IF0 evaluates the following word if the top of the stack" CR
 	." is 0 and skips it if the top of the stack is nonzero." CR
-	." Try putting numbers on the stack and typing things like: IF+ 123 456" CR
+	." Try putting numbers on the stack and typing things like: IF+ 1 0" CR
 	incStep
 	nextRemind ;
 
