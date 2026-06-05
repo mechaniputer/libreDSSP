@@ -19,9 +19,10 @@
 include config.mk
 
 # Core user/developer flags
-CFLAGS += -I/usr/local/include -Wall -O2
-DEBUG ?= 
-CFLAGS += $(DEBUG)
+# We avoid += here for compatibility with illumos Make, which requires that variables be defined before they can be appended to.
+BASE_CFLAGS = -I/usr/local/include -Wall -O2
+DEBUG =
+COMBINED_CFLAGS =  $(CFLAGS) $(BASE_CFLAGS) $(DEBUG)
 
 OBJS = stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o
 
@@ -30,10 +31,10 @@ OBJS = stack.o tokparse.o cmdbuf.o dict.o corewords.o util.o
 all: dssp
 
 debug:
-	$(MAKE) all DEBUG="-ggdb -fsanitize=address -fno-omit-frame-pointer"
+	$(MAKE) all DEBUG="-ggdb $(CONFIG_DEBUG_SANITIZERS)"
 
 dssp: dssp.c $(OBJS)
-	$(CC) $(CFLAGS) $(CFLAGS_LIB) -L/usr/local/lib dssp.c -o dssp $(OBJS) $(LDLIBS_LIB)
+	$(CC) $(COMBINED_CFLAGS) $(CFLAGS_LIB) -L/usr/local/lib dssp.c -o dssp $(OBJS) $(LDLIBS_LIB)
 
 # Explicit header dependencies
 stack.o: stack.c stack.h
@@ -48,4 +49,4 @@ clean:
 
 .SUFFIXES: .c .o
 .c.o:
-	$(CC) $(CFLAGS) $(CFLAGS_LIB) -c $< -o $@
+	$(CC) $(COMBINED_CFLAGS) $(CFLAGS_LIB) -c $< -o $@

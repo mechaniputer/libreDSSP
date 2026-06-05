@@ -62,7 +62,7 @@ if [ $FOUND_LIB -eq 0 ]; then
 	exit 1
 fi
 
-# 3. Write config.mk
+# 3. Write line editing config to config.mk
 {
 	echo "# Generated automatically by ./configure"
 	echo "CC = $CC"
@@ -74,6 +74,31 @@ fi
 		echo "CFLAGS += -DHAVE_READLINE"
 	fi
 } > "$CONFIG_FILE"
+
+
+# 4. Configure debug flags
+echo "Checking if compiler supports -fsanitize=address..."
+
+# Create a temporary dummy file
+cat << 'EOF' > conftest.c
+int main() { return 0; }
+EOF
+
+# Try compiling with the sanitizer flags
+if ${CC:-cc} -fsanitize=address -fno-omit-frame-pointer conftest.c -o conftest >/dev/null 2>&1; then
+    echo "  Result: Yes"
+    DEBUG_SANITIZERS="-fsanitize=address -fno-omit-frame-pointer"
+else
+    echo "  Result: No (disabling ASan for this platform)"
+    DEBUG_SANITIZERS=""
+fi
+
+# Clean up temp files
+rm -f conftest conftest.c
+
+# Write out to config.mk (using standard portabile assignments)
+echo "CONFIG_DEBUG_SANITIZERS = $DEBUG_SANITIZERS" >> config.mk
+
 
 echo "Configuration successful. Written to $CONFIG_FILE"
 
