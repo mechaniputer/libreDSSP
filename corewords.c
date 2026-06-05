@@ -548,6 +548,8 @@ void do_loop(){
 	if(tempval > 0){
 		DEREF_LOOP_TOP_PTR -= 1;
 		cmdbuf->ip -= 2; // Re-execute the previous word (word_next will increment it again before executing)
+	}else{
+		pop(loopStack);
 	}
 	return;
 }
