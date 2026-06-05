@@ -179,6 +179,7 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		assert(-1 == returnStack->top); // Ensure we have an empty return stack
+		assert(-1 == loopStack->top); // Ensure we have an empty loop stack
 		abort_requested = 0;
 		// Show prompt, get line of input
 		char * line = prompt(status);
