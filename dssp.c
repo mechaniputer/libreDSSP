@@ -174,6 +174,8 @@ int main(int argc, char *argv[]){
 				cmdbuf->array[0] = NULL;
 			}
 			fclose(file);
+			free(bufptr);
+			bufptr = NULL;
 		}
 	}
 

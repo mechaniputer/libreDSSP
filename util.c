@@ -21,24 +21,6 @@
 #include <ctype.h>
 #include <stdint.h>
 
-#if defined(HAVE_LIBEDIT)
-#	if defined(__NetBSD__) || defined(__FreeBSD__)
-#	include <readline/readline.h>
-#	include <readline/history.h>
-#	elif defined(__APPLE__) || defined(__illumos__)
-#	include <editline/readline.h>
-#	else // Linux/other
-#	include <editline/readline.h>
-#	include <editline/history.h>
-#	endif
-#elif defined(HAVE_READLINE)
-// Standard GNU Readline path
-#  include <readline/readline.h>
-#  include <readline/history.h>
-#else
-#	error "No command-line editing library defined!"
-#endif
-
 #include "util.h"
 #include "dict.h"
 #include "stack.h"
