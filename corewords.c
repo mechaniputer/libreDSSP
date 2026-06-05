@@ -585,6 +585,12 @@ void rp_loop(){
 // Then exit words until we are back at the loop level (rp_loop or do_loop will end the loop)
 void loop_exit(){
 	// So that the loop repeating word won't repeat the loop
+	if(loopStack->top == -1){
+		printf("ERR: EX called outside of any loop\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
 	loopStack->array[loopStack->top] = 0;
 
 	// Back out to the looping words
