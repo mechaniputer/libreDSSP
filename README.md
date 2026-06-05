@@ -60,7 +60,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - =, <, >
 - NEG, ABS
 - ..(show stack), .(show top of stack)
-- DO, RP, EX
+- DO, RP, EX, EX-, EX0, EX+
 - IF+, IF0, IF-
 - BR+, BR0, BR-, BRS, BR
 - D (drop), C (copy), DS (drop entire stack)
@@ -83,7 +83,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 
 
 ## What doesn't work yet
-- EX-, EX0, EX+, EXT
+- EXT
 - References to undefined vars
 - Arrays, fixed variables, etc
 - SAVE, LOAD

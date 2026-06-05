@@ -606,6 +606,60 @@ void loop_exit(){
 	return;
 }
 
+// Minus conditional version of loop_exit
+void loop_exit_minus(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for EX-\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) < 0){
+		// This is not how most of our commands work but in this case it's fine and saves some memory.
+		loop_exit();
+	}
+
+	return;
+}
+
+// Zero conditional version of loop_exit
+void loop_exit_zero(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for EX0\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) == 0){
+		// This is not how most of our commands work but in this case it's fine and saves some memory.
+		loop_exit();
+	}
+
+	return;
+}
+
+// Plus conditional version of loop_exit
+void loop_exit_plus(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for EX+\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	if(pop(dataStack) > 0){
+		// This is not how most of our commands work but in this case it's fine and saves some memory.
+		loop_exit();
+	}
+
+	return;
+}
+
 // Stack manipulation
 void exch2(){
 	FETCH_TOP_IND

@@ -97,6 +97,9 @@ int main(int argc, char *argv[]){
 	defCore("RP", rp_begin, vocab);
 	defCore("RP_LOOP", rp_loop, vocab); // Not to be used directly
 	defCore("EX", loop_exit, vocab);
+	defCore("EX-", loop_exit_minus, vocab);
+	defCore("EX0", loop_exit_zero, vocab);
+	defCore("EX+", loop_exit_plus, vocab);
 
 	// Stack manipulation
 	defCore("E2", exch2, vocab);
