@@ -1,4 +1,5 @@
 .vscode/
+site/
 config.mk
 *.o
 dssp

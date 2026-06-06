@@ -29,9 +29,10 @@ make
 * `make clean` — Removes generated binaries, object files, and temporary configurations to reset the build directory.
 
 
-### Other Helpful Stuff
-Some code examples are provided in the examples directory.
-Vim source highlighting files are included in vim/.
+### How to use libreDSSP
+The [Official libreDSSP Docs](https://mechaniputer.github.io/libreDSSP/) are still incomplete, but are probably helpful for new users.
+
+In additon some code examples are provided in the examples directory, and Vim source highlighting files are included in vim/.
 
 
 ## Contributing
