@@ -85,6 +85,7 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 
 
 ## What doesn't work yet
+- File IO (this doesn't seem to be very standardized so we are allowed to make good choices here)
 - References to undefined vars
 - Arrays, fixed variables, etc
 - ' (push address of var)
@@ -105,13 +106,13 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - BELL
 - LPSP, LPCR, LPS, LPT, LPFF
 - INT, TRAP, ON, EON
+- Floating point math (not an original DSSP feature)
 - Everything unaccounted for in this README
 
 
 ## Possible future goals
-- Full documentation and in-shell interactive tutorial
-- Floating point math
-- External libraries for platform-specific uses (graphics, networking, GPIO)
+- Libraries for various algorithms, data structures, etc.
+- Platform-specific libraries for special uses (graphics, networking, GPIO)
 - Ports to additional OSes and embedded devices
 - Multithreading support, callbacks
 - Ability to generate tiny standalone executables

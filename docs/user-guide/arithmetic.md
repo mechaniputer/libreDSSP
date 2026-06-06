@@ -76,7 +76,7 @@ The reason for the existence of these words is threefold:
 
 2. They can yield better performance and smaller code compared to performing the same operation using two separate words and a literal cell.
 
-3. The DSSP language places some intentional restrictions on code structure. One such restriction is that conditional, branch and loop operands must consist of a single word. If you need to conditionally increment a value, these words can come in handy.
+3. The DSSP language places some intentional restrictions on code structure. One such restriction is that conditional, branch, and loop operands must consist of a single word. If you need to conditionally increment a value, these words can come in handy.
 
 To add 1 to the top of the stack, you can use `1+`. The words `2+`, `3+`, and `4+` are likewise available.
 
