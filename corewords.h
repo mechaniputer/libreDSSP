@@ -81,6 +81,7 @@ void loop_exit();
 void loop_exit_minus();
 void loop_exit_zero();
 void loop_exit_plus();
+void loop_exit_nested();
 
 // Stack manipulation
 void exch2();

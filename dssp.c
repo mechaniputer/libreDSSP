@@ -100,6 +100,7 @@ int main(int argc, char *argv[]){
 	defCore("EX-", loop_exit_minus, vocab);
 	defCore("EX0", loop_exit_zero, vocab);
 	defCore("EX+", loop_exit_plus, vocab);
+	defCore("EXT", loop_exit_nested, vocab);
 
 	// Stack manipulation
 	defCore("E2", exch2, vocab);

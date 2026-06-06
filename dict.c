@@ -312,10 +312,11 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 				// Found a match
 				dependent_array[j] = def;
 			}
-			while(!strcmp(dependent_array[j]->name, "PUSHLIT") || !strcmp(dependent_array[j]->name, "PUSHVAR") || !strcmp(dependent_array[j]->name, "!")){
+			if(!strcmp(dependent_array[j]->name, "PUSHLIT") || !strcmp(dependent_array[j]->name, "PUSHVAR") || !strcmp(dependent_array[j]->name, "!")){
 				//printf("Skipping literal\n");
 				// Skip the literal
-				j+=2;
+				j+=1;
+				continue;
 			}
 
 			//printf("array index is now %d\n",j);

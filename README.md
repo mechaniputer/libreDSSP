@@ -60,9 +60,10 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 - =, <, >
 - NEG, ABS
 - ..(show stack), .(show top of stack)
-- DO, RP, EX, EX-, EX0, EX+
 - IF+, IF0, IF-
 - BR+, BR0, BR-, BRS, BR
+- DO, RP (loops)
+- EX (loop exit), EX-, EX0, EX+, EXT (nested loop exit)
 - D (drop), C (copy), DS (drop entire stack)
 - DEEP (push height of stack)
 - ET, E2, E3, E4
@@ -83,22 +84,21 @@ In addition, WORDS lists an inventory of all user-defined words in open subdicti
 
 
 ## What doesn't work yet
-- EXT
 - References to undefined vars
 - Arrays, fixed variables, etc
-- SAVE, LOAD
+- ' (push address of var)
+- '' (push address of function)
+- @ (dereference top of stack and push result)
+- !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
+- SHL, SHR, other bitwise operations
 - ONLY, CANCEL, FORGET, CLEAR
+- SAVE, LOAD
 - SGN, NOT
 - SORT, SPIN, MAX, MIN
 - T0, T1
 - TRB, TOB, BASE@
 - TIB, TIS
 - B2, B8, B16
-- SHL, SHR, other bitwise operations
-- ' (push address of var)
-- '' (push address of function)
-- @ (dereference top of stack and push result)
-- !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
 - EXEC (execute function from address on stack)
 - TEXEC (execute text)
 - BELL

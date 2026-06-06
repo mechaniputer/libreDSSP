@@ -598,11 +598,11 @@ void loop_exit(){
 	loopStack->array[loopStack->top] = 0;
 
 	// Back out to the looping words
-	while((cmdbuf->array[cmdbuf->ip+1]->xt != rp_loop) && (cmdbuf->array[cmdbuf->ip+1]->xt != do_loop)){
+	do{
 		cmdbuf->size = (int) pop(returnStack);
 		cmdbuf->array = (codeword_t **) pop(returnStack);
 		cmdbuf->ip = (int) pop(returnStack);
-	}
+	}while((cmdbuf->array[cmdbuf->ip+1]->xt != rp_loop) && (cmdbuf->array[cmdbuf->ip+1]->xt != do_loop));
 	return;
 }
 
@@ -656,6 +656,50 @@ void loop_exit_plus(){
 		// This is not how most of our commands work but in this case it's fine and saves some memory.
 		loop_exit();
 	}
+
+	return;
+}
+
+// Pop value from stack. Attempt to exit that many loops.
+// If there aren't that many loops to exit, abort execution.
+void loop_exit_nested(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for EXT\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	intptr_t depth = pop(dataStack);
+	for( ; depth>0; depth--){
+		//printf("Acending. Current depth is %ld\n",depth);
+		// Make sure there is a layer to exit
+		if(loopStack->top == -1){
+			printf("ERR: EXT ran out of loops to exit\n");
+			abortExecution();
+			cmdbuf->ip = -1; // word_next increments this!
+			return;
+		}
+
+		// Exit one layer
+		do{
+			//printf("Exiting one loop...\n");
+			cmdbuf->size = (int) pop(returnStack);
+			cmdbuf->array = (codeword_t **) pop(returnStack);
+			cmdbuf->ip = (int) pop(returnStack);
+		}while((cmdbuf->array[cmdbuf->ip+1]->xt != rp_loop) && (cmdbuf->array[cmdbuf->ip+1]->xt != do_loop));
+		//printf("Done\n");
+		// If there are more layers to exit, we need to entirely forget we were ever in the one we just left.
+		if(depth>1){
+			//printf("Popping loopstack\n");
+			pop(loopStack);
+		}
+	}
+	// We always leave one layer on the loopStack! do_loop/rp_loop require it.
+	// So that the loop repeating word won't repeat the loop
+	loopStack->array[loopStack->top] = 0;
+	//printf("Loopstack top is %d\n",loopStack->top);
 
 	return;
 }
