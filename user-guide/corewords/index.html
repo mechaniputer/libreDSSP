@@ -137,7 +137,7 @@
 
 <h1 id="libredssp-core-words">libreDSSP Core Words</h1>
 <p>libreDSSP provides a set of built-in "core" words. These words cannot be removed or redefined once libreDSSP has been built. All other libreDSSP programs consist of concatenations of these core words.</p>
-<p>The table below summarizes core words that are meant to be used in libreDSSP code. Currently there are some other core words "under the hood" that are not meant to be used explicitly. Those are not documented here, and a future version of libreDSSP will make them inaccessible anyway.</p>
+<p>The table below summarizes core words that are meant to be used in libreDSSP code and/or the interactive prompt. Currently there are some other core words "under the hood" that are not meant to be used explicitly. Those are not documented here, and a future version of libreDSSP will make them inaccessible anyway.</p>
 <p>As work on libreDSSP progresses, the table will get longer. Refer to the list of non-working features on our <a href="https://github.com/mechaniputer/libreDSSP">GitHub repository</a>.</p>
 <p>The order is mostly alphabetical with some minor variances for the purpose of grouping. I will probably introduce organized sections later.</p>
 <p><strong>Obviously, the table isn't done yet. I think has all of the rows at least.</strong></p>
@@ -152,332 +152,337 @@
 <tbody>
 <tr>
 <td>+</td>
-<td></td>
+<td>Add</td>
 <td></td>
 </tr>
 <tr>
 <td>-</td>
-<td></td>
+<td>Subtract</td>
 <td></td>
 </tr>
 <tr>
 <td>*</td>
-<td></td>
+<td>Multiply</td>
 <td></td>
 </tr>
 <tr>
 <td>/</td>
-<td></td>
+<td>Divide</td>
 <td></td>
 </tr>
 <tr>
 <td>&lt;</td>
-<td></td>
+<td>Less than</td>
 <td></td>
 </tr>
 <tr>
 <td>&gt;</td>
-<td></td>
+<td>Greater than</td>
 <td></td>
 </tr>
 <tr>
 <td>=</td>
-<td></td>
+<td>Equal</td>
 <td></td>
 </tr>
 <tr>
 <td>.</td>
-<td></td>
+<td>Show top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>..</td>
-<td></td>
+<td>Show entire stack</td>
 <td></td>
 </tr>
 <tr>
 <td>!</td>
-<td></td>
+<td>Assign top of stack to an existing variable</td>
 <td></td>
 </tr>
 <tr>
 <td>?$</td>
-<td></td>
+<td>List available dictionaries</td>
 <td></td>
 </tr>
 <tr>
 <td>0</td>
-<td></td>
+<td>Push 0</td>
 <td></td>
 </tr>
 <tr>
 <td>1</td>
-<td></td>
+<td>Push 1</td>
 <td></td>
 </tr>
 <tr>
 <td>2</td>
-<td></td>
+<td>Push 2</td>
 <td></td>
 </tr>
 <tr>
 <td>4</td>
-<td></td>
+<td>Push 4</td>
 <td></td>
 </tr>
 <tr>
 <td>8</td>
-<td></td>
+<td>Push 8</td>
 <td></td>
 </tr>
 <tr>
 <td>1+</td>
-<td></td>
+<td>Add 1 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>1-</td>
-<td></td>
+<td>Subtract 1 from top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>2+</td>
-<td></td>
+<td>Add 2 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>2-</td>
-<td></td>
+<td>Subtract 2 from top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>3+</td>
-<td></td>
+<td>Add 3 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>3-</td>
-<td></td>
+<td>Subtract 3 from top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>4+</td>
-<td></td>
+<td>Add 4 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>4-</td>
-<td></td>
+<td>Subtract 4 from top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>ABS</td>
-<td></td>
+<td>Take absolute value of top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>B10</td>
-<td></td>
+<td>Set mode to Base 10 arithmetic (placeholder)</td>
 <td></td>
 </tr>
 <tr>
 <td>BR</td>
-<td></td>
+<td>Multi-clause branch</td>
 <td></td>
 </tr>
 <tr>
 <td>BR+</td>
-<td></td>
+<td>Branch on positive</td>
 <td></td>
 </tr>
 <tr>
 <td>BR0</td>
-<td></td>
+<td>Branch on zero</td>
 <td></td>
 </tr>
 <tr>
 <td>BR-</td>
-<td></td>
+<td>Branch on negative</td>
 <td></td>
 </tr>
 <tr>
 <td>BRS</td>
-<td></td>
+<td>Three-way branch on sign</td>
 <td></td>
 </tr>
 <tr>
 <td>BYE</td>
+<td>Exit libreDSSP</td>
 <td></td>
+</tr>
+<tr>
+<td>C</td>
+<td>Duplicate top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>C2</td>
-<td></td>
+<td>Copy cell from depth 2 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>C3</td>
-<td></td>
+<td>Copy cell from depth 3 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>C4</td>
-<td></td>
+<td>Copy cell from depth 4 to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>CT</td>
-<td></td>
+<td>Consume top stack cell and copy the cell from given depth to top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>CR</td>
-<td></td>
+<td>Print a newline</td>
 <td></td>
 </tr>
 <tr>
 <td>D</td>
-<td></td>
+<td>Drop the top cell from the stack</td>
 <td></td>
 </tr>
 <tr>
 <td>DEEP</td>
-<td></td>
+<td>Push the stack depth to the stack</td>
 <td></td>
 </tr>
 <tr>
 <td>DO</td>
-<td></td>
+<td>Loop a word a given number of times</td>
 <td></td>
 </tr>
 <tr>
 <td>DS</td>
-<td></td>
+<td>Drop the entire stack contents</td>
 <td></td>
 </tr>
 <tr>
 <td>E2</td>
-<td></td>
+<td>Exchange the top stack cell with the cell below it</td>
 <td></td>
 </tr>
 <tr>
 <td>E3</td>
-<td></td>
+<td>Exchange the top stack cell with the cell at depth 3</td>
 <td></td>
 </tr>
 <tr>
 <td>E4</td>
-<td></td>
+<td>Exchange the top stack cell with the cell at depth 4</td>
 <td></td>
 </tr>
 <tr>
 <td>ET</td>
-<td></td>
+<td>Consume top stack cell and exchange new top cell with the cell at given depth</td>
 <td></td>
 </tr>
 <tr>
 <td>EX</td>
-<td></td>
+<td>Exit from the current innermost loop</td>
 <td></td>
 </tr>
 <tr>
 <td>EX+</td>
-<td></td>
+<td>Consume the top stack cell and if it is positive, exit from the current innermost loop</td>
 <td></td>
 </tr>
 <tr>
 <td>EX0</td>
-<td></td>
+<td>Consume the top stack cell and if it is zero, exit from the current innermost loop</td>
 <td></td>
 </tr>
 <tr>
 <td>EX-</td>
-<td></td>
+<td>Consume the top stack cell and if it is positive, exit from the current innermost loop</td>
 <td></td>
 </tr>
 <tr>
 <td>EXT</td>
-<td></td>
+<td>Consume the top stack cell and exit from that many layers of ongoing loops</td>
 <td></td>
 </tr>
 <tr>
 <td>GROW</td>
-<td></td>
+<td>Select a dictionary for expansion</td>
 <td></td>
 </tr>
 <tr>
 <td>IF+</td>
-<td></td>
+<td>Consume top stack cell; If the value is positive, execute the following word; Otherwise skip it</td>
 <td></td>
 </tr>
 <tr>
 <td>IF0</td>
-<td></td>
+<td>Consume top stack cell; If the value is zero, execute the following word; Otherwise skip it</td>
 <td></td>
 </tr>
 <tr>
 <td>IF-</td>
-<td></td>
+<td>Consume top stack cell; If the value is negative, execute the following word; Otherwise skip it</td>
 <td></td>
 </tr>
 <tr>
 <td>NEG</td>
-<td></td>
+<td>Negate the cell at top of stack</td>
 <td></td>
 </tr>
 <tr>
 <td>NOP</td>
-<td></td>
+<td>Do nothing (no-op)</td>
 <td></td>
 </tr>
 <tr>
 <td>RP</td>
-<td></td>
+<td>Repeat the following word until a loop exit is triggered</td>
 <td></td>
 </tr>
 <tr>
 <td>SHUT</td>
-<td></td>
+<td>Disable lookup access to a given dictionary</td>
 <td></td>
 </tr>
 <tr>
 <td>SP</td>
-<td></td>
+<td>Print a space</td>
 <td></td>
 </tr>
 <tr>
 <td>TIN</td>
-<td></td>
+<td>Terminal Input Number</td>
 <td></td>
 </tr>
 <tr>
 <td>TON</td>
-<td></td>
+<td>Terminal Output Number</td>
 <td></td>
 </tr>
 <tr>
 <td>TOS</td>
-<td></td>
+<td>Terminal Output String</td>
 <td></td>
 </tr>
 <tr>
 <td>UNDEF</td>
-<td></td>
+<td>List undefined words</td>
 <td></td>
 </tr>
 <tr>
 <td>USE</td>
-<td></td>
+<td>Enable lookup access to a given dictionary</td>
 <td></td>
 </tr>
 <tr>
 <td>VAR</td>
-<td></td>
+<td>Declare a new variable (init to 0)</td>
 <td></td>
 </tr>
 <tr>
 <td>WORDS</td>
-<td></td>
+<td>List all user-defined words</td>
 <td></td>
 </tr>
 </tbody>
