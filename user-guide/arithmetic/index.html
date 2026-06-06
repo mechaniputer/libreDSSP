@@ -125,12 +125,145 @@
     
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#arithmetic-in-libredssp" class="nav-link">Arithmetic in libreDSSP</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#addition" class="nav-link">Addition</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#subtraction" class="nav-link">Subtraction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#multiplication" class="nav-link">Multiplication</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#division" class="nav-link">Division</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#negation" class="nav-link">Negation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#absolute-value" class="nav-link">Absolute value</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#shorthand-additionsubtraction" class="nav-link">Shorthand addition/subtraction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#integer-comparisons" class="nav-link">Integer comparisons</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9" role="main">
 
-</div>
+<h1 id="arithmetic-in-libredssp">Arithmetic in libreDSSP</h1>
+<p>This page covers integer arithmetic. libreDSSP does not yet support other kinds of arithmetic.</p>
+<h2 id="addition">Addition</h2>
+<p>Addition consumes two cells from the top of the stack and then pushes a cell containing the result.
+To add the top two values of the stack together, use the word <code>+</code>.</p>
+<p>Example:</p>
+<pre><code>* ..
+[6 7]
+* +
+* ..
+[13]
+</code></pre>
+<h2 id="subtraction">Subtraction</h2>
+<p>Subtraction consumes two cells from the top of the stack and then pushes a cell containing the result.
+To subtract the top of the stack from the value below it, use the word <code>-</code>.</p>
+<p>Example:</p>
+<pre><code>* ..
+[17 23]
+* -
+* ..
+[-6]
+</code></pre>
+<p>Note that the result in this example is negative. By default, libreDSSP treats cells as signed values. On currently supported platforms this relies on two's complement binary notation.</p>
+<h2 id="multiplication">Multiplication</h2>
+<p>Multiplication consumes two cells from the top of the stack and then pushes a cell containing the result.
+To multiply the top two values of the stack, use the word <code>*</code>.</p>
+<p>Example:</p>
+<pre><code>* ..
+[15 6]
+* *
+* ..
+[90]
+</code></pre>
+<h2 id="division">Division</h2>
+<p>Division consumes two cells from the top of the stack and then pushes two cells containing the results.
+<strong>Important: when performing integer division, libreDSSP produces not one, but two results.</strong>
+The quotient is pushed first, followed by the remainder.</p>
+<p>To divide the cell immediately below the top of the stack by the top cell, use the word <code>/</code>.</p>
+<p>Example:</p>
+<pre><code>* ..
+[100 33]
+* /
+* ..
+[3 1]
+</code></pre>
+<h2 id="negation">Negation</h2>
+<p>To negate the sign of the top cell, use the word <code>NEG</code>.
+The top cell will be replaced.
+This is equivalent to <code>-1 *</code>.</p>
+<h2 id="absolute-value">Absolute value</h2>
+<p>To take the absolute value of the top cell, use the word <code>ABS</code>.
+The top cell will be replaced.
+This is equivalent to <code>C IF- NEG</code>.</p>
+<h2 id="shorthand-additionsubtraction">Shorthand addition/subtraction</h2>
+<p>libreDSSP includes several words to perform common increment/decrement operations.</p>
+<p>The reason for the existence of these words is threefold:</p>
+<ol>
+<li>
+<p>They can make code nicer to read.</p>
+</li>
+<li>
+<p>They can yield better performance and smaller code compared to performing the same operation using two separate words and a literal cell.</p>
+</li>
+<li>
+<p>The DSSP language places some intentional restrictions on code structure. One such restriction is that conditional, branch and loop operands must consist of a single word. If you need to conditionally increment a value, these words can come in handy.</p>
+</li>
+</ol>
+<p>To add 1 to the top of the stack, you can use <code>1+</code>. The words <code>2+</code>, <code>3+</code>, and <code>4+</code> are likewise available.</p>
+<p>To subtract 1 from the top of the stack, you can use <code>1-</code>. The words <code>2-</code>, <code>3-</code>, and <code>4-</code> are likewise available.</p>
+<h2 id="integer-comparisons">Integer comparisons</h2>
+<p>If the top two stack cells are equal, the word <code>=</code> will consume both cells and push <code>1</code>. Otherise it will consume both cells and push <code>0</code>.</p>
+<p>Example:</p>
+<pre><code>* ..
+[2 3 3]
+* =
+* ..
+[2 1]
+* =
+* ..
+[0]
+</code></pre>
+<p>The word <code>&lt;</code> compares and consumes the top two cells of the stack. If the lower cell was less than the top cell, then a 1 is pushed. Otherwise a 0 is pushed.</p>
+<p>Example:</p>
+<pre><code>* ..
+[3 4]
+* &lt;
+* ..
+[1]
+</code></pre>
+<p>The word <code>&gt;</code> compares and consumes the top two cells of the stack. If the lower cell was greater than the top cell, then a 1 is pushed. Otherwise a 0 is pushed.</p>
+<p>Example:</p>
+<pre><code>* ..
+[3 4]
+* &gt;
+* ..
+[0]
+</code></pre></div>
             </div>
         </div>
 

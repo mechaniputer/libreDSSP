@@ -136,7 +136,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#cell-size" class="nav-link">Cell Size</a>
+            <li class="nav-item" data-bs-level="2"><a href="#cell-size" class="nav-link">Cell size</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -158,7 +158,7 @@ In libreDSSP (and Forth), the term "word" is used to refer to what other languag
 libreDSSP consists of <a href="../corewords/">core words</a> and allows programmers to define additional <a href="../userwords/">user words</a>.</p>
 <h2 id="cells">Cells</h2>
 <p>A cell is the basic unit of data in libreDSSP. The <a href="../datastack/">data stack</a> contains 0 or more cells of information. A compiled DSSP word consists of an array of cells that contain references to other words. If there are no referenced-but-undefined words, then all of the word definitions form a directed (though not necessarily acyclic) graph where the sink nodes (aka leaves) are all <a href="../corewords/">core words</a>.</p>
-<h2 id="cell-size">Cell Size</h2>
+<h2 id="cell-size">Cell size</h2>
 <p>Unfortunately, the word "word" can also refer to the size of the machine word. In libreDSSP the machine word size determines the size of cells, so these docs will try to refer to the "cell size" rather than "word size". libreDSSP targets machines with a word size of either 32 or 64 bits, and the cell size will match the word size of the machine that libreDSSP was compiled for.</p>
 <h2 id="top-down-programming">Top-down programming</h2>
 <p>libreDSSP (unlike most Forth dialects) allows you to define a word that calls into another word that is not yet defined (including the very word that you are currently defining, as in recursion). This allows for "top-down programming", in which you break the problem into subproblems prior to implementing solutions to any of those subproblems.</p>
