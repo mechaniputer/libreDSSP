@@ -9,7 +9,7 @@ libreDSSP consists of [core words](corewords.md) and allows programmers to defin
 A cell is the basic unit of data in libreDSSP. The [data stack](datastack.md) contains 0 or more cells of information. A compiled DSSP word consists of an array of cells that contain references to other words. If there are no referenced-but-undefined words, then all of the word definitions form a directed (though not necessarily acyclic) graph where the sink nodes (aka leaves) are all [core words](corewords.md).
 
 
-## Cell Size
+## Cell size
 Unfortunately, the word "word" can also refer to the size of the machine word. In libreDSSP the machine word size determines the size of cells, so these docs will try to refer to the "cell size" rather than "word size". libreDSSP targets machines with a word size of either 32 or 64 bits, and the cell size will match the word size of the machine that libreDSSP was compiled for.
 
 ## Top-down programming

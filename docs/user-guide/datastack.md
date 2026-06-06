@@ -11,7 +11,7 @@ For example, the stack below has a `1` on the bottom, and a `3` on top.
 [1 2 3]
 ```
 
-To view only the top element of the stack use the word `.`. A newline is also printed. If the stack is empty, it will print  `(NIL)`.
+You can use the word `.` to view only the top element of the stack. A newline is also printed. If the stack is empty, it will print  `(NIL)`.
 
 ## Pushing cells to the stack
 In libreDSSP code, integer constants are normally compiled as a word that pushes that constant to the data stack. New cells are always placed on top of any prior elements.
