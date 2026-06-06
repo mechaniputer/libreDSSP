@@ -1,0 +1,17 @@
+site_name: libreDSSP Docs
+theme: mkdocs
+nav:
+  - Home: index.md
+  - User Guide:
+    - Some Jargon: user-guide/jargon.md
+    - Running libreDSSP: user-guide/running.md
+    - The Data Stack: user-guide/datastack.md
+    - Basic Arithmetic: user-guide/arithmetic.md
+    - Core Words: user-guide/corewords.md
+    - Defining User Words: user-guide/userwords.md
+    - Variables: user-guide/vars.md
+    - Conditionals: user-guide/conditionals.md
+    - Loops: user-guide/loops.md
+    - Input/Output: user-guide/io.md
+    - Comments and Code Style: user-guide/style.md
+    - Word Dictionaries: user-guide/dictionaries.md
