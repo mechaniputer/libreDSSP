@@ -1,4 +1,4 @@
-# Arithmetic in libreDSSP
+# Integer Arithmetic
 This page covers integer arithmetic. libreDSSP does not yet support other kinds of arithmetic.
 
 ## Addition

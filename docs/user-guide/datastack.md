@@ -33,7 +33,7 @@ You can duplicate the cell at the top of the stack using the word `C`.
 
 If you want to copy a deeper cell to the top of the stack, you may use `C2`, `C3`, or `C4` depending on the depth of the cell you want to copy.
 
-If you need to copy a cell from deeper than 4 cells down, there is a `CT` command for this purpose. `CT` pops the top cell from the stack and uses it as a depth cell. For example, `10 CT` will copy a cell from 10 cells deep in the stack onto the top of the stack. Note that, in effect, the copied cell will replace the just-pushed depth parameter `10` on the stack. Also note that `1 CT` is equivalent to `C`.
+If you need to copy a cell from deeper than 4 cells down, there is a `CT` command for this purpose. `CT` pops the top cell from the stack and uses it as a depth parameter. For example, `10 CT` will copy a cell from 10 cells deep in the stack onto the top of the stack. Note that, in effect, the copied cell will replace the just-pushed depth parameter `10` on the stack. Also note that `1 CT` is equivalent to `C`.
 
 ## Exchanging stack cells
 `E2` will swap the top two stack cells with each other. `E3` and `E4` swap deeper cells with the top cell. Similar to above, a command `ET` exists to exchange the top cell of the stack with a different cell of any specified depth. Note that like `CT`, `ET` likewise pops a cell from the stack to use as a depth parameter, and therefore will treat the cell below that as the top when peforming the swap. Also note that `1 ET` does nothing, since it exchanges the top with itself.
