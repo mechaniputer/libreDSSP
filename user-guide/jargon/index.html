@@ -144,6 +144,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#compile-mode" class="nav-link">Compile mode</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -163,7 +167,16 @@ libreDSSP consists of <a href="../corewords/">core words</a> and allows programm
 <h2 id="top-down-programming">Top-down programming</h2>
 <p>libreDSSP (unlike most Forth dialects) allows you to define a word that calls into another word that is not yet defined (including the very word that you are currently defining, as in recursion). This allows for "top-down programming", in which you break the problem into subproblems prior to implementing solutions to any of those subproblems.</p>
 <p>This also makes it possible to test an incomplete program. If an undefined word is run during testing, execution will cleanly abort and return to the libreDSSP prompt.</p>
-<p>You can view a list of all currently undefined words by running the word <code>UNDEF</code>.</p></div>
+<p>You can view a list of all currently undefined words by running the word <code>UNDEF</code>.</p>
+<p><strong>Note:</strong> Curently, you may only reference undefined <a href="../userwords/">user words</a>, not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins></p>
+<h2 id="compile-mode">Compile mode</h2>
+<p>Those of you familiar with Forth will probably know of a distinction between "compile mode" and "immediate mode".
+For new Forth users, the nuances of these modes can be a source of confusion and can produce code that is harder to understand.
+DSSP simplifies (and arguably removes) that distinction.</p>
+<p>In libreDSSP, every line entered is compiled and then run. In one sense, libreDSSP is always in "compile mode".
+However, DSSP uses a different meaning.
+In DSSP, "compile mode" is an internal mode of the DSSP parser that redirects compiled code into a word-definition buffer instead of an interactive command buffer. That's all!</p>
+<p>We believe that this simplified semantics is one of DSSP's main advantages. Combined with top-down programming and transparent runtime word redefinitions, this design gives the interpreter a feel closer to other interpreted languages while preserving the strengths of a compiled, stack-based, concatenative language. The programmer is freed from managing interpreter state alongside program state.</p></div>
             </div>
         </div>
 

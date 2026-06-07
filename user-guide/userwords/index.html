@@ -125,12 +125,54 @@
     
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#user-defined-words" class="nav-link">User-defined Words</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#defining" class="nav-link">Defining</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#redefining" class="nav-link">Redefining</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#undefined-words" class="nav-link">Undefined words</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#displaying-currently-defined-words" class="nav-link">Displaying currently defined words</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#a-note-about-dictionaries" class="nav-link">A note about dictionaries</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9" role="main">
 
-</div>
+<h1 id="user-defined-words">User-defined Words</h1>
+<h2 id="defining">Defining</h2>
+<p>To define a new word, enter a statement in the following format:</p>
+<pre><code>: [Word name] [Body] ;
+</code></pre>
+<p>For example, the following statement defines a function named square that squares a number:</p>
+<pre><code>: square C 2 * ;
+</code></pre>
+<p>Note the use of spaces. There is a mandatory space following ':', and a mandatory space following each word used in the word body, including up to the closing ';'.</p>
+<p>It is permissible to split a word defition across multiple lines:</p>
+<pre><code>: square
+    C 2 * ;
+</code></pre>
+<h2 id="redefining">Redefining</h2>
+<p>If you need to change the definition of the word, you may simply define it again with a different body. No special steps are needed. The old definition will be seamlessly replaced and any word that invokes the updated word will already use the new version.</p>
+<h2 id="undefined-words">Undefined words</h2>
+<h2 id="displaying-currently-defined-words">Displaying currently defined words</h2>
+<h2 id="a-note-about-dictionaries">A note about dictionaries</h2></div>
             </div>
         </div>
 
