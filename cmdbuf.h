@@ -24,19 +24,19 @@
 #include "stack.h"
 
 // Interpreter status flags (mostly for space-delimited input, but some may be used for other purposes)
-#define STAT_INC_COMMENT   (1UL<<0)
-#define STAT_INC_STRING    (1UL<<1)
-#define STAT_INC_PRINT     (1UL<<2)
-#define STAT_INC_COMPILE   (1UL<<3)  // For an incomplete : definition
-#define STAT_INC_ESCAPE    (1UL<<4)  // For an escape char to apply to the next char
-#define STAT_INC_DICT_OP   (1UL<<5)  // For GROW, USE, SHUT, ONLY
-#define STAT_INC_VAR_DECL  (1UL<<6)  // For a VAR X statement that doesn't have X yet
-#define STAT_INC_VAR_ASGN  (1UL<<7)  // For a ! X statement that doesn't have X yet
-#define STAT_INC_VCTR 	   (1UL<<8)  // For vectors (eg 9 VCTR ROW, which declares a 10 element vector named ROW)
-#define STAT_BR_NO_ELSE    (1UL<<9)  // For a BR that still needs an ELSE
-#define STAT_BR_ELSE       (1UL<<10) // For a BR with an ELSE that still needs the last outcome.
-#define STAT_INC_DO_LOOP   (1UL<<11) // For an incomplete DO-LOOP
-#define STAT_INC_RP_LOOP   (1UL<<12) // For an incomplete RP-LOOP
+#define STAT_INC_COMMENT    (1UL<<0)
+#define STAT_INC_STRING     (1UL<<1)
+#define STAT_INC_PRINT      (1UL<<2)
+#define STAT_INC_COMPILE    (1UL<<3)  // For an incomplete : definition
+#define STAT_INC_ESCAPE     (1UL<<4)  // For an escape char to apply to the next char
+#define STAT_INC_DICT_OP    (1UL<<5)  // For GROW, USE, SHUT, ONLY
+#define STAT_INC_VAR_DECL   (1UL<<6)  // For a VAR X statement that doesn't have X yet
+#define STAT_INC_VAR_ASGN   (1UL<<7)  // For a ! X statement that doesn't have X yet
+#define STAT_INC_VCTR 	    (1UL<<8)  // For vectors (eg 9 VCTR ROW, which declares a 10 element vector named ROW)
+#define STAT_BR_NO_ELSE     (1UL<<9)  // For a BR that still needs an ELSE
+#define STAT_BR_ELSE        (1UL<<10) // For a BR with an ELSE that still needs the last outcome.
+#define STAT_INC_DO_LOOP    (1UL<<11) // For an incomplete DO-LOOP
+#define STAT_INC_RP_LOOP    (1UL<<12) // For an incomplete RP-LOOP
 #define STAT_EXPECT_BR_COND (1UL<<13) // For when the next thing is expected to be either ELSE or a number
 
 typedef struct cmdbuffer_struct cmdbuffer;

@@ -38,6 +38,10 @@ int newWordCodeLen;
 int newWordCodeCap;
 codeword_t * newWordDictEntry;
 
+// For ensuring that we do not emit a multicell word when we only have one cell to populate (eg, in a conditional or loop)
+static const char *const multicell_words[] = {"IF-","IF0","IF+","BR-","BR0","BR+","BRS","BR","DO","RP","VAR","!","GROW","SHUT","USE"};
+static const size_t NUM_MULTICELL_WORDS = sizeof(multicell_words) / sizeof(multicell_words[0]);
+
 #define PARSE_ENTER_STATE(ST)  { push(parserStack, parser_state); parser_state = ST; }
 #define PARSE_CHANGE_STATE(ST) { parser_state = ST; }
 #define PARSE_EXIT_STATE       { parser_state = pop(parserStack); }
@@ -62,6 +66,7 @@ codeword_t * newWordDictEntry;
 		newWordTextCap += (SZ);                                            \
 		newWordText = realloc(newWordText, newWordTextCap * sizeof(char)); \
 	}
+
 
 
 // NOTE: If an aborted definition contained refs to a string literal (eg for
@@ -280,6 +285,20 @@ int isValidWordVarName(const char *s) {
 	return has_letter;
 }
 
+// If the word is a multi-cell core word, trigger an abort.
+// Necessary when compiling branches, conditionals, and loops.
+// FIXME Consider a more efficient approach (eg hashing or use the size field
+//       in core word entries to indicate number of cells needed)
+void ensureSingleCellWord(const char * s){
+	for(int i=0; i<NUM_MULTICELL_WORDS; i++){
+		if(!strcmp(s, multicell_words[i])){
+			printf("ERR: %s not allowed as a branch/loop word\n",s);
+			abortExecution();
+			return;
+		}
+	}
+	return;
+}
 
 void start_new_def(){
 	// Prepare vars to build definition
@@ -514,6 +533,11 @@ int parse_tokens(char * tok){
 	case PARSE_IF_S0:
 		// IF-/IF0/IF+ only need one branch target
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested){
@@ -524,6 +548,12 @@ int parse_tokens(char * tok){
 	case PARSE_BR2_S0:
 		// Expecting first of two branch targets
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		// But there is no room for a multi-cell word in an BR.
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -533,6 +563,12 @@ int parse_tokens(char * tok){
 	case PARSE_BR2_S1:
 		// Expecting second of two branch targets
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		// But there is no room for a multi-cell word in an BR.
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -541,6 +577,12 @@ int parse_tokens(char * tok){
 	case PARSE_BRS_S0:
 		// Expecting first of three branch targets
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		// But there is no room for a multi-cell word in an BRS.
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -550,6 +592,11 @@ int parse_tokens(char * tok){
 	case PARSE_BRS_S1:
 		// Expecting second of three branch targets
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -559,6 +606,11 @@ int parse_tokens(char * tok){
 	case PARSE_BRS_S2:
 		// Expecting third of three branch targets
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -598,6 +650,11 @@ int parse_tokens(char * tok){
 	case PARSE_BR_S2:
 		// Expecting a branch target
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -606,6 +663,11 @@ int parse_tokens(char * tok){
 	case PARSE_BR_S3:
 		// Expecting one final branch target
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_cw(coreSearch("SKP1", vocab));
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
@@ -615,6 +677,11 @@ int parse_tokens(char * tok){
 	case PARSE_DO_S0:
 		// Expecting a word to loop
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -624,6 +691,11 @@ int parse_tokens(char * tok){
 	case PARSE_RP_S0:
 		// Expecting a word to loop
 		// This might be a core word, a user word, or an undefined word (nothing else)
+		ensureSingleCellWord(tok);
+		// ensureSingleCellWord() is able to request an abort so we need to watch for that here
+		if(abort_requested){
+			return 0;
+		}
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -684,7 +756,7 @@ int parse_tokens(char * tok){
 		PARSE_EXIT_STATE
 		break;
 	default:
-		printf("Fatal Error: Unknown tokenizer state\n");
+		printf("Fatal Error: Unknown parser state\n");
 		exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
 		break;
 	}
