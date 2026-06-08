@@ -157,5 +157,6 @@ CR ."           ************************************************" CR
 ." This program will attempt to teach you how to use various libreDSSP" CR
 ." features. After you complete each step, enter 'next' to continue the" CR
 ." tutorial. You can restart from the beginning at any time by entering 'restart'" CR CR
+." NOTE - You must run this program with the -i flag or it will not work!" CR
 
 next
