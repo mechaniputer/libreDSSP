@@ -128,15 +128,27 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#running-libredssp" class="nav-link">Running libreDSSP</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-bs-level="2"><a href="#running-interactively" class="nav-link">Running Interactively</a>
+            <li class="nav-item" data-bs-level="2"><a href="#how-to-launch-the-libredssp-shell" class="nav-link">How to launch the libreDSSP shell</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#how-to-exit-the-libredssp-interactive-prompt" class="nav-link">How to exit the libreDSSP interactive prompt</a>
+            <li class="nav-item" data-bs-level="2"><a href="#how-to-exit-the-libredssp-shell" class="nav-link">How to exit the libreDSSP shell</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#running-a-source-file" class="nav-link">Running a Source File</a>
+            <li class="nav-item" data-bs-level="2"><a href="#evaluating-a-source-file" class="nav-link">Evaluating a Source File</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#turning-off-copyright-and-version-information" class="nav-link">Turning off copyright and version information</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#evaluating-a-text-string" class="nav-link">Evaluating a text string</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#pipes-and-libredssp" class="nav-link">Pipes and libreDSSP</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -148,12 +160,12 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="running-libredssp">Running libreDSSP</h1>
-<h2 id="running-interactively">Running Interactively</h2>
+<h2 id="how-to-launch-the-libredssp-shell">How to launch the libreDSSP shell</h2>
 <p>To launch libreDSSP, enter the directory where the executable is located and run <code>./dssp</code> in your shell. You will see the interactive "*" prompt.</p>
-<h2 id="how-to-exit-the-libredssp-interactive-prompt">How to exit the libreDSSP interactive prompt</h2>
+<h2 id="how-to-exit-the-libredssp-shell">How to exit the libreDSSP shell</h2>
 <ul>
 <li>
-<p>The libreDSSP prompt normally appears as an asterisk (*) but if there is an incomplete statement it will instead appear as a question mark (?).</p>
+<p>The libreDSSP shell prompt normally appears as an asterisk (*) but if there is an incomplete statement it will instead appear as a question mark (?).</p>
 </li>
 <li>
 <p>If you see the asterisk prompt, you can type the word <code>BYE</code> and press Enter — this cleanly terminates libreDSSP.</p>
@@ -168,12 +180,36 @@
 <p><strong>Note: At the moment, pressing Ctrl-C will terminate libreDSSP. This behavior will be changed in a future version to cleanly return to the * prompt.</strong></p>
 </li>
 </ul>
-<h2 id="running-a-source-file">Running a Source File</h2>
+<h2 id="evaluating-a-source-file">Evaluating a Source File</h2>
 <p>libreDSSP can open a file from a path specified as a commandline argument. For example:</p>
 <pre><code>$ ./dssp examples/FIB.DSP
 </code></pre>
-<p>If the source file contains words that execute the program, it will run. If it doesn't, then you might have to type something at the prompt to make it run. You should examine the source file for possible instructions in this matter.</p>
-<p>If the program itself executes the word <code>BYE</code> then libreDSSP will exit upon program completion. Otherwise, you may use the prompt to relaunch the program, or exit using the instructions above.</p></div>
+<p>This will evaluate all of the line of code in the source file, and then close DSSP. If you want to keep the shell open after the file has been evaluated, pass the <code>-i</code> flag:</p>
+<pre><code>$ ./dssp examples/FIB.DSP -i
+</code></pre>
+<p>If you specify any optional parameters before the filename, you must also pass the -f flag just prior to the filename or you will get an error about the number of parameters:</p>
+<pre><code>$ ./dssp -i -f examples/FIB.DSP
+</code></pre>
+<p>or equivalently,</p>
+<pre><code>$ ./dssp -if examples/FIB.DSP
+</code></pre>
+<h2 id="turning-off-copyright-and-version-information">Turning off copyright and version information</h2>
+<p>To prevent printing of copyright and version information, pass the <code>-q</code> flag:</p>
+<pre><code>$ ./dssp -q
+*
+</code></pre>
+<h2 id="evaluating-a-text-string">Evaluating a text string</h2>
+<p>libreDSSP allows evaluation of a text string passed as a CLI arg:</p>
+<pre><code>$ ./dssp -qe '.&quot;Hello World&quot; CR'
+Hello World
+$
+</code></pre>
+<p>In the example above, the code contained double quotes for <a href="../io/">printing a string</a>. Note that the code string used single quotes to ensure correct behavior. Alternatively, you can use the backslash (\) character to escape quotes inside the code string.</p>
+<p>If both a file and a text string are to be evaluated, the file is always evaluated first, then the text string. Lastly, if <code>-i</code> was passed, the interactive shell will open. This sequence allows the text string to be used to select or test specific functionality within the source file.</p>
+<p>Only one file and one text string may be passed. This differs from some Forth implementations which allow multiple files and text strings to be evaluated, but is consistent with DSSP's use of structure to avoid confusing or unmaintainable use patterns.</p>
+<h2 id="pipes-and-libredssp">Pipes and libreDSSP</h2>
+<p>libreDSSP will behave in the standard useful ways when piping data in or out of DSSP programs. You should probably enable the <code>-q</code> flag for the latter.</p>
+<p>You can also pipe DSSP code into dssp itself (as long as you use flags that result in starting an interactive shell) but this is not recommended as a standard practice. Just use a file.</p></div>
             </div>
         </div>
 
