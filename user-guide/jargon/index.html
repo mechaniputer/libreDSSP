@@ -171,10 +171,11 @@ libreDSSP consists of <a href="../corewords/">core words</a> and allows programm
 <p><strong>Note:</strong> Curently, you may only reference undefined <a href="../userwords/">user words</a>, not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins></p>
 <h2 id="compile-mode">Compile mode</h2>
 <p>Those of you familiar with Forth will probably know of a distinction between "compile mode" and "immediate mode".
-For new Forth users, the nuances of these modes can be a source of confusion and can produce code that is harder to understand.
+For new Forth users, the nuances of these modes can be a source of confusion.
+Some use patterns resulting from these modes can also result in code that is harder to understand.
 DSSP simplifies (and arguably removes) that distinction.</p>
-<p>In libreDSSP, every line entered is compiled and then run. In one sense, libreDSSP is always in "compile mode".
-However, DSSP uses a different meaning.
+<p>In libreDSSP, every line entered is compiled and then run. In this sense, libreDSSP is always in "compile mode".
+However, DSSP uses the term "compile mode" in a different way.
 In DSSP, "compile mode" is an internal mode of the DSSP parser that redirects compiled code into a word-definition buffer instead of an interactive command buffer. That's all!</p>
 <p>We believe that this simplified semantics is one of DSSP's main advantages. Combined with top-down programming and transparent runtime word redefinitions, this design gives the interpreter a feel closer to other interpreted languages while preserving the strengths of a compiled, stack-based, concatenative language. The programmer is freed from managing interpreter state alongside program state.</p></div>
             </div>
