@@ -15,3 +15,4 @@
 	." no more bottles of beer!" CR
     ."Go to the store and buy some more, "
     99 + 2 TON BOBOTW ;
+99 BOTTLES

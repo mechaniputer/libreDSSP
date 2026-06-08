@@ -30,9 +30,9 @@ make
 
 
 ### How to use libreDSSP
-The [Official libreDSSP Docs](https://mechaniputer.github.io/libreDSSP/) are still incomplete, but are probably helpful for new users.
+The [Official libreDSSP Docs](https://mechaniputer.github.io/libreDSSP/) are still incomplete, but the basics are covered.
 
-In additon some code examples are provided in the examples directory, and Vim source highlighting files are included in vim/.
+In addition some code examples are provided in the examples directory, and Vim source highlighting files are included in vim/.
 
 
 ## Contributing
