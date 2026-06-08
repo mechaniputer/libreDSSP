@@ -26,11 +26,12 @@ You can view a list of all currently undefined words by running the word `UNDEF`
 
 ## Compile mode
 Those of you familiar with Forth will probably know of a distinction between "compile mode" and "immediate mode".
-For new Forth users, the nuances of these modes can be a source of confusion and can produce code that is harder to understand.
+For new Forth users, the nuances of these modes can be a source of confusion.
+Some use patterns resulting from these modes can also result in code that is harder to understand.
 DSSP simplifies (and arguably removes) that distinction.
 
-In libreDSSP, every line entered is compiled and then run. In one sense, libreDSSP is always in "compile mode".
-However, DSSP uses a different meaning.
+In libreDSSP, every line entered is compiled and then run. In this sense, libreDSSP is always in "compile mode".
+However, DSSP uses the term "compile mode" in a different way.
 In DSSP, "compile mode" is an internal mode of the DSSP parser that redirects compiled code into a word-definition buffer instead of an interactive command buffer. That's all!
 
 We believe that this simplified semantics is one of DSSP's main advantages. Combined with top-down programming and transparent runtime word redefinitions, this design gives the interpreter a feel closer to other interpreted languages while preserving the strengths of a compiled, stack-based, concatenative language. The programmer is freed from managing interpreter state alongside program state.
