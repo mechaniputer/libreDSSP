@@ -119,5 +119,7 @@ void stackDepth();
 void inventoryUndefined();
 void inventoryWords();
 
+// Add all of the core words to a dictionary
+void define_all_core(dict * vocab);
 
 #endif

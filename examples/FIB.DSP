@@ -6,4 +6,4 @@
 : GO C2 C2 + CHECK . ;
 : CHECK C IF- END ;
 : END DS ."Sign overflow" CR EX ;
-START RP GO BYE
+START RP GO

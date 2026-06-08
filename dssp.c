@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
+#include <unistd.h>
 
 #include "tokparse.h"
 #include "dict.h"
@@ -27,6 +29,10 @@
 #include "corewords.h"
 #include "util.h"
 
+#define VERSION "0.6.0"
+
+extern char *optarg;
+extern int optind;
 cmdbuffer *cmdbuf;
 stack *dataStack;
 stack *returnStack;
@@ -49,96 +55,8 @@ int main(int argc, char *argv[]){
 	vocab->grow = NULL;
 	vocab->undefined = NULL;
 
-	// Most common literals
-	defCore("0", push_zero, vocab);
-	defCore("1", push_one, vocab);
-	defCore("2", push_two, vocab);
-	defCore("4", push_four, vocab);
-	defCore("8", push_eight, vocab);
-
-	// Arithmetic
-	defCore("+", plus, vocab);
-	defCore("*", multiply, vocab);
-	defCore("-", minus, vocab);
-	defCore("/", divide, vocab);
-	defCore("NEG", negate, vocab);
-	defCore("ABS", absval, vocab);
-	defCore("1+", plus1, vocab);
-	defCore("2+", plus2, vocab);
-	defCore("3+", plus3, vocab);
-	defCore("4+", plus4, vocab);
-	defCore("1-", minus1, vocab);
-	defCore("2-", minus2, vocab);
-	defCore("3-", minus3, vocab);
-	defCore("4-", minus4, vocab);
-
-	// Display and interpreter
-	defCore("BYE", bye, vocab);
-	defCore(".", showTop, vocab);
-	defCore("..", showStack, vocab);
-	defCore("B10", base10, vocab);
-
-	// Conditionals
-	defCore("IF+", ifplus, vocab);
-	defCore("IF0", ifzero, vocab);
-	defCore("IF-", ifminus, vocab);
-	defCore("BR-", branchminus, vocab);
-	defCore("BR0", branchzero, vocab);
-	defCore("BR+", branchplus, vocab);
-	defCore("BRS", branchsign, vocab);
-	defCore("BR", branch, vocab);
-	defCore("=", equality, vocab);
-	defCore(">", greaterthan, vocab);
-	defCore("<", lessthan, vocab);
-
-	// Looping and flow control
-	defCore("DO", do_begin, vocab);
-	defCore("DO_LOOP", do_loop, vocab); // Not to be used directly
-	defCore("RP", rp_begin, vocab);
-	defCore("RP_LOOP", rp_loop, vocab); // Not to be used directly
-	defCore("EX", loop_exit, vocab);
-	defCore("EX-", loop_exit_minus, vocab);
-	defCore("EX0", loop_exit_zero, vocab);
-	defCore("EX+", loop_exit_plus, vocab);
-	defCore("EXT", loop_exit_nested, vocab);
-
-	// Stack manipulation
-	defCore("E2", exch2, vocab);
-	defCore("E3", exch3, vocab);
-	defCore("E4", exch4, vocab);
-	defCore("ET", exchdepth, vocab);
-	defCore("C", copy, vocab);
-	defCore("C2", copy2, vocab);
-	defCore("C3", copy3, vocab);
-	defCore("C4", copy4, vocab);
-	defCore("CT", copydepth, vocab);
-	defCore("D", drop, vocab);
-	defCore("DS", dropStack, vocab);
-
-	// Misc
-	// TODO for special functions we should just use references instead of the dictionary.
-	defCore("PUSHLIT", pushLiteral, vocab);
-	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
-	defCore(";S", word_exit, vocab); // Not to be used directly
-	defCore("SKP1", skip1, vocab); // Not to be used directly
-	defCore("SKP2", skip2, vocab); // Not to be used directly
-	defCore("NOP", noop, vocab);
-	defCore("VAR", declareVar, vocab);
-	defCore("!", assignVar, vocab);
-	defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
-	defCore("CR", printNewline, vocab);
-	defCore("SP", printSpace, vocab);
-	defCore("?$", listDicts, vocab);
-	defCore("GROW", growSub, vocab);
-	defCore("SHUT", shutSub, vocab);
-	defCore("USE", openSub, vocab);
-	defCore("TIN", termInNum, vocab);
-	defCore("TON", termOutNum, vocab);
-	defCore("TOS", termOutString, vocab);
-	defCore("DEEP", stackDepth, vocab);
-	defCore("UNDEF",inventoryUndefined, vocab);
-	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
-	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
+	// Add dictionary entries for every core word (corewords.c)
+	define_all_core(vocab);
 
 	// Sub-Dictionaries
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
@@ -149,24 +67,91 @@ int main(int argc, char *argv[]){
 	vocab->sub->varlist = NULL;
 	vocab->grow = vocab->sub; // We will grow this dictionary by default
 
-	// Version
-	printf("\nlibreDSSP, version 0.6.0\n");
+	// Parse args, set flags
+	int opt_load_file = 0;      // Load a file, evaluate it, and close unless -i is passed
+	int opt_eval_String = 0;    // Evaluate string between loading file and showing prompt (if interactive)
+	int opt_print_help = 0;     // Print help/usage information and exit
+	int opt_quiet_shell = 0;    // Do not print version/copyright before prompt
+	int opt_interactive = 0;    // Keep shell open after evaluating file (if provided)
+	int opt_version_info = 0;   // Print version information and exit
+	char * fname = NULL;
+	char *eval_string = NULL;
 
-	// Copyright notice
-	printf("Copyright (C) 2026  Alan Beadle\n\nThis program is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	// Arg parse loop
+	int opt;
+	while((opt = getopt(argc, argv, "f:e:hqiv")) != -1) {
+		switch(opt) {
+			case 'f':
+				opt_load_file = 1;
+				fname = optarg;
+				break;
+			case 'e':
+				if (opt_eval_String) {
+					fprintf(stderr, "%s: only one -e allowed\n", argv[0]);
+					return -1;
+				}
+				opt_eval_String = 1;
+				eval_string = strdup(optarg);
+				break;
+			case 'h':
+				opt_print_help = 1;
+				break;
+			case 'q':
+				opt_quiet_shell = 1;
+				break;
+			case 'i':
+				opt_interactive = 1;
+				break;
+			case 'v':
+				opt_version_info = 1;
+				break;
+			default:
+				fprintf(stderr, "Usage: %s [-f filename] [-e string] [-h] [-q] [-i] [-v]\n", argv[0]);
+				return -1;
+		}
+	}
+
+	if (!opt_load_file && optind < argc) {
+		if (optind + 1 < argc) {
+			printf("ERR: %s: too many arguments\n", argv[0]);
+			return -1;
+		}
+		opt_load_file = 1;
+		fname = argv[optind];
+	}
 	int status = 0;
 
-	if(argc >= 2){
-		printf("Attempting to open %s... ",argv[1]);
-		FILE *file = fopen(argv[1], "r");
+	if(opt_version_info) {
+		printf("libreDSSP, version %s\n", VERSION);
+		return 0;
+	}else if(opt_print_help) {
+		printf("Usage: %s [-f filename] [-e string] [-h] [-q] [-i] [-v]\n", argv[0]);
+		printf("  -f filename   Load and evaluate a DSSP source file\n");
+		printf("  -e string     Evaluate a string\n");
+		printf("  -h            Print this help message and exit\n");
+		printf("  -q            Suppress version/copyright information on startup\n");
+		printf("  -i            Keep shell open after executing file (if provided)\n");
+		printf("  -v            Print version information and exit\n");
+		return 0;
+	}
+
+	// Print copyright/version unless told not to
+	if(!opt_quiet_shell){
+		printf("\nlibreDSSP, version %s\n", VERSION);
+		printf("Copyright (C) 2026  Alan Beadle\n\nYou should have received a copy of the GNU General Public License\nalong with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n");
+	}
+
+	if(opt_load_file){
 		char * bufptr = NULL;
 		size_t bufsize = 0;
 		size_t characters;
+		errno = 0;
+		FILE *file = fopen(fname, "r");
 
-		if (file == 0){
-			printf("Failed!\n");
+		if (file == NULL){
+			printf("%s Failed to open file `%s`: [Errno %d] %s\n",argv[0], fname,errno, strerror(errno));
+			return -1;
 		}else{
-			printf("Success!\n");
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
 				status = process_line(bufptr);
@@ -181,6 +166,21 @@ int main(int argc, char *argv[]){
 			free(bufptr);
 			bufptr = NULL;
 		}
+	}
+
+	// Evaluate a string if provided
+	if(opt_eval_String) {
+		status = process_line(eval_string);
+		free(eval_string);
+		if(status == 0) word_next();
+		cmdbuf->size = 0;
+		cmdbuf->array[0] = NULL;
+	}
+
+	// We have evaluated a file and/or string if provided.
+	// Unless -i was passed, we are done.
+	if((opt_load_file || opt_eval_String) && !opt_interactive) {
+		return 0; // If we loaded a file and are not interactive, exit after processing the file
 	}
 
 	while(1){

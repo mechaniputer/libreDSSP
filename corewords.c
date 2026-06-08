@@ -1112,3 +1112,97 @@ void inventoryWords(){
 	}
 	return;
 }
+
+
+void define_all_core(dict * vocab){
+	// Most common literals
+	defCore("0", push_zero, vocab);
+	defCore("1", push_one, vocab);
+	defCore("2", push_two, vocab);
+	defCore("4", push_four, vocab);
+	defCore("8", push_eight, vocab);
+
+	// Arithmetic
+	defCore("+", plus, vocab);
+	defCore("*", multiply, vocab);
+	defCore("-", minus, vocab);
+	defCore("/", divide, vocab);
+	defCore("NEG", negate, vocab);
+	defCore("ABS", absval, vocab);
+	defCore("1+", plus1, vocab);
+	defCore("2+", plus2, vocab);
+	defCore("3+", plus3, vocab);
+	defCore("4+", plus4, vocab);
+	defCore("1-", minus1, vocab);
+	defCore("2-", minus2, vocab);
+	defCore("3-", minus3, vocab);
+	defCore("4-", minus4, vocab);
+
+	// Display and interpreter
+	defCore("BYE", bye, vocab);
+	defCore(".", showTop, vocab);
+	defCore("..", showStack, vocab);
+	defCore("B10", base10, vocab);
+
+	// Conditionals
+	defCore("IF+", ifplus, vocab);
+	defCore("IF0", ifzero, vocab);
+	defCore("IF-", ifminus, vocab);
+	defCore("BR-", branchminus, vocab);
+	defCore("BR0", branchzero, vocab);
+	defCore("BR+", branchplus, vocab);
+	defCore("BRS", branchsign, vocab);
+	defCore("BR", branch, vocab);
+	defCore("=", equality, vocab);
+	defCore(">", greaterthan, vocab);
+	defCore("<", lessthan, vocab);
+
+	// Looping and flow control
+	defCore("DO", do_begin, vocab);
+	defCore("DO_LOOP", do_loop, vocab); // Not to be used directly
+	defCore("RP", rp_begin, vocab);
+	defCore("RP_LOOP", rp_loop, vocab); // Not to be used directly
+	defCore("EX", loop_exit, vocab);
+	defCore("EX-", loop_exit_minus, vocab);
+	defCore("EX0", loop_exit_zero, vocab);
+	defCore("EX+", loop_exit_plus, vocab);
+	defCore("EXT", loop_exit_nested, vocab);
+
+	// Stack manipulation
+	defCore("E2", exch2, vocab);
+	defCore("E3", exch3, vocab);
+	defCore("E4", exch4, vocab);
+	defCore("ET", exchdepth, vocab);
+	defCore("C", copy, vocab);
+	defCore("C2", copy2, vocab);
+	defCore("C3", copy3, vocab);
+	defCore("C4", copy4, vocab);
+	defCore("CT", copydepth, vocab);
+	defCore("D", drop, vocab);
+	defCore("DS", dropStack, vocab);
+
+	// Misc
+	// TODO for special functions we should just use references instead of the dictionary.
+	defCore("PUSHLIT", pushLiteral, vocab);
+	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
+	defCore(";S", word_exit, vocab); // Not to be used directly
+	defCore("SKP1", skip1, vocab); // Not to be used directly
+	defCore("SKP2", skip2, vocab); // Not to be used directly
+	defCore("NOP", noop, vocab);
+	defCore("VAR", declareVar, vocab);
+	defCore("!", assignVar, vocab);
+	defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
+	defCore("CR", printNewline, vocab);
+	defCore("SP", printSpace, vocab);
+	defCore("?$", listDicts, vocab);
+	defCore("GROW", growSub, vocab);
+	defCore("SHUT", shutSub, vocab);
+	defCore("USE", openSub, vocab);
+	defCore("TIN", termInNum, vocab);
+	defCore("TON", termOutNum, vocab);
+	defCore("TOS", termOutString, vocab);
+	defCore("DEEP", stackDepth, vocab);
+	defCore("UNDEF",inventoryUndefined, vocab);
+	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
+	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
+}
