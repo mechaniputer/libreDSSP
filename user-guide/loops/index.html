@@ -125,12 +125,109 @@
     
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#dssp-loops" class="nav-link">DSSP Loops</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#do-loops" class="nav-link">DO loops</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#rp-loops" class="nav-link">RP Loops</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#loop-exits" class="nav-link">Loop Exits</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9" role="main">
 
-</div>
+<h1 id="dssp-loops">DSSP Loops</h1>
+<p>DSSP provides two types of loops, as well as several words that can be used to terminate a loop from within.</p>
+<h2 id="do-loops">DO loops</h2>
+<p>The DSSP <code>DO</code> loop is used when the number of repetitions (or the maximum number) is known in advance.</p>
+<p>Example for <code>DO</code>:</p>
+<pre><code>* : HELLO .&quot;Hello world!&quot; CR ;
+* 5 DO HELLO
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+* 
+</code></pre>
+<h2 id="rp-loops">RP Loops</h2>
+<p>The DSSP <code>RP</code> loop is used when a loop must continue indefinitely, or until some condition is met.</p>
+<p>Example for <code>RP</code>:</p>
+<pre><code>* : HELLO .&quot;Hello world!&quot; CR ;
+* RP HELLO
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+Hello world!
+(...and so on...)
+</code></pre>
+<h2 id="loop-exits">Loop Exits</h2>
+<p>DSSP provides the following words to exit from a loop: <code>EX</code>, <code>EX-</code>, <code>EX0</code>, <code>EX+</code>, <code>EXT</code></p>
+<p>The simplest loop exit is <code>EX</code>. If executed, <code>EX</code> will unconditionally exit from a loop.
+<code>EX</code> is normally combined with one of the <a href="../conditionals/">conditional words</a>, as in the example below:</p>
+<pre><code>* LOOP  : LOOP  RP BODY ;
+* BODY  : BODY  1- C BR- DONE NOTDONE ;
+* DONE  : DONE  .&quot;Exiting loop!&quot; CR EX ;
+* NOTDONE  : NOTDONE  .&quot;The value is &quot; . CR ;
+* 5 LOOP
+The value is 4
+The value is 3
+The value is 2
+The value is 1
+The value is 0
+Exiting loop!
+* 
+</code></pre>
+<p>The words <code>EX-</code>, <code>EX0</code>, and <code>EX+</code> all work similarly to <code>EX</code>, except that the loop exit is done conditionally without relying on any other conditionals.</p>
+<p><code>EX-</code> will consume the top stack cell and exit the loop if the value was negative.
+<code>EX0</code> will consume the top stack cell and exit the loop if the value was zero.
+<code>EX+</code> will consume the top stack cell and exit the loop if the value was positive.</p>
+<p>For example:</p>
+<pre><code>* : BODY 1- C EX- .&quot;The value is &quot; . ;
+* : LOOP RP BODY .&quot;Loop terminated!&quot; CR ;
+* 5 LOOP
+The value is 4
+The value is 3
+The value is 2
+The value is 1
+The value is 0
+Loop terminated!
+</code></pre>
+<p>Finally, <code>EXT</code> allows the program to (unconditionally) exit multiple layers of nested loops.
+<code>EXT</code> consumes the top of the stack and exits that many layers of loops (they can be either <code>RP</code> loops, <code>DO</code> loops, or some interleaving of the two).
+<code>EXT</code> is normally combined with one of the <a href="../conditionals/">conditional words</a>, as in the (admittedly complicated) example below:</p>
+<pre><code>* : FOOLOOP .&quot;FOO&quot; CR BAR ;
+* : BAR RP BARLOOP ;
+* : BARLOOP .&quot;BAR&quot; CR RP BAZ ;
+* : BAZ .&quot;BAZ&quot; CR 1- C BR0 DONE EX ;
+* : DONE .&quot;Doing a nested exit.&quot; CR 3 EXT ;
+* 3 RP FOOLOOP
+FOO
+BAR
+BAZ
+BAR
+BAZ
+BAR
+BAZ
+Doing a nested exit.
+</code></pre></div>
             </div>
         </div>
 

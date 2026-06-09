@@ -125,12 +125,147 @@
     
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#dssp-conditionals" class="nav-link">DSSP Conditionals</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#a-note-about-permitted-branch-targets" class="nav-link">A note about permitted branch targets</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#readability-and-code-structure" class="nav-link">Readability and code structure</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#1-target-if" class="nav-link">1-target IF</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#2-target-br" class="nav-link">2-target BR</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#3-target-br" class="nav-link">3-target BR</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#many-target-br" class="nav-link">Many-target BR</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9" role="main">
 
-</div>
+<h1 id="dssp-conditionals">DSSP Conditionals</h1>
+<p>DSSP provides the following categories of conditional <a href="../corewords/">core words</a>.</p>
+<h2 id="a-note-about-permitted-branch-targets">A note about permitted branch targets</h2>
+<p>All of the words described on this page require one or more branch targets (words to be conditionally executed).
+In DSSP, branch targets must be single-word operands that compile into a single cell.
+This means that the majority of core words and any user-defined word are permissible as branch targets.</p>
+<p>The core words that are not allowed as branch targets are:
+<code>IF-</code>,<code>IF0</code>,<code>IF+</code>,<code>BR-</code>,<code>BR0</code>,<code>BR+</code>,<code>BRS</code>,<code>BR</code>,<code>DO</code>,<code>RP</code>,<code>VAR</code>,<code>!</code>,<code>GROW</code>,<code>SHUT</code>,<code>USE</code>.</p>
+<p>In addition, you may not use a <a href="../io/#showing-data-to-the-user">print statement</a> as a branch target, nor may you use a literal value that is not also defined as a <a href="../corewords/">core word</a>.</p>
+<h2 id="readability-and-code-structure">Readability and code structure</h2>
+<p>The single-cell restriction on branch targets encourages a modular code structure with intentional layers of word definitions.
+Decomposing problems into smaller units can be challenging at first but the end result is more readable and maintainable.</p>
+<p>For more about how to write maintainable code in DSSP, see the page about <a href="../style/">code style</a></p>
+<h2 id="1-target-if">1-target IF</h2>
+<p>DSSP provides three single-target IF-type words with similar behavior: <code>IF-</code>, <code>IF-</code>, and <code>IF+</code>.
+These words will either skip or not skip the following word depending on the value at the top of <a href="../datastack/">the stack</a>.
+Note that these words all consume the top stack value.</p>
+<p>Example for <code>IF-</code>:</p>
+<pre><code>* : NTV .&quot;The number is negative&quot; CR ;
+* 0 IF- NTV
+* -1 IF- NTV
+The number is negative
+* 
+</code></pre>
+<p>Example for <code>IF0</code>:</p>
+<pre><code>* : ZER .&quot;The number is zero&quot; CR ;
+* -7 IF0 ZER
+* 0 IF0 ZER
+The number is zero
+*
+</code></pre>
+<p>Example for <code>IF+</code>:</p>
+<pre><code>* : POS .&quot;The number is positive&quot; CR ;
+* 3 IF+ POS
+The number is positive
+* 0 IF+ POS
+* 
+</code></pre>
+<h2 id="2-target-br">2-target BR</h2>
+<p>DSSP provides three dual-target BR-type words with similar behavior: <code>BR-</code>, <code>BR0</code>, and <code>BR+</code>.
+These words will execute either the following word or the one after that depending on the value at the top of <a href="../datastack/">the stack</a>.
+Note that these words all consume the top stack value.</p>
+<p>Example for <code>BR-</code>:</p>
+<pre><code>* : NTV .&quot;The number is negative&quot; CR ;
+* : NON .&quot;The number is not negative&quot; CR ;
+* 5 BR- NTV NON
+The number is not negative
+* -5 BR- NTV NON
+The number is negative
+* 
+</code></pre>
+<p>Example for <code>BR0</code>:</p>
+<pre><code>* : ZER .&quot;The number is zero&quot; CR ;
+* : NON .&quot;The number is not zero&quot; CR ;
+* 5 BR0 ZER NON
+The number is not zero
+* 0 BR0 ZER NON
+The number is zero
+* 
+</code></pre>
+<p>Example for <code>BR+</code>:</p>
+<pre><code>* : POS .&quot;The number is positive&quot; CR ;
+* : NON .&quot;The number is not positive&quot; CR ;
+* 5 BR+ POS NON
+The number is positive
+* 0 BR+ POS NON
+The number is not positive
+* 
+</code></pre>
+<h2 id="3-target-br">3-target BR</h2>
+<p>DSSP provides one triple-target BR-type word, <code>BRS</code>.
+<code>BRS</code> will execute one of the three following words depending on whether the top stack value is negative, zero, or positive.
+Note that this word consumes the top stack value.</p>
+<p>Example of BRS:</p>
+<pre><code>* : CHECKSIGN BRS NGT ZER POS ;
+* : NGT .&quot;The sign is negative&quot; CR ;
+* : ZER .&quot;The number is 0&quot; CR ;
+* : POS .&quot;The sign is positive&quot; CR ;
+* -7 CHECKSIGN
+The sign is negative
+* 0 CHECKSIGN
+The number is 0
+* 3 CHECKSIGN
+The sign is positive
+* 
+</code></pre>
+<h2 id="many-target-br">Many-target BR</h2>
+<p>DSSP provides one many-target BR-type word, <code>BR</code>.</p>
+<p><code>BR</code> requires that the words following <code>BR</code> be an alternating sequence of integer values and branch targets, terminated with an <code>ELSE</code> and one more branch target. See the example below for clarification.</p>
+<p><code>BR</code> will execute one of the subsequent words depending on which condition, if any, matches the value on top of the stack.
+If none of the conditions match, the word following <code>ELSE</code> is executed instead.
+Note that this word consumes the top stack value.</p>
+<p>Example for BR:</p>
+<pre><code>* : NUMBER BR 1 ONE 2 TWO 3 THREE 4 FOUR ELSE OTHER ;
+* : ONE .&quot;The number is one!&quot; CR ;
+* : TWO .&quot;The number is two!&quot; CR ;
+* : THREE .&quot;The number is three!&quot; CR ;
+* : FOUR .&quot;The number is four!&quot; CR ;
+* : OTHER .&quot;Oops, that number is not in the range [1,4]&quot; CR ;
+* 1 NUMBER
+The number is one!
+* 4 NUMBER
+The number is four!
+* 42 NUMBER
+Oops, that number is not in the range [1,4]
+* 
+</code></pre></div>
             </div>
         </div>
 

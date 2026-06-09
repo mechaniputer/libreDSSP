@@ -125,12 +125,80 @@
     
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#variables" class="nav-link">Variables</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#a-note-on-data-sizes" class="nav-link">A note on data sizes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#declaring-variables" class="nav-link">Declaring variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#assigning-variables" class="nav-link">Assigning variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#recalling-variables" class="nav-link">Recalling variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#shortcuts-for-altering-variable-contents" class="nav-link">Shortcuts for altering variable contents</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#a-note-about-subdictionaries" class="nav-link">A note about subdictionaries</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9" role="main">
 
-</div>
+<h1 id="variables">Variables</h1>
+<h2 id="a-note-on-data-sizes">A note on data sizes</h2>
+<p>In libreDSSP, all variables are sized to fit one <a href="../jargon/#cell-size">cell</a>.
+On a 64-bit machine, variables are 64-bits. On a 32-bit machine, variables are 32 bits.</p>
+<p><strong>NOTE: The DSSP language includes words that allow for more flexibility in data size, but libreDSSP currently lacks these words. These will be added in an upcoming version. The <code>BYTE</code> (<code>BIT</code>) prefix will declare a variable that always truncates to one byte (bit). <code>VCTR</code> and <code>ARR</code> will allow for defining larger contiguous sequences of these element types.</strong></p>
+<h2 id="declaring-variables">Declaring variables</h2>
+<p>Declaring a variable results in space for that variable being allocated and initialized to <code>0</code>.
+A variable cannot have a name that is the same as any <a href="../dictionaries/">currently-accessible</a> word or variable.</p>
+<p>To declare a variable, use the <code>VAR</code> core word like so:</p>
+<pre><code>* VAR X
+</code></pre>
+<p>Variables must be declared before they can be assigned a value or referenced.
+Note that a VAR statement will not be evaluated until a newline occurs, so you cannot do this:</p>
+<pre><code>* VAR X 5 ! X
+</code></pre>
+<p>Instead you can do this:</p>
+<pre><code>* VAR X
+* 5 ! X
+</code></pre>
+<p>Support for compiling references to undeclared variables may be supported in a future version.
+The best style approach, however, is to declare your variables at the top of the source file above any variable references.</p>
+<h2 id="assigning-variables">Assigning variables</h2>
+<p>To assign the top stack cell to a previously declared variable, use the <code>!</code> core word like so:</p>
+<pre><code>* ! X
+</code></pre>
+<p>You can reuse <code>!</code> to assign a new value to a variable at any point in the code.</p>
+<h2 id="recalling-variables">Recalling variables</h2>
+<p>Typing the name of a variable will result in the current value being pushed to the stack:</p>
+<pre><code>* VAR X
+* 5 ! X
+* X ..
+[5]
+* 
+</code></pre>
+<h2 id="shortcuts-for-altering-variable-contents">Shortcuts for altering variable contents</h2>
+<p>A future version of libreDSSP will add support for the following words: <code>!0, !1, !1-, !1+, !-, !+, !!!</code>. They will be documented here at that time.</p>
+<h2 id="a-note-about-subdictionaries">A note about subdictionaries</h2>
+<p>When you define a variable, it will go into whatever subdictionary is selected for expansion. By default, this will be a subdictionary called <code>$DEFAULT</code>.
+Words from one subdictionary can reference and use variables from any other subdictionary, but this can also be restricted.
+For more about the use of subdictionaries in libreDSSP, refer to the <a href="../dictionaries/">relevant page</a>.</p></div>
             </div>
         </div>
 
