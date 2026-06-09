@@ -383,7 +383,7 @@ int parse_tokens(char * tok){
 
 	// If we are in compile mode, record the token in the word definition text.
 	if(compiling){
-		CHECK_CAP_TEXT(strlen(tok)+1)
+		CHECK_CAP_TEXT(strlen(tok)+2)
 		if(newWordTextLen != 0){
 			strcat(newWordText, " ");
 			newWordTextLen += 1;
@@ -405,7 +405,7 @@ int parse_tokens(char * tok){
 
 			// newWordCode already allocated in compile mode setup
 			// Populate start of text entry
-			CHECK_CAP_TEXT(strlen(newWordName)+3)
+			CHECK_CAP_TEXT(strlen(newWordName)+4)
 			strcpy(newWordText, ": ");
 			strcat(newWordText, newWordName);
 			strcat(newWordText, " ");
