@@ -7,7 +7,7 @@ To launch libreDSSP, enter the directory where the executable is located and run
 
 - The libreDSSP shell prompt normally appears as an asterisk (*) but if there is an incomplete statement it will instead appear as a question mark (?).
 
-- If you see the asterisk prompt, you can type the word `BYE` and press Enter — this cleanly terminates libreDSSP.
+- If you see the asterisk prompt, you can type the word `BYE` and press Enter.
 
 - Or press Ctrl-D at the start of a new line (send EOF character).
 
