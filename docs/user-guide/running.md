@@ -59,4 +59,4 @@ Only one file and one text string may be passed. This differs from some Forth im
 ## Pipes and libreDSSP
 libreDSSP will behave in the standard useful ways when piping data in or out of DSSP programs. You should probably enable the `-q` flag for the latter.
 
-You can also pipe DSSP code into dssp itself (as long as you use flags that result in starting an interactive shell) but this is not recommended as a standard practice. Just use a file.
+You can also pipe DSSP code into libreDSSP itself (as long as you use flags that result in starting an interactive shell) but this is not recommended as a standard practice. Just use a file.

@@ -21,7 +21,7 @@ This also makes it possible to test an incomplete program. If an undefined word 
 
 You can view a list of all currently undefined words by running the word `UNDEF`.
 
-**Note:** Curently, you may only reference undefined [user words](userwords.md), not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins>
+**Note:** Currently, you may only reference undefined [user words](userwords.md), not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins>
 
 
 ## Compile mode

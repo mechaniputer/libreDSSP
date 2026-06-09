@@ -13,9 +13,9 @@ For example, the following statement defines a function named square that square
 : square C 2 * ;
 ```
 
-Note the use of spaces. There is a mandatory space following ':', and a mandatory space following each word used in the word body, including up to the closing ';'.
+Note the use of spaces. There is a mandatory space following `:`, and a mandatory space following each word used in the word body, including up to the closing `;`.
 
-It is permissible to split a word defition across multiple lines:
+It is permissible to split a word definition across multiple lines:
 
 ```
 : square
@@ -31,7 +31,7 @@ For example, consider the following code:
 ```
 * : FOO 1 2 3 .. ADD3 ;
 ```
-This code will be compiled without error, even if the ADD3 word is currently undefined.
+This code will be compiled without error, even if the `ADD3` word is currently undefined.
 If you run `FOO`, it will push the three numbers to [the stack](stack.md), print the stack (`..`), and then display an error when it finds no definition for `ADD3`.
 ```
 * FOO
@@ -51,7 +51,7 @@ If you subsequently define `ADD3`, the old definition of `FOO` will automaticall
 *
 ```
 
-Consequently, note that if you write part of a program and test it, as long as you do not hit any of the unfinished words during the test, you will be able to examine how the finished program will behave for the inputs you provide.
+As a consequence of these features, note that if you write part of a program and test it, as long as you do not hit any of the undefined words during the test, *(or until you do)* you will be able to examine how the finished program will behave for the inputs you provide.
 
 ## Displaying currently defined words
 The above might make you think, *"What if I forget to define a word and deploy code that will fail when that word is called?"* Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word `UNDEF`:

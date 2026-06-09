@@ -13,5 +13,5 @@ nav:
     - Conditionals: user-guide/conditionals.md
     - Loops: user-guide/loops.md
     - Input/Output: user-guide/io.md
+    - Dictionaries: user-guide/dictionaries.md
     - Comments and Code Style: user-guide/style.md
-    - Word Dictionaries: user-guide/dictionaries.md

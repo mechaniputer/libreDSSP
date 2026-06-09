@@ -84,7 +84,7 @@ To subtract 1 from the top of the stack, you can use `1-`. The words `2-`, `3-`,
 
 ## Integer comparisons
 
-If the top two stack cells are equal, the word `=` will consume both cells and push `1`. Otherise it will consume both cells and push `0`.
+If the top two stack cells are equal, the word `=` will consume both cells and push `1`. Otherwise it will consume both cells and push `0`.
 
 Example:
 ```

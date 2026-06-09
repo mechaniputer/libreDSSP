@@ -87,18 +87,20 @@ Also let us know if you are interested in setting up other resources such as an 
 ## What doesn't work yet
 - File IO (this doesn't seem to be very standardized so we are allowed to make good choices here)
 - References to undefined vars
-- Arrays, fixed variables, etc
+- VCTR, ARR, CNST, BYTE, WORD, LONG, QUAD (new), VALUE, TEXT, FIX, EMPTY, EQU
 - ' (push address of var)
 - '' (push address of function)
 - @ (dereference top of stack and push result)
+- ACT (mark a VAR as an executable word pointer, callable by name)
 - !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
-- SHL, SHR, other bitwise operations
+- T0, T1 (assign 0 or 1 to prior top of stack)
+- SGN (push -1, 0, or 1 based on sign of stack top)
+- MAX, MIN
+- Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
+- Word ops: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
 - ONLY, CANCEL, FORGET, CLEAR
-- SAVE, LOAD
-- SGN, NOT
-- SORT, SPIN, MAX, MIN
-- T0, T1
-- TRB, TOB, BASE@
+- SAVE, LOAD (for saving state to, or restoring state from, a source file)
+- TRB, TOB
 - TIB, TIS
 - B2, B8, B16
 - EXEC (execute function from address on stack)
