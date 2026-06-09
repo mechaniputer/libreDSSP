@@ -171,8 +171,38 @@
 <h2 id="redefining">Redefining</h2>
 <p>If you need to change the definition of the word, you may simply define it again with a different body. No special steps are needed. The old definition will be seamlessly replaced and any word that invokes the updated word will already use the new version.</p>
 <h2 id="undefined-words">Undefined words</h2>
+<p>As mentioned on the <a href="../jargon/">DSSP Jargon</a> page, DSSP allows you to reference (but not use) undefined words.
+For example, consider the following code:</p>
+<pre><code>* : FOO 1 2 3 .. ADD3 ;
+</code></pre>
+<p>This code will be compiled without error, even if the ADD3 word is currently undefined.
+If you run <code>FOO</code>, it will push the three numbers to <a href="stack.md">the stack</a>, print the stack (<code>..</code>), and then display an error when it finds no definition for <code>ADD3</code>.</p>
+<pre><code>* FOO
+[1 2 3]
+ERR: Undefined word ADD3 called during execution
+[Execution aborted]
+*
+</code></pre>
+<p>If you subsequently define <code>ADD3</code>, the old definition of <code>FOO</code> will automatically use that definition when you try again:</p>
+<pre><code>* : ADD3 + + .. ;
+* DS
+* FOO
+[1 2 3]
+[6]
+*
+</code></pre>
+<p>Consequently, note that if you write part of a program and test it, as long as you do not hit any of the unfinished words during the test, you will be able to examine how the finished program will behave for the inputs you provide.</p>
 <h2 id="displaying-currently-defined-words">Displaying currently defined words</h2>
-<h2 id="a-note-about-dictionaries">A note about dictionaries</h2></div>
+<p>The above might make you think, <em>"What if I forget to define a word and deploy code that will fail when that word is called?"</em> Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word <code>UNDEF</code>:</p>
+<pre><code>* : FOO BAR BAZ ;
+* UNDEF
+BAZ
+BAR
+</code></pre>
+<h2 id="a-note-about-dictionaries">A note about dictionaries</h2>
+<p>When you define a word, it will go into whatever dictionary is selected for expansion. By default, this will be a dictionary called <code>$DEFAULT</code>.
+Words from one dictionary can reference and use words from any other dictionary.
+For more about the use of dictionaries in libreDSSP, refer to the <a href="../dictionaries/">relevant page</a>.</p></div>
             </div>
         </div>
 
