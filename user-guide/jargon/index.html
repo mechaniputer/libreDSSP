@@ -82,11 +82,11 @@
 </li>
                                     
 <li>
-    <a href="../style/" class="dropdown-item">Comments and Code Style</a>
+    <a href="../dictionaries/" class="dropdown-item">Dictionaries</a>
 </li>
                                     
 <li>
-    <a href="../dictionaries/" class="dropdown-item">Word Dictionaries</a>
+    <a href="../style/" class="dropdown-item">Comments and Code Style</a>
 </li>
                                 </ul>
                             </li>
@@ -168,7 +168,7 @@ libreDSSP consists of <a href="../corewords/">core words</a> and allows programm
 <p>libreDSSP (unlike most Forth dialects) allows you to define a word that calls into another word that is not yet defined (including the very word that you are currently defining, as in recursion). This allows for "top-down programming", in which you break the problem into subproblems prior to implementing solutions to any of those subproblems.</p>
 <p>This also makes it possible to test an incomplete program. If an undefined word is run during testing, execution will cleanly abort and return to the libreDSSP prompt.</p>
 <p>You can view a list of all currently undefined words by running the word <code>UNDEF</code>.</p>
-<p><strong>Note:</strong> Curently, you may only reference undefined <a href="../userwords/">user words</a>, not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins></p>
+<p><strong>Note:</strong> Currently, you may only reference undefined <a href="../userwords/">user words</a>, not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins></p>
 <h2 id="compile-mode">Compile mode</h2>
 <p>Those of you familiar with Forth will probably know of a distinction between "compile mode" and "immediate mode".
 For new Forth users, the nuances of these modes can be a source of confusion.

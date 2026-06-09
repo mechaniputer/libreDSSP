@@ -82,11 +82,11 @@
 </li>
                                     
 <li>
-    <a href="../style/" class="dropdown-item">Comments and Code Style</a>
+    <a href="../dictionaries/" class="dropdown-item">Dictionaries</a>
 </li>
                                     
 <li>
-    <a href="../dictionaries/" class="dropdown-item">Word Dictionaries</a>
+    <a href="../style/" class="dropdown-item">Comments and Code Style</a>
 </li>
                                 </ul>
                             </li>
@@ -182,7 +182,7 @@
 <p>If you want to copy a deeper cell to the top of the stack, you may use <code>C2</code>, <code>C3</code>, or <code>C4</code> depending on the depth of the cell you want to copy.</p>
 <p>If you need to copy a cell from deeper than 4 cells down, there is a <code>CT</code> command for this purpose. <code>CT</code> pops the top cell from the stack and uses it as a depth parameter. For example, <code>10 CT</code> will copy a cell from 10 cells deep in the stack onto the top of the stack. Note that, in effect, the copied cell will replace the just-pushed depth parameter <code>10</code> on the stack. Also note that <code>1 CT</code> is equivalent to <code>C</code>.</p>
 <h2 id="exchanging-stack-cells">Exchanging stack cells</h2>
-<p><code>E2</code> will swap the top two stack cells with each other. <code>E3</code> and <code>E4</code> swap deeper cells with the top cell. Similar to above, a command <code>ET</code> exists to exchange the top cell of the stack with a different cell of any specified depth. Note that like <code>CT</code>, <code>ET</code> likewise pops a cell from the stack to use as a depth parameter, and therefore will treat the cell below that as the top when peforming the swap. Also note that <code>1 ET</code> does nothing, since it exchanges the top with itself.</p>
+<p><code>E2</code> will swap the top two stack cells with each other. <code>E3</code> and <code>E4</code> swap deeper cells with the top cell. Similar to above, a command <code>ET</code> exists to exchange the top cell of the stack with a different cell of any specified depth. Note that like <code>CT</code>, <code>ET</code> likewise pops a cell from the stack to use as a depth parameter, and therefore will treat the cell below that as the top when performing the swap. Also note that <code>1 ET</code> does nothing, since it exchanges the top with itself.</p>
 <h2 id="measuring-the-stack-depth">Measuring the stack depth</h2>
 <p>The word <code>DEEP</code> pushes the number of cells currently in the stack to the top of the stack. Note that although the resulting cell will now be off by 1, it will be correct again once the depth parameter has been popped for use by a word that needs to know the depth of the stack.</p>
 <p>Regardless of stack depth, you can swap the top and bottom cells by <code>DEEP ET</code>, or copy the bottom cell to the top with <code>DEEP CT</code>.</p></div>

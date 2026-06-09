@@ -82,11 +82,11 @@
 </li>
                                     
 <li>
-    <a href="../style/" class="dropdown-item">Comments and Code Style</a>
+    <a href="../dictionaries/" class="dropdown-item">Dictionaries</a>
 </li>
                                     
 <li>
-    <a href="../dictionaries/" class="dropdown-item">Word Dictionaries</a>
+    <a href="../style/" class="dropdown-item">Comments and Code Style</a>
 </li>
                                 </ul>
                             </li>
@@ -163,8 +163,8 @@
 <p>For example, the following statement defines a function named square that squares a number:</p>
 <pre><code>: square C 2 * ;
 </code></pre>
-<p>Note the use of spaces. There is a mandatory space following ':', and a mandatory space following each word used in the word body, including up to the closing ';'.</p>
-<p>It is permissible to split a word defition across multiple lines:</p>
+<p>Note the use of spaces. There is a mandatory space following <code>:</code>, and a mandatory space following each word used in the word body, including up to the closing <code>;</code>.</p>
+<p>It is permissible to split a word definition across multiple lines:</p>
 <pre><code>: square
     C 2 * ;
 </code></pre>
@@ -175,7 +175,7 @@
 For example, consider the following code:</p>
 <pre><code>* : FOO 1 2 3 .. ADD3 ;
 </code></pre>
-<p>This code will be compiled without error, even if the ADD3 word is currently undefined.
+<p>This code will be compiled without error, even if the <code>ADD3</code> word is currently undefined.
 If you run <code>FOO</code>, it will push the three numbers to <a href="stack.md">the stack</a>, print the stack (<code>..</code>), and then display an error when it finds no definition for <code>ADD3</code>.</p>
 <pre><code>* FOO
 [1 2 3]
@@ -191,7 +191,7 @@ ERR: Undefined word ADD3 called during execution
 [6]
 *
 </code></pre>
-<p>Consequently, note that if you write part of a program and test it, as long as you do not hit any of the unfinished words during the test, you will be able to examine how the finished program will behave for the inputs you provide.</p>
+<p>As a consequence of these features, note that if you write part of a program and test it, as long as you do not hit any of the undefined words during the test, <em>(or until you do)</em> you will be able to examine how the finished program will behave for the inputs you provide.</p>
 <h2 id="displaying-currently-defined-words">Displaying currently defined words</h2>
 <p>The above might make you think, <em>"What if I forget to define a word and deploy code that will fail when that word is called?"</em> Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word <code>UNDEF</code>:</p>
 <pre><code>* : FOO BAR BAZ ;
