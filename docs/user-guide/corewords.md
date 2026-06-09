@@ -22,7 +22,7 @@ The order is mostly alphabetical with some minor variances for the purpose of gr
 | . | Show top of stack | |
 | .. | Show entire stack | |
 | ! | Assign top of stack to an existing variable | |
-| ?$ | List available dictionaries | |
+| ?$ | List available subdictionaries | |
 | 0 | Push 0 | |
 | 1 | Push 1 | |
 | 2 | Push 2 | |
@@ -63,19 +63,19 @@ The order is mostly alphabetical with some minor variances for the purpose of gr
 | EX0 | Consume the top stack cell and if it is zero, exit from the current innermost loop | |
 | EX- | Consume the top stack cell and if it is positive, exit from the current innermost loop | |
 | EXT | Consume the top stack cell and exit from that many layers of ongoing loops | |
-| GROW | Select a dictionary for expansion | |
+| GROW | Select a subdictionary for expansion | |
 | IF+ | Consume top stack cell; If the value is positive, execute the following word; Otherwise skip it | |
 | IF0 | Consume top stack cell; If the value is zero, execute the following word; Otherwise skip it| |
 | IF- | Consume top stack cell; If the value is negative, execute the following word; Otherwise skip it | |
 | NEG | Negate the cell at top of stack | |
 | NOP | Do nothing (no-op)| |
 | RP | Repeat the following word until a loop exit is triggered | |
-| SHUT | Disable lookup access to a given dictionary | |
+| SHUT | Disable lookup access to a given subictionary | |
 | SP | Print a space | |
 | TIN | Terminal Input Number | |
 | TON | Terminal Output Number | |
 | TOS | Terminal Output String | |
 | UNDEF | List undefined words | |
-| USE | Enable lookup access to a given dictionary | |
+| USE | Enable lookup access to a given subdictionary | |
 | VAR | Declare a new variable (init to 0) | |
 | WORDS | List all user-defined words | |

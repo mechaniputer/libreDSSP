@@ -62,7 +62,7 @@ BAZ
 BAR
 ```
 
-## A note about dictionaries
-When you define a word, it will go into whatever dictionary is selected for expansion. By default, this will be a dictionary called `$DEFAULT`.
-Words from one dictionary can reference and use words from any other dictionary.
-For more about the use of dictionaries in libreDSSP, refer to the [relevant page](dictionaries.md).
+## A note about subdictionaries
+When you define a word, it will go into whatever subdictionary is selected for expansion. By default, this will be a subdictionary called `$DEFAULT`.
+Words from one subdictionary can reference and use words from any other subdictionary, but this can also be restricted.
+For more about the use of subdictionaries in libreDSSP, refer to the [relevant page](dictionaries.md).

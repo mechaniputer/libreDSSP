@@ -96,6 +96,7 @@ Also let us know if you are interested in setting up other resources such as an 
 - T0, T1 (assign 0 or 1 to prior top of stack)
 - SGN (push -1, 0, or 1 based on sign of stack top)
 - MAX, MIN
+- Variable/Array store shortcuts: !0, !1, !1-, !1+, !-, !+, !!!
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
 - Word ops: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
 - ONLY, CANCEL, FORGET, CLEAR
