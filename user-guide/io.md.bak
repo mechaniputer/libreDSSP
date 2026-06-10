@@ -1,0 +1,59 @@
+# Input and Output in DSSP
+This page focuses on interactive I/O.
+
+In the future, additional pages will exist for File I/O and other varieties of IO.
+
+## Print Statements
+In DSSP the simplest way to display a literal string is with a print statement.
+With this method, the content of the string must be defined in the source code prior to execution.
+```
+* ."Hello, world!"
+Hello, Word!*
+```
+
+Notice that no newline was inserted, and the subsequent shell prompt was shown on the same line as the printed output.
+If you need to terminate a printed line, you should use `CR` after the print statement:
+```
+* ."Hello, world!" CR
+Hello, Word!
+*
+```
+
+Similarly, `SP` will print a space:
+```
+* ."Hello," SP ."World!" CR
+Hello, Word!
+*
+```
+
+## Displaying stack values
+For commands that display the contents of the stack, refer to the page about [the stack](datastack.md#examining-the-stack).
+
+## Storing strings in memory
+
+One way that you can place a string in memory is by entering a string literal with quotes:
+```
+* "foo bar baz"
+* ..
+[93947397451360 11]
+* 
+```
+The first value pushed to the stack is the memory address where the string's buffer is located.
+The second value (`11`) is the length of the string.
+
+Another way to place a string into memory is to use one of the **currently unimplemented** words to read data into a memory buffer (eg `TIS`, `TIB`), to read data from a file **(also unimplemented)**, or manipulate buffer contents in memory to construct a string **(You guessed it, unimplemented)**.
+
+## Printing a string from memory
+The `TOS` command is used to print a string located at some address in memory.
+It takes two stack parameters, the same ones pushed when we entered a string in the previous section (address, length).
+
+Therefore, continuing from above, we print the string:
+```
+* ..
+[93947397451360 11]
+* TOS CR
+foo bar baz
+* 
+```
+
+## Getting input from the userr

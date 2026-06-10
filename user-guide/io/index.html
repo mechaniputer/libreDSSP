@@ -128,11 +128,23 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#input-and-output-in-dssp" class="nav-link">Input and Output in DSSP</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-bs-level="2"><a href="#showing-data-to-the-user" class="nav-link">Showing data to the user</a>
+            <li class="nav-item" data-bs-level="2"><a href="#print-statements" class="nav-link">Print Statements</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#getting-data-from-the-user" class="nav-link">Getting data from the user</a>
+            <li class="nav-item" data-bs-level="2"><a href="#storing-strings-in-memory" class="nav-link">Storing strings in memory</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#printing-a-string-from-memory" class="nav-link">Printing a string from memory</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#getting-numeric-input-from-the-user" class="nav-link">Getting numeric input from the user</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#printing-numeric-data-from-the-stack" class="nav-link">Printing numeric data from the stack</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -146,11 +158,86 @@
 <h1 id="input-and-output-in-dssp">Input and Output in DSSP</h1>
 <p>This page focuses on interactive I/O.</p>
 <p>In the future, additional pages will exist for File I/O and other varieties of IO.</p>
-<h2 id="showing-data-to-the-user">Showing data to the user</h2>
-<h3 id="print-statements">Print Statements</h3>
-<h3 id="displaying-stack-values">Displaying stack values</h3>
-<h3 id="displaying-strings-from-memory">Displaying strings from memory</h3>
-<h2 id="getting-data-from-the-user">Getting data from the user</h2></div>
+<p>I am planning to introduce new words for safer and more convenient input/output.
+For now, we support the following original DSSP IO words.</p>
+<h2 id="print-statements">Print Statements</h2>
+<p>The simplest way to display a literal string is with a print statement.
+With this method, the content of the string must be defined in the source code (or shell input) prior to execution.</p>
+<pre><code>* .&quot;Hello, world!&quot;
+Hello, Word!*
+</code></pre>
+<p>Notice that no newline was inserted, and the subsequent shell prompt was shown on the same line as the printed output.
+If you need to terminate a printed line, you should use <code>CR</code> after the print statement:</p>
+<pre><code>* .&quot;Hello, world!&quot; CR
+Hello, Word!
+*
+</code></pre>
+<p>Similarly, <code>SP</code> will print a space:</p>
+<pre><code>* .&quot;Hello,&quot; SP .&quot;World!&quot; CR
+Hello, Word!
+*
+</code></pre>
+<h2 id="storing-strings-in-memory">Storing strings in memory</h2>
+<p>One way that you can place a string in memory is by entering a string literal with quotes:</p>
+<pre><code>* &quot;foo bar baz&quot;
+* ..
+[93947397451360 11]
+*
+</code></pre>
+<p>The first value pushed to the stack is the memory address where the string's buffer is located.
+The second value (<code>11</code>) is the length of the string.</p>
+<p>Another way to place a string into memory is to use one of the <strong>currently unimplemented</strong> words to read data into a memory buffer (eg <code>TIS</code>, <code>TIB</code>), or read data from a file <strong>(also unimplemented)</strong>, or manipulate buffer contents in memory to construct a string <strong>(You guessed it, unimplemented)</strong>.</p>
+<h2 id="printing-a-string-from-memory">Printing a string from memory</h2>
+<p>The <code>TOS</code> word is used to print a string located at some address in memory.
+It takes two stack parameters, the same ones pushed when we entered a string in the previous section (address, length).
+Both parameters are consumed.</p>
+<p>Therefore, continuing from above, we print the string:</p>
+<pre><code>* ..
+[93947397451360 11]
+* TOS CR
+foo bar baz
+*
+</code></pre>
+<h2 id="getting-numeric-input-from-the-user">Getting numeric input from the user</h2>
+<p>The <code>TIN</code> word reads numeric input from the user. <code>TIN</code> requires a size parameter on top of the stack, which will be consumed.
+The size specifies how many digits the user should be allowed to type.</p>
+<p>Example of correct usage:</p>
+<pre><code>* .&quot;Enter a 2-digit number: &quot; 2 TIN
+Enter a 2-digit number: 42
+* ..
+[42]
+*
+</code></pre>
+<p>If the user enters more than the specified number of digits, the number will be truncated, preserving the lowest signifigance digits.</p>
+<p>Example of truncation:</p>
+<pre><code>* .&quot;Enter a 2-digit number: &quot; 2 TIN
+Enter a 2-digit number: 123456
+* ..
+[56]
+*
+</code></pre>
+<h2 id="printing-numeric-data-from-the-stack">Printing numeric data from the stack</h2>
+<p>The <code>TON</code> word prints a number out to some specificed number of digits.
+It requires two stack operands, with the top being the number of digits to print, and the subtop the value to be printed.
+Both stack operands will be consumed.</p>
+<p>A newline is not printed automatically, so remember to use CR if you want a newline.</p>
+<p>Example:</p>
+<pre><code>* 123456 6 TON CR
+123456
+*
+</code></pre>
+<p>If the number contains more than the specified number of digits, the number will be truncated, preserving the lowest signifigance digits.</p>
+<p>Example with truncation:</p>
+<pre><code>* 123456 3 TON CR
+456
+*
+</code></pre>
+<p>You can of course use the word <code>.</code> to print the top of the stack with a newline, without truncation, and without consuming any stack values:</p>
+<pre><code>* 123456 .
+123456
+* ..
+[123456]
+</code></pre></div>
             </div>
         </div>
 
