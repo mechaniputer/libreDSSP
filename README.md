@@ -3,8 +3,6 @@
 
 libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was inspired by the architecture of the Setun ternary computer. It is very similar to Forth but has greatly simplified "mode" semantics, more compact syntax, and arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.
 
-DSSP provides a somewhat larger set of core words than most Forth-style languages. We consider this a strength, because memory is abundant on modern platforms (at least relative to our needs). Having more specific core words also eases development and improves performance.
-
 To our knowledge this is the only maintained DSSP implementation, and the first to be free software (GPLv3 license).
 
 libreDSSP uses an indirect threaded design and avoids any inline assembly for maximum portability. At the moment we target every modern *nix system that we reasonably can, but most are untested. Longer term, embedded ports would certainly be nice to have.
