@@ -98,6 +98,8 @@ Also let us know if you are interested in setting up other resources such as an 
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
 - Word ops: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
 - ONLY, CANCEL, FORGET, CLEAR
+- :: (to define words not subject to CLEAR)
+- DEFINE? (Predicate for whether a word is defined. I assume this should not check in CLOSED subdicts.)
 - SAVE, LOAD (for saving state to, or restoring state from, a source file)
 - TRB, TOB
 - TIB, TIS
