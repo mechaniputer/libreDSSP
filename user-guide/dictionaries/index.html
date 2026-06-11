@@ -128,6 +128,34 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#dssp-dictionaries" class="nav-link">DSSP Dictionaries</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#disclaimer" class="nav-link">Disclaimer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#viewing-a-list-of-subdictionaries" class="nav-link">Viewing a list of subdictionaries</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#opening-a-new-subdictionary" class="nav-link">Opening a new subdictionary</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#choosing-subdictionaries-for-growth" class="nav-link">Choosing subdictionaries for growth</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#shutting-subdictionaries" class="nav-link">Shutting subdictionaries</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#reopening-a-closed-subdictionary" class="nav-link">Reopening a closed subdictionary</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#some-details-to-be-aware-of" class="nav-link">Some details to be aware of</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -137,8 +165,98 @@
 
 <h1 id="dssp-dictionaries">DSSP Dictionaries</h1>
 <p>DSSP uses a structure called a dictionary to track word definitions and variable declarations.</p>
-<p>The dictionary consists of various named subdictionaries.</p>
-<p>(More information coming soon)</p></div>
+<p>The dictionary consists of various named subdictionaries.
+In libreDSSP, a subdictionary name must begin with a <code>$</code> symbol, to distinguish them from other kinds of named entities.
+There exists a subdictionary named <code>$PRIME</code> containing all of the <a href="../corewords/">core words</a>. <code>$PRIME</code> cannot be modified or affected by programs.</p>
+<p>On launch, libreDSSP also created a <code>$DEFAULT</code> subdictionary for user-defined entities including <a href="../userwords/">words</a> and <a href="../vars/">variables</a>.</p>
+<h2 id="disclaimer">Disclaimer</h2>
+<p>Several key features of the DSSP dictionary system are currently unimplemented in libreDSSP.
+The features that exist are likely to have bugs, and current edge cases may be subject to change.
+If you discover any problems relating to these features, please don't hesitate to open an issue on the <a href="https://github.com/mechaniputer/libreDSSP">GitHub repo</a>.</p>
+<h2 id="viewing-a-list-of-subdictionaries">Viewing a list of subdictionaries</h2>
+<p>To see a list of all subdictionaries and their respective status, use <code>?$</code>:</p>
+<pre><code>* ?$
+$DEFAULT OPEN
+$PRIME OPEN
+*
+</code></pre>
+<p>The subdictionary at the top of the list is the one currently selected for growth.
+The status of a subdictionary is either <code>OPEN</code> or <code>CLOSED</code>.
+An <code>OPEN</code> subdictionary can be used when looking for previously defined entities, but a <code>CLOSED</code> one cannot.
+If the dictionary currently selected for growth is <code>CLOSED</code>, new entities cannot be added.</p>
+<h2 id="opening-a-new-subdictionary">Opening a new subdictionary</h2>
+<p>To open a new subdictionary which did not previously exist, use <code>GROW</code>.
+The new subdictionary will be automatically selected for growth so that subsequently defined entities will go into it.</p>
+<pre><code>* GROW $MATH
+* ?$
+$MATH OPEN
+$PRIME OPEN
+$DEFAULT OPEN
+*
+</code></pre>
+<h2 id="choosing-subdictionaries-for-growth">Choosing subdictionaries for growth</h2>
+<p>The <code>GROW</code> word used above to create a new subdictionary is also used to re-select a previously defined subdictionary for growth.</p>
+<pre><code>* GROW $DEFAULT
+* ?$
+$DEFAULT OPEN
+$PRIME OPEN
+$MATH OPEN
+*
+</code></pre>
+<h2 id="shutting-subdictionaries">Shutting subdictionaries</h2>
+<p>By shutting a subdictionary, you ensure that any new word references will ignore the contents of that subdictionary.</p>
+<pre><code>* : HELLO .&quot;Hello from $DEFAULT&quot; CR ;
+* SHUT $DEFAULT
+* HELLO
+ERR: Symbol HELLO is not an executable word
+</code></pre>
+<p>This is useful if there is a risk or expectation of name collisions across multiple subdictionaries.</p>
+<pre><code>* : FOO .&quot;Foo the first&quot; CR ;
+* GROW $NEW
+* SHUT $DEFAULT
+* : FOO .&quot;Foo the second&quot; CR ;
+* FOO
+Foo the second
+* ?$
+$NEW OPEN
+$PRIME OPEN
+$DEFAULT CLOSED
+*
+* USE $DEFAULT
+* FOO
+Foo the second
+* SHUT $NEW
+* FOO
+Foo the first
+*
+</code></pre>
+<h2 id="reopening-a-closed-subdictionary">Reopening a closed subdictionary</h2>
+<p>The word <code>USE</code> sets a subdictionary status to <code>OPEN</code>.</p>
+<pre><code>* ?$
+$NEW OPEN
+$PRIME OPEN
+$DEFAULT CLOSED
+* USE $DEFAULT
+* ?$
+$NEW OPEN
+$PRIME OPEN
+$DEFAULT OPEN
+</code></pre>
+<p>However, <code>USE</code> does not change the search order. Dictionaries near the top of the list will be searched for matching words first.
+To force the use of a word defined in a lower subdictionary you may have to close other subdictionaries:</p>
+<pre><code>* FOO
+Foo the second
+* SHUT $NEW
+* FOO
+Foo the first
+*
+</code></pre>
+<h2 id="some-details-to-be-aware-of">Some details to be aware of</h2>
+<ul>
+<li>Shutting a subdictionary does not prevent prior references to words therein from working. A program will run as usual with all subdictionaries closed as long as no new entities are declared or defined.</li>
+<li>Although reopening a subdictionary might make new words available for searching, it will not trigger resolution of undefined words. A future version of libreDSSP might introduce a word to force a search for new definitions.</li>
+<li>Currently there is no good way to modify the dictionary search order. You might have to <code>SHUT</code> one subdictionary to use a word instance from another. A future version will add words to manage subdictionary search order.</li>
+</ul></div>
             </div>
         </div>
 
