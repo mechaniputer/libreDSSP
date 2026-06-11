@@ -132,6 +132,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#code-organization" class="nav-link">Code Organization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#capitalization-and-naming-conventions" class="nav-link">Capitalization and naming conventions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-bs-level="2"><a href="#stack-annotations" class="nav-link">Stack annotations</a>
               <ul class="nav flex-column">
               </ul>
@@ -140,7 +148,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#naming-words-and-variables" class="nav-link">Naming words and variables</a>
+            <li class="nav-item" data-bs-level="2"><a href="#multi-line-definitions" class="nav-link">Multi-line definitions</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -152,7 +160,11 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="dssp-coding-style">DSSP Coding Style</h1>
-<p>Assuming correct code, this page suggests some standard formatting practices to improve readability of DSSP code.</p>
+<p>Taking correct syntax as a given, this page suggests some standard formatting practices to improve readability of libreDSSP code.</p>
+<p>These guidelines are designed with the goal of producing readable code for libreDSSP.
+Some of these practices might be incompatible with earlier DSSP implementations.</p>
+<p>If these guidelines are not sufficient to specify what you need to, feel free to improvise since these guidelines are still being worked out.
+Please <a href="https://github.com/mechaniputer/libreDSSP/issues">let us know</a> if you think of any other useful guidelines to include here.</p>
 <h2 id="commenting">Commenting</h2>
 <p>In DSSP, comments are enclosed by square brackets. Comments may span multiple lines:</p>
 <pre><code>[This is a comment]
@@ -162,9 +174,44 @@ multi-
 line
 comment]
 </code></pre>
+<h2 id="code-organization">Code Organization</h2>
+<p>We recommend that variable declarations be placed near the top of the file.
+It is ok for one line to contain multiple variable declarations:</p>
+<pre><code>VAR count VAR running_avg
+</code></pre>
+<p>If any variables require nonzero initial values these should be set either below the last VAR declaration or inside of an initialization word.</p>
+<h2 id="capitalization-and-naming-conventions">Capitalization and naming conventions</h2>
+<p>It is often important to visually distinguish <a href="../corewords/">core words</a> from <a href="../userwords/">user words</a>.
+Therefore we recommend that new code use lower or mixed case for names of user-defined entities.
+Underscores are recommended over camelCase to make user words and variables stand out better from core words.</p>
+<pre><code>var count
+: add_to_Count [ .. n -- .. ] count + ! count ;
+</code></pre>
 <h2 id="stack-annotations">Stack annotations</h2>
+<p>As in the above example, we recommend that word definitions include comments to indicate the stack content before after the word is invoked.
+The stack annotation should be placed immediately after the word name (on the same line in case the word spans several lines).</p>
+<p>The expected prior stack state is written first, followed by a double hyphen (<code>--</code>), and then the expected stack state after the word is invoked.</p>
+<p>To indicate that it is safe for any amount of other content to exist below the specified content, use a <code>..</code> to the left of the indicated stack content.</p>
+<p>Stack annotations will often use generic names such as <code>n</code>, <code>m</code>, <code>i</code>, <code>j</code>, <code>x</code>, <code>y</code> to indicate distinct values.
+Alternatively, a shorthand name that assigns meaning to stack cells is often helpful:</p>
+<pre><code>: pulse_pin [.. time pin -- .. ]
+  set_pin_On
+  wait_time
+  set_pin_off ;
+</code></pre>
 <h2 id="using-indentation">Using indentation</h2>
-<h2 id="naming-words-and-variables">Naming words and variables</h2></div>
+<p>As in the above example, we recommend that DSSP code use two-space indentation inside of function definitions.
+If the code you are working on uses tabs, set the tabspace to 2 for optimal viewing.</p>
+<h2 id="multi-line-definitions">Multi-line definitions</h2>
+<p>The previous example illustrates our recommended style for multi-line word definitions, except that a multi-line definition is probably overkill for such a simple word.
+Each line should be short enough to understand but it doesn't need to be any specific length.
+The semicolon should go on the same line as the last word in the definition.</p>
+<p>Using multi-line definitions is also recommended when longer inline comments are used:</p>
+<pre><code>: main_loop_body
+  check_sensors    [This must be first in the loop body]
+  IF- sense_error  [If we get bad data, don't do anything!! (invokes EX)]
+  plan_action set_outputs ;
+</code></pre></div>
             </div>
         </div>
 
