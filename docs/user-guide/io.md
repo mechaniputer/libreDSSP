@@ -4,26 +4,25 @@ This page focuses on interactive I/O.
 In the future, additional pages will exist for File I/O and other varieties of IO.
 
 I am planning to introduce new words for safer and more convenient input/output.
-For now, we support the following original DSSP IO words.
+For now, libreDSSP supports the following original DSSP IO words.
 
 
 ## Print Statements
-The simplest way to display a literal string is with a print statement.
-With this method, the content of the string must be defined in the source code (or shell input) prior to execution.
+The simplest way to display a literal string is with a print statement:
 ```
 * ."Hello, world!"
 Hello, Word!*
 ```
 
 Notice that no newline was inserted, and the subsequent shell prompt was shown on the same line as the printed output.
-If you need to terminate a printed line, you should use `CR` after the print statement:
+If you need to terminate a printed line, you should use the word `CR` after the print statement:
 ```
 * ."Hello, world!" CR
 Hello, Word!
 *
 ```
 
-Similarly, `SP` will print a space:
+Similarly, the word `SP` will print a space:
 ```
 * ."Hello," SP ."World!" CR
 Hello, Word!
