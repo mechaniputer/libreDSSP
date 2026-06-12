@@ -4,7 +4,7 @@
 To define a new word, enter a statement in the following format:
 
 ```
-: [Word name] [Body] ;
+: word_name body1 body2 [body 3 ...] ;
 ```
 
 For example, the following statement defines a function named square that squares a number:
@@ -29,23 +29,23 @@ If you need to change the definition of the word, you may simply define it again
 As mentioned on the [DSSP Jargon](jargon.md) page, DSSP allows you to reference (but not use) undefined words.
 For example, consider the following code:
 ```
-* : FOO 1 2 3 .. ADD3 ;
+* : foo 1 2 3 .. add_3 ;
 ```
-This code will be compiled without error, even if the `ADD3` word is currently undefined.
-If you run `FOO`, it will push the three numbers to [the stack](datastack.md), print the stack (`..`), and then display an error when it finds no definition for `ADD3`.
+This code will be compiled without error, even if the `add_3` word is currently undefined.
+If you run `foo`, it will push the three numbers to [the stack](datastack.md), print the stack (`..`), and then display an error when it finds no definition for `add_3`.
 ```
-* FOO
+* foo
 [1 2 3]
-ERR: Undefined word ADD3 called during execution
+ERR: Undefined word add_3 called during execution
 [Execution aborted]
 *
 ```
 
-If you subsequently define `ADD3`, the old definition of `FOO` will automatically use that definition when you try again:
+If you subsequently define `add_3`, the old definition of `foo` will automatically use that definition when you try again:
 ```
-* : ADD3 + + .. ;
+* : add_3 + + .. ;
 * DS
-* FOO
+* foo
 [1 2 3]
 [6]
 *
@@ -56,10 +56,10 @@ As a consequence of these features, note that if you write part of a program and
 ## Displaying currently defined words
 The above might make you think, *"What if I forget to define a word and deploy code that will fail when that word is called?"* Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word `UNDEF`:
 ```
-* : FOO BAR BAZ ;
+* : foo bar baz ;
 * UNDEF
-BAZ
-BAR
+baz
+bar
 ```
 
 ## A note about subdictionaries

@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", function() {
     hljs.registerLanguage('dssp', function(hljs) {
       return {
         aliases: ['dssp'],
-        keywords: {
-          // Primary control-flow structural keywords
-          keyword: 'IF- IF0 IF+ BR- BR0 BR+ BRS BR ELSE RP DO BYE',
-        },
+        //keywords: {
+        //  // Primary control-flow structural keywords
+        //  keyword: 'IF- IF0 IF+ BR- BR0 BR+ BRS BR ELSE RP DO BYE',
+        //},
         contains: [
           // 1. Bracket Comments: [ like this ]
           hljs.COMMENT('\\[', '\\]'),
@@ -21,6 +21,12 @@ document.addEventListener("DOMContentLoaded", function() {
             begin: '\\bERR:\\s*.*$',
           },
           
+          // 2.5 control flow words
+          {
+            className: 'keyword',
+            begin: '(^|\\s)(IF\\-|IF0|IF\\+|BR\\-|BR0|BR\\+|BRS|BR|ELSE|DO|RP|BYE)(?=\\s|$)'
+          },
+
           // 3. Multi-line BR Block Matcher (High Precedence)
           {
             begin: '\\bBR\\b',
@@ -51,14 +57,16 @@ document.addEventListener("DOMContentLoaded", function() {
           // 6. Word Declarations: Matches word name after an isolated colon
           {
             className: 'title.function',
-            begin: '(?<=(^|\\s):)\\s+\\S+'
+            begin: '(^|\\s):\\s+',
+            end: '\\S+',
+            excludeBegin: true
           },
 
           // 7. Variable Declarations: Matches the word right after "VAR "
-          {
-            className: 'variable',
-            begin: '(?<=\\bVAR\\s+)\\s*\\S+'
-          },
+          //{
+          //  className: 'variable',
+          //  begin: '(?<=\\bVAR\\s+)\\s*\\S+'
+          //},
 
           // 8. Dictionary Names: Matches tokens beginning with $
           {
@@ -71,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function() {
           // Does not include pseudo-literals 0, 1, 2, 4, 8.
           {
             className: 'built_in',
-            begin: '\\b(\\+|\\-|\\*|\\/|<|>|=|\\.|\\.\\.|!|\\?\\$|1\\+|1\\-|2\\+|2\\-|3\\+|3\\-|4\\+|4\\-|ABS|B10|CT|CR|D|DEEP|DS|E2|E3|E4|ET|EX|EX\\+|EX0|EX\\-|EXT|GROW|NEG|NOP|TIN|TON|TOS|USE|GROW|SHUT|C|C2|C3|C4)\\b'
+            begin: '(^|\\s)(\\+|\\-|\\*|\\/|<|>|=|\\.|\\.\\.|!|\\?\\$|1\\+|1\\-|2\\+|2\\-|3\\+|3\\-|4\\+|4\\-|ABS|B10|CT|CR|D|DEEP|DS|E2|E3|E4|ET|EX|EX\\+|EX0|EX\\-|EXT|GROW|NEG|NOP|TIN|TON|TOS|USE|GROW|SHUT|C|C2|C3|C4|VAR)(?=\\s|$)'
           },
           
           // 10. Word Markers: Only highlight : and ; when they are standalone structural tokens
