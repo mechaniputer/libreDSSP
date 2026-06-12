@@ -220,8 +220,10 @@ Alternatively, a shorthand name that assigns meaning to stack cells is often hel
 <p>To further improve readability, you may want to add stack annotations for certain individual lines that change the stack.
 These will usually omit the <code>--</code> and only show the stack content following the completion of that line.</p>
 <p>As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on that state. In such a case we propose two alternatives:</p>
-<p>1) You can write a comment explaining what the word does in natural language
-2) Experimentally, we propose multi-possibility stack annotations, with each <code>before -- after</code> clause separated with a single slash:</p>
+<ol>
+<li>You can write a comment explaining what the word does in natural language</li>
+<li>Experimentally, we propose multi-possibility stack annotations, with each <code>before -- after</code> clause separated with a single slash:</li>
+</ol>
 <pre><code>[ a b c -- a+b+c / a b -- a+b]
 </code></pre>
 <h2 id="using-indentation">Using indentation</h2>
@@ -283,6 +285,7 @@ Each tuple should be additionally indented (if already inside of a word definiti
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="../../js/base.js"></script>
+        <script src="../../dssp.js"></script>
         <script src="../../search/main.js"></script>
 
         <div class="modal" id="properdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">

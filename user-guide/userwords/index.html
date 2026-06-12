@@ -176,7 +176,7 @@ For example, consider the following code:</p>
 <pre><code>* : FOO 1 2 3 .. ADD3 ;
 </code></pre>
 <p>This code will be compiled without error, even if the <code>ADD3</code> word is currently undefined.
-If you run <code>FOO</code>, it will push the three numbers to <a href="stack.md">the stack</a>, print the stack (<code>..</code>), and then display an error when it finds no definition for <code>ADD3</code>.</p>
+If you run <code>FOO</code>, it will push the three numbers to <a href="../datastack/">the stack</a>, print the stack (<code>..</code>), and then display an error when it finds no definition for <code>ADD3</code>.</p>
 <pre><code>* FOO
 [1 2 3]
 ERR: Undefined word ADD3 called during execution
@@ -216,6 +216,7 @@ For more about the use of subdictionaries in libreDSSP, refer to the <a href="..
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="../../js/base.js"></script>
+        <script src="../../dssp.js"></script>
         <script src="../../search/main.js"></script>
 
         <div class="modal" id="properdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">

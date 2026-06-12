@@ -167,7 +167,7 @@ In DSSP, branch targets must be single-word operands that compile into a single 
 This means that the majority of core words and any user-defined word are permissible as branch targets.</p>
 <p>The core words that are not allowed as branch targets are:
 <code>IF-</code>,<code>IF0</code>,<code>IF+</code>,<code>BR-</code>,<code>BR0</code>,<code>BR+</code>,<code>BRS</code>,<code>BR</code>,<code>DO</code>,<code>RP</code>,<code>VAR</code>,<code>!</code>,<code>GROW</code>,<code>SHUT</code>,<code>USE</code>.</p>
-<p>In addition, you may not use a <a href="../io/#showing-data-to-the-user">print statement</a> as a branch target, nor may you use a literal value that is not also defined as a <a href="../corewords/">core word</a>.</p>
+<p>In addition, you may not use a <a href="../io/#print-statements">print statement</a> as a branch target, nor may you use a literal value that is not also defined as a <a href="../corewords/">core word</a>.</p>
 <h2 id="readability-and-code-structure">Readability and code structure</h2>
 <p>The single-cell restriction on branch targets encourages a modular code structure with intentional layers of word definitions.
 Decomposing problems into smaller units can be challenging at first but the end result is more readable and maintainable.</p>
@@ -279,6 +279,7 @@ Oops, that number is not in the range [1,4]
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="../../js/base.js"></script>
+        <script src="../../dssp.js"></script>
         <script src="../../search/main.js"></script>
 
         <div class="modal" id="properdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">

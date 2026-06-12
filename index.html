@@ -132,6 +132,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#licensing" class="nav-link">Licensing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#ai-policy" class="nav-link">AI Policy</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -144,7 +152,21 @@
 <p>libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was inspired by the architecture of the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.</p>
 <p>These docs focus solely on the use of libreDSSP. For information about building, installing, or contributing code to libreDSSP, please visit our <a href="https://github.com/mechaniputer/libreDSSP">GitHub repository</a></p>
 <h2 id="documentation-status">Documentation Status</h2>
-<p>The docs are very incomplete at the moment, but getting there. Several pages are entirely missing, and those that exist could probably use more detail. Once the essentials are documented another editing pass will be necessary.</p></div>
+<p>Most of what currently works is documented, but more editing is needed.
+The list of <a href="user-guide/corewords/">core words</a> needs more detail.</p>
+<h2 id="licensing">Licensing</h2>
+<p>All libreDSSP code, all libreDSSP example programs, all libreDSSP markdown documentation, the vim source highlighting configuration files, and all custom files that configure and format the documentation, are licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>.</p>
+<p><a href="https://properdocs.org/">Properdocs</a> (the tool we use to prepare our documentation) is under the <a href="https://properdocs.org/about/license/">MkDocs License (BSD)</a>.</p>
+<h2 id="ai-policy">AI Policy</h2>
+<p>The libreDSSP project prioritizes authenticity over perfection. None of the documentation was AI-generated, and no part of the libreDSSP environment itself was AI-generated.</p>
+<p>At present, the only really AI-generated code in libreDSSP is found in <a href="https://github.com/mechaniputer/libreDSSP/blob/master/docs/dssp.js">dssp.js</a>, which handles DSSP source highlighting on the official docs (obviously highlight.js doesn't know about DSSP). Even this file was generated with many rounds of human input and substantial manual revision, making it eligible for copyright (AI tools know practically nothing that is accurate about DSSP anyway, although the existence of these docs might change that soon).</p>
+<p>Aside from the above, I have used AI assistance when working on libreDSSP for the following tasks:</p>
+<ul>
+<li>Taking inventory of the project state when I resumed work after a multi-year delay and had forgotten what I was doing nearly 7 years prior.</li>
+<li>Translation of original Russian DSSP documents and papers to help me learn DSSP syntax.</li>
+<li>Planning the addition of new features and to reduce the risk of forgetting to apply changes to older code.</li>
+</ul>
+<p>In all of the above, all AI output was taken with more than a few grains of salt and everything was also rechecked in other ways. The AI tools were just one of many data points so that they added to, rather than harmed, the likelihood of correctness.</p></div>
             </div>
         </div>
 
@@ -158,6 +180,7 @@
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="js/base.js"></script>
+        <script src="dssp.js"></script>
         <script src="search/main.js"></script>
 
         <div class="modal" id="properdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
@@ -226,5 +249,5 @@
 
 <!--
 ProperDocs version : ProperDocs 1.6.7
-Build Date UTC : 2026-06-12 00:57:22.830262+00:00
+Build Date UTC : 2026-06-12 17:03:38.966403+00:00
 -->
