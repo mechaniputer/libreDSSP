@@ -45,9 +45,13 @@ Also let us know if you are interested in setting up other resources such as an 
 ## What is different from earlier DSSP dialects?
 - libreDSSP supports 64-bit cells when running on 64-bit platforms. We are not aware of any prior DSSP implementations with 64-bit cells. Prior systems were either 16-bit or 32-bit (we also support the latter).
 
-- The $PRIME subdictionary contains core words and cannot be modified. Instead, a $DEFAULT subdictionary exists for user-defined words, and more subdictionaries can be added.
+- The $PRIME subdictionary contains all exposed core words and cannot be modified. Instead, a $DEFAULT subdictionary exists for user-defined words, and more subdictionaries can be added.
 
 - The core word WORDS displays an inventory of all user-defined words in open subdictionaries. This is a loanword from Forth that may or may not have had an equivalent in past dialects of DSSP.
+
+- When you redefine a word in a subdictionary, past references to the same word (in the same subdictionary) automatically use the new definition. Earlier DSSPs seem to have kept the definition originally referenced, which results in a needlessly more confusing environment and makes it hard to fix earlier mistakes.
+
+- Related to the previous point, there will be no support for redefining existing VARS as words, or vice-versa. There is no good reason to do this.
 
 
 ## What works
