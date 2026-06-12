@@ -132,7 +132,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#code-organization" class="nav-link">Code Organization</a>
+            <li class="nav-item" data-bs-level="2"><a href="#general-code-layout" class="nav-link">General code layout</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -149,6 +149,14 @@
               </ul>
             </li>
             <li class="nav-item" data-bs-level="2"><a href="#multi-line-definitions" class="nav-link">Multi-line definitions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#formatting-the-br-statement" class="nav-link">Formatting the BR statement</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#a-useful-tip-about-naming-branch-target-words" class="nav-link">A useful tip about naming branch target words</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -174,33 +182,51 @@ multi-
 line
 comment]
 </code></pre>
-<h2 id="code-organization">Code Organization</h2>
+<h2 id="general-code-layout">General code layout</h2>
 <p>We recommend that variable declarations be placed near the top of the file.
 It is ok for one line to contain multiple variable declarations:</p>
 <pre><code>VAR count VAR running_avg
 </code></pre>
 <p>If any variables require nonzero initial values these should be set either below the last VAR declaration or inside of an initialization word.</p>
+<p><strong>Note: libreDSSP does not currently support declaring and initializing a variable on the same line</strong></p>
+<p>Following any variable initializations, define all of the words in the file. For advice about formatting each word definition, keep reading this page.</p>
+<p>Lastly, most standalone programs require that words be invoked outside of any definition to begin running the code.
+We recommend placing any such code in a single short line at the end of the file (followed by the customary blank line).
+If the code that must be run outside of a definition is lengthy (more than three or four words), put it in a new word definition and then invoke that word.</p>
 <h2 id="capitalization-and-naming-conventions">Capitalization and naming conventions</h2>
 <p>It is often important to visually distinguish <a href="../corewords/">core words</a> from <a href="../userwords/">user words</a>.
 Therefore we recommend that new code use lower or mixed case for names of user-defined entities.
 Underscores are recommended over camelCase to make user words and variables stand out better from core words.</p>
-<pre><code>var count
-: add_to_Count [ .. n -- .. ] count + ! count ;
+<pre><code>VAR count
+: add_to_count [ .. n -- .. ]
+  count + ! count ;
 </code></pre>
 <h2 id="stack-annotations">Stack annotations</h2>
-<p>As in the above example, we recommend that word definitions include comments to indicate the stack content before after the word is invoked.
+<p>As in the above example, we recommend that word definitions include comments to indicate the stack content before and after the word is invoked.
 The stack annotation should be placed immediately after the word name (on the same line in case the word spans several lines).</p>
 <p>The expected prior stack state is written first, followed by a double hyphen (<code>--</code>), and then the expected stack state after the word is invoked.</p>
-<p>To indicate that it is safe for any amount of other content to exist below the specified content, use a <code>..</code> to the left of the indicated stack content.</p>
+<p>To indicate that any number of additional cells may exist below the specified content, use a <code>..</code> to the left of the indicated stack content.
+If a cell drops the stack (for example with DS), be sure to indicate this in the stack annotation:</p>
+<pre><code>: does_ds [ .. -- ]
+  DS ;
+</code></pre>
 <p>Stack annotations will often use generic names such as <code>n</code>, <code>m</code>, <code>i</code>, <code>j</code>, <code>x</code>, <code>y</code> to indicate distinct values.
 Alternatively, a shorthand name that assigns meaning to stack cells is often helpful:</p>
-<pre><code>: pulse_pin [.. time pin -- .. ]
-  set_pin_On
+<pre><code>: pulse_pin [ .. time pin -- .. ]
+  set_pin_on
   wait_time
   set_pin_off ;
 </code></pre>
+<p>To further improve readability, you may want to add stack annotations for certain individual lines that change the stack.
+These will usually omit the <code>--</code> and only show the stack content following the completion of that line.</p>
+<p>As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on this.
+In such a case we propose two alternatives:
+1) You can write a comment explaining what the word does in natural language
+2) Experimentally, we propose multi-possibility stack annotations, with each <code>before -- after</code> clause separated with a single slash:</p>
+<pre><code>[ a b c -- a+b+c / a b -- a+b]
+</code></pre>
 <h2 id="using-indentation">Using indentation</h2>
-<p>As in the above example, we recommend that DSSP code use two-space indentation inside of function definitions.
+<p>As in the above example, we recommend that DSSP code use two-space indentation inside of word definitions.
 If the code you are working on uses tabs, set the tabspace to 2 for optimal viewing.</p>
 <h2 id="multi-line-definitions">Multi-line definitions</h2>
 <p>The previous example illustrates our recommended style for multi-line word definitions, except that a multi-line definition is probably overkill for such a simple word.
@@ -211,6 +237,39 @@ The semicolon should go on the same line as the last word in the definition.</p>
   check_sensors    [This must be first in the loop body]
   IF- sense_error  [If we get bad data, don't do anything!! (invokes EX)]
   plan_action set_outputs ;
+</code></pre>
+<h2 id="formatting-the-br-statement">Formatting the <code>BR</code> statement</h2>
+<p>A BR statement should generally be formatted as a multi-line statement, with one value-target tuple per line, treating the <code>ELSE</code> like any other value.
+Each tuple should be double-indented (4 spaces)</p>
+<p>For example, instead of this:</p>
+<pre><code>: check_val
+  BR 0 is_zero 1 is_one 2 is_two ELSE is_other ;
+</code></pre>
+<p>Do this:</p>
+<pre><code>: check_val
+  BR
+    0 is_zero
+    1 is_one
+    2 is_two
+    ELSE is_other ;
+</code></pre>
+<h2 id="a-useful-tip-about-naming-branch-target-words">A useful tip about naming branch target words</h2>
+<p>While not "mandatory", we recommend that helper words that exist solely to perform a small action in the context of a particular <code>BR</code> statement be named in a way that associates it with the goal of the <code>BR</code> statement (often this will relate to the name of the containing word).</p>
+<p>For example, instead of this:</p>
+<pre><code>: check_temperature
+  compare_temp_with_target
+  BR
+    -1 low
+    0 good
+    ELSE high ;
+</code></pre>
+<p>Do this:</p>
+<pre><code>: check_temperature
+  compare_temp_with_target
+  BR
+    -1 temperature_low
+    0 temperature_good
+    ELSE temperature_high ;
 </code></pre></div>
             </div>
         </div>
