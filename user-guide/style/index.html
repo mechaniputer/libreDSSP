@@ -219,9 +219,8 @@ Alternatively, a shorthand name that assigns meaning to stack cells is often hel
 </code></pre>
 <p>To further improve readability, you may want to add stack annotations for certain individual lines that change the stack.
 These will usually omit the <code>--</code> and only show the stack content following the completion of that line.</p>
-<p>As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on this.
-In such a case we propose two alternatives:
-1) You can write a comment explaining what the word does in natural language
+<p>As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on that state. In such a case we propose two alternatives:</p>
+<p>1) You can write a comment explaining what the word does in natural language
 2) Experimentally, we propose multi-possibility stack annotations, with each <code>before -- after</code> clause separated with a single slash:</p>
 <pre><code>[ a b c -- a+b+c / a b -- a+b]
 </code></pre>
@@ -240,7 +239,7 @@ The semicolon should go on the same line as the last word in the definition.</p>
 </code></pre>
 <h2 id="formatting-the-br-statement">Formatting the <code>BR</code> statement</h2>
 <p>A BR statement should generally be formatted as a multi-line statement, with one value-target tuple per line, treating the <code>ELSE</code> like any other value.
-Each tuple should be double-indented (4 spaces)</p>
+Each tuple should be additionally indented (if already inside of a word definition, this means 4 spaces)</p>
 <p>For example, instead of this:</p>
 <pre><code>: check_val
   BR 0 is_zero 1 is_one 2 is_two ELSE is_other ;
