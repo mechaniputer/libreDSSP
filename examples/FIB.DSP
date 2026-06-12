@@ -2,8 +2,9 @@
 [ https://github.com/beadleha/libreDSSP ]
 [ Compute Fibonacci nums as signed ints ]
 [ Stop when a sign overflow occurs      ]
-: START 0 . 1 . ;
-: GO C2 C2 + CHECK . ;
-: CHECK C IF- END ;
-: END DS ."Sign overflow" CR EX ;
-START RP GO
+
+: start 0 . 1 . RP run ;
+: run C2 C2 + check . ;
+: check C IF- end ;
+: end DS ."Sign overflow" CR EX ;
+start
