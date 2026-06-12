@@ -15,3 +15,6 @@ nav:
     - Input/Output: user-guide/io.md
     - Dictionaries: user-guide/dictionaries.md
     - Comments and Code Style: user-guide/style.md
+
+extra_javascript:
+  - dssp.js

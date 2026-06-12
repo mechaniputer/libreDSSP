@@ -11,7 +11,7 @@ This means that the majority of core words and any user-defined word are permiss
 The core words that are not allowed as branch targets are:
 `IF-`,`IF0`,`IF+`,`BR-`,`BR0`,`BR+`,`BRS`,`BR`,`DO`,`RP`,`VAR`,`!`,`GROW`,`SHUT`,`USE`.
 
-In addition, you may not use a [print statement](io.md#showing-data-to-the-user) as a branch target, nor may you use a literal value that is not also defined as a [core word](corewords.md).
+In addition, you may not use a [print statement](io.md#print-statements) as a branch target, nor may you use a literal value that is not also defined as a [core word](corewords.md).
 
 
 ## Readability and code structure

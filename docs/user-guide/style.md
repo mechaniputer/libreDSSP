@@ -77,8 +77,9 @@ These will usually omit the `--` and only show the stack content following the c
 
 As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on that state. In such a case we propose two alternatives:
 
-1) You can write a comment explaining what the word does in natural language
-2) Experimentally, we propose multi-possibility stack annotations, with each `before -- after` clause separated with a single slash:
+1. You can write a comment explaining what the word does in natural language
+2. Experimentally, we propose multi-possibility stack annotations, with each `before -- after` clause separated with a single slash:
+
 ```
 [ a b c -- a+b+c / a b -- a+b]
 ```

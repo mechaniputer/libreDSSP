@@ -32,7 +32,7 @@ For example, consider the following code:
 * : FOO 1 2 3 .. ADD3 ;
 ```
 This code will be compiled without error, even if the `ADD3` word is currently undefined.
-If you run `FOO`, it will push the three numbers to [the stack](stack.md), print the stack (`..`), and then display an error when it finds no definition for `ADD3`.
+If you run `FOO`, it will push the three numbers to [the stack](datastack.md), print the stack (`..`), and then display an error when it finds no definition for `ADD3`.
 ```
 * FOO
 [1 2 3]
