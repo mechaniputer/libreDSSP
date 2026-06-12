@@ -75,8 +75,8 @@ Alternatively, a shorthand name that assigns meaning to stack cells is often hel
 To further improve readability, you may want to add stack annotations for certain individual lines that change the stack.
 These will usually omit the `--` and only show the stack content following the completion of that line.
 
-As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on this.
-In such a case we propose two alternatives:
+As a last note, we point out that some words might be called without knowing the current state of the stack, and will behave differently depending on that state. In such a case we propose two alternatives:
+
 1) You can write a comment explaining what the word does in natural language
 2) Experimentally, we propose multi-possibility stack annotations, with each `before -- after` clause separated with a single slash:
 ```
@@ -103,7 +103,7 @@ Using multi-line definitions is also recommended when longer inline comments are
 
 ## Formatting the `BR` statement
 A BR statement should generally be formatted as a multi-line statement, with one value-target tuple per line, treating the `ELSE` like any other value.
-Each tuple should be double-indented (4 spaces)
+Each tuple should be additionally indented (if already inside of a word definition, this means 4 spaces)
 
 For example, instead of this:
 ```
