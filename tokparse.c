@@ -703,11 +703,11 @@ int parse_tokens(char * tok){
 		PARSE_EXIT_STATE
 		break;
 	case PARSE_VAR_S0:
-		// Expecting a variable name
-		// This must not be a core word or existing/undefined user word/var, and must be alphanumeric
+		// Expecting a new variable name
+		// This must not be a core word and must be alphanumeric
 		// If we get it, PARSE_EXIT_STATE
 		// Otherwise we need to error out of the parser
-		if(!isValidWordVarName(tok) || coreSearch(tok, vocab) || growSearch(tok,vocab) || undefSearch(tok, vocab)){
+		if(!isValidWordVarName(tok) || coreSearch(tok, vocab)){
 			printf("ERR: Variable name %s not allowed\n",tok);
 			abortExecution();
 			return 0;

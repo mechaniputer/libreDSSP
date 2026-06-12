@@ -127,12 +127,13 @@ All libreDSSP code, all libreDSSP example programs, all libreDSSP markdown docum
 [Properdocs](https://properdocs.org/) (the tool we use to prepare our documentation) is under the [MkDocs License (BSD)](https://properdocs.org/about/license/).
 
 ## AI Policy
-The libreDSSP project prioritizes authenticity over perfection. None of the documentation was AI-generated, and no part of the libreDSSP environment itself was AI-generated. At present, the only really AI-generated code in libreDSSP is found in [dssp.js](https://github.com/mechaniputer/libreDSSP/blob/master/docs/dssp.js), which handles DSSP source highlighting on the official docs (obviously highlight.js doesn't know about DSSP). Even this file was generated with many rounds of human input and substantial manual revision, making it eligible for copyright (AI tools know practically nothing that is accurate about DSSP anyway, although the existence of these docs might change that soon).
+The libreDSSP project prioritizes authenticity over perfection. None of the documentation was AI-generated, and significant code in libreDSSP itself was AI-generated. At present, the only really AI-generated code in libreDSSP is found in [dssp.js](https://github.com/mechaniputer/libreDSSP/blob/master/docs/dssp.js), which handles DSSP source highlighting on the official docs (obviously highlight.js doesn't know about DSSP). Even this file was generated with many rounds of human input and substantial manual revision, making it eligible for copyright (AI tools know practically nothing that is accurate about DSSP anyway, although the existence of these docs might change that soon).
 
 Aside from the above, I have used AI assistance when working on libreDSSP for the following tasks:
 
 - Taking inventory of the project state when I resumed work after a multi-year delay and had forgotten what I was doing nearly 7 years prior.
 - Translation of original Russian DSSP documents and papers to help me learn DSSP syntax.
 - Planning the addition of new features and to reduce the risk of forgetting to apply changes to older code.
+- Occasionally, AI auto-completion was used during repetitive or tedious refactoring.
 
 In all of the above, all AI output was taken with more than a few grains of salt and everything was also rechecked in other ways. The AI tools were just one of many data points so that they added to, rather than harmed, the likelihood of correctness.

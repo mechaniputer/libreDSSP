@@ -905,6 +905,29 @@ void declareVar(){
 	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
 	// The parser has already ensured that the name is valid and null-terminated
 
+	// If no dictionary is selected to declare the VAR, abort!
+	if(vocab->grow == NULL){
+		printf("Error: We are defining a word but no dictionary is selected\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	if(vocab->grow->open == 0){
+		printf("Error: We are defining a word in a closed dictionary\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname,vocab);
+	if(collision != 0){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
 	// No problems. Declare the var.
 	variable_t * tempVar = malloc(sizeof(variable_t));
 	tempVar->name = varname; // The parser allocated this buffer and we can keep it

@@ -32,7 +32,8 @@
 // Return 0: Nothing found
 // Return 1: Word found
 // Return 2: Variable found
-int growSearch(char * name, dict * vocab){
+// Return 3: Undefined word found
+int collisionSearch(char * name, dict * vocab){
 	variable_t * tempVar;
 	codeword_t * tempWord;
 
@@ -59,6 +60,11 @@ int growSearch(char * name, dict * vocab){
 			return 2;
 		}
 		tempVar = tempVar->next;
+	}
+
+	// Last we check for undefined words with that name
+	if(NULL != undefSearch(name, vocab)){
+		return 3;
 	}
 	return 0;
 }
@@ -131,12 +137,10 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	codeword_t * tempWord;
 
 	if(vocab->grow == NULL){
-		// TODO This should be handled gracefully (free resources, return NULL, print error).
 		printf("Error: We are defining a word but no dictionary is selected\n");
 		abortExecution();
 	}
 	if(vocab->grow->open == 0){
-		// TODO This should be handled gracefully (free resources, return NULL, print error).
 		printf("Error: We are defining a word in a closed dictionary\n");
 		abortExecution();
 	}

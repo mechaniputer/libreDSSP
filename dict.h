@@ -91,7 +91,7 @@ struct dict
 };
 
 // Check if a name is already used for a word/var
-int growSearch(char * name, dict * vocab);
+int collisionSearch(char * name, dict * vocab);
 // Looks for defined variables
 variable_t * varSearch(char * name, dict * vocab);
 // Looks for words to see if they are already defined
