@@ -18,7 +18,8 @@ All libreDSSP code, all libreDSSP example programs, all libreDSSP markdown docum
 
 ## AI Policy
 The libreDSSP project prioritizes authenticity over perfection. None of the documentation was AI-generated, and **no significant code in libreDSSP itself is AI-generated**. At present, the only really AI-generated code in libreDSSP is found in:
-- [dssp.js](https://github.com/mechaniputer/libreDSSP/blob/master/docs/dssp.js), which handles DSSP source highlighting on the official docs (obviously highlight.js doesn't know about DSSP).
+
+- Parts of [dssp.js](https://github.com/mechaniputer/libreDSSP/blob/master/docs/dssp.js), which handles DSSP source highlighting on the official docs (obviously highlight.js doesn't know about DSSP).
 - Parts of the [configure](https://github.com/mechaniputer/libreDSSP/blob/master/configure) script.
 - Parts of the [Makefile](https://github.com/mechaniputer/libreDSSP/blob/master/Makefile).
 
