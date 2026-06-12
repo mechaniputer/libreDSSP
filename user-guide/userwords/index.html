@@ -158,7 +158,7 @@
 <h1 id="user-defined-words">User-defined Words</h1>
 <h2 id="defining">Defining</h2>
 <p>To define a new word, enter a statement in the following format:</p>
-<pre><code>: [Word name] [Body] ;
+<pre><code>: word_name body1 body2 [body 3 ...] ;
 </code></pre>
 <p>For example, the following statement defines a function named square that squares a number:</p>
 <pre><code>: square C 2 * ;
@@ -173,20 +173,20 @@
 <h2 id="undefined-words">Undefined words</h2>
 <p>As mentioned on the <a href="../jargon/">DSSP Jargon</a> page, DSSP allows you to reference (but not use) undefined words.
 For example, consider the following code:</p>
-<pre><code>* : FOO 1 2 3 .. ADD3 ;
+<pre><code>* : foo 1 2 3 .. add_3 ;
 </code></pre>
-<p>This code will be compiled without error, even if the <code>ADD3</code> word is currently undefined.
-If you run <code>FOO</code>, it will push the three numbers to <a href="../datastack/">the stack</a>, print the stack (<code>..</code>), and then display an error when it finds no definition for <code>ADD3</code>.</p>
-<pre><code>* FOO
+<p>This code will be compiled without error, even if the <code>add_3</code> word is currently undefined.
+If you run <code>foo</code>, it will push the three numbers to <a href="../datastack/">the stack</a>, print the stack (<code>..</code>), and then display an error when it finds no definition for <code>add_3</code>.</p>
+<pre><code>* foo
 [1 2 3]
-ERR: Undefined word ADD3 called during execution
+ERR: Undefined word add_3 called during execution
 [Execution aborted]
 *
 </code></pre>
-<p>If you subsequently define <code>ADD3</code>, the old definition of <code>FOO</code> will automatically use that definition when you try again:</p>
-<pre><code>* : ADD3 + + .. ;
+<p>If you subsequently define <code>add_3</code>, the old definition of <code>foo</code> will automatically use that definition when you try again:</p>
+<pre><code>* : add_3 + + .. ;
 * DS
-* FOO
+* foo
 [1 2 3]
 [6]
 *
@@ -194,10 +194,10 @@ ERR: Undefined word ADD3 called during execution
 <p>As a consequence of these features, note that if you write part of a program and test it, as long as you do not hit any of the undefined words during the test, <em>(or until you do)</em> you will be able to examine how the finished program will behave for the inputs you provide.</p>
 <h2 id="displaying-currently-defined-words">Displaying currently defined words</h2>
 <p>The above might make you think, <em>"What if I forget to define a word and deploy code that will fail when that word is called?"</em> Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word <code>UNDEF</code>:</p>
-<pre><code>* : FOO BAR BAZ ;
+<pre><code>* : foo bar baz ;
 * UNDEF
-BAZ
-BAR
+baz
+bar
 </code></pre>
 <h2 id="a-note-about-subdictionaries">A note about subdictionaries</h2>
 <p>When you define a word, it will go into whatever subdictionary is selected for expansion. By default, this will be a subdictionary called <code>$DEFAULT</code>.
