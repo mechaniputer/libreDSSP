@@ -53,6 +53,8 @@ Also let us know if you are interested in setting up other resources such as an 
 
 - Related to the previous point, there will be no support for redefining existing VARS as words, or vice-versa. There is no good reason to do this.
 
+- So-called "compiling words" like `VAR`, `VCTR`, `ARR`, etc, can be used inside of a defined word without needing to use `TEXEC`. libreDSSP needs no "compiling words". In libreDSSP these words are instead "state smart", and will not waste space if invoked repeatedly at runtime. Earlier DSSPs seem not to have allowed this, limiting reference patching to compile/parse time. libreDSSP can patch variable references at runtime whenever a declaration happens. **(Or, at least this is how it will work, eventually)**
+
 
 ## What works
 - Top-down programming! (reference undefined words when defining words)
