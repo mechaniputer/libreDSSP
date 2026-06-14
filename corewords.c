@@ -892,8 +892,8 @@ void pushLiteral(){
 // Push the current value of a variable
 // The next cell should contain the address of the correct variable struct
 void pushVar(){
-	push(dataStack, ((variable_t *)(cmdbuf->array[cmdbuf->ip+1]))->value);
-	cmdbuf->ip++; // Skip data cell
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, v->value);
 	return;
 }
 
@@ -934,6 +934,23 @@ void declareVar(){
 	tempVar->value = 0;
 	tempVar->next = vocab->grow->varlist;
 	vocab->grow->varlist = tempVar;
+
+	// Pushvar op
+	tempVar->cw[0].xt = pushVar;
+	tempVar->cw[0].name = varname;
+	tempVar->cw[0].data = (intptr_t) tempVar;
+	tempVar->cw[0].next = NULL;
+	tempVar->cw[0].text = NULL;
+	tempVar->cw[0].size = 0;
+
+	// Assign op
+	tempVar->cw[1].xt = assignVar;
+	tempVar->cw[1].name = varname;
+	tempVar->cw[1].data = (intptr_t) tempVar;
+	tempVar->cw[1].next = NULL;
+	tempVar->cw[1].text = NULL;
+	tempVar->cw[1].size = 0;
+
 	//printf("Declared variable %s\n",varname);
 	return;
 }
@@ -948,8 +965,7 @@ void assignVar(){
 		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	cmdbuf->ip++; // Advance to data cell
-	((variable_t *)(cmdbuf->array[cmdbuf->ip]))->value = pop(dataStack);
+	((variable_t*) current_codeword->data)->value = pop(dataStack);
 	return;
 }
 
@@ -1213,8 +1229,8 @@ void define_all_core(dict * vocab){
 	defCore("SKP2", skip2, vocab); // Not to be used directly
 	defCore("NOP", noop, vocab);
 	defCore("VAR", declareVar, vocab);
-	defCore("!", assignVar, vocab);
-	defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
+	//defCore("!", assignVar, vocab); // Not to be used directly
+	//defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
 	defCore("CR", printNewline, vocab);
 	defCore("SP", printSpace, vocab);
 	defCore("?$", listDicts, vocab);

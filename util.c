@@ -88,10 +88,19 @@ void print_codewords(codeword_t ** array){
 	while((array[i] != NULL) || (i < loop_end_index)){
 		// Either we are looking at a BR literal or we are not at the NULL sentinel yet
 
-		// The condition above determines whether we are looking at a literal value
+		// The condition here determines whether we are looking at a literal value within a BR statement
 		if((i <= loop_end_index) && ((loop_end_index-i) % 3 == 0)){
 			printf("%d) %p: LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
 			i++;
+		}
+		if(array[i]->xt == pushVar){
+			printf("%d) %p: PUSH %s\n", i, (void*) &array[i], ((variable_t*)array[i]->data)->name);
+			i++;
+			continue;
+		}else if(array[i]->xt == assignVar){
+			printf("%d) %p: ASSIGN %s\n", i, (void*) &array[i], ((variable_t*)array[i]->data)->name);
+			i++;
+			continue;
 		}
 
 		// If we were pointing at a literal before, we incremented i and should see a named word.
@@ -105,10 +114,6 @@ void print_codewords(codeword_t ** array){
 			// GROW is followed by a char * containing a dict name
 			i++;
 			printf("%d) %p: STR %s\n", i, (void*) &array[i], (char *) array[i]);
-		}else if(!strcmp("PUSHVAR", array[i]->name) || !strcmp("!", array[i]->name)){
-			// PUSHVAR/! are followed by a pointer to a variable struct
-			i++;
-			printf("%d) %p: VAR %s\n", i, (void*) &array[i], ((variable_t *) array[i])->name);
 		}else if(!strcmp("SHUT", array[i]->name) || !strcmp("USE", array[i]->name)){
 			// SHUT/USE are followed by a pointer to a variable struct
 			i++;

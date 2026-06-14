@@ -469,13 +469,13 @@ int parse_tokens(char * tok){
 				PARSE_ENTER_STATE(PARSE_RP_S0);
 			}else if(!strcmp(tok,"VAR")){
 				PARSE_ENTER_STATE(PARSE_VAR_S0);
-			}else if(!strcmp(tok,"!")){
-				PARSE_ENTER_STATE(PARSE_ASGN_S0);
 			}else if(!strcmp(tok,"GROW")){
 				PARSE_ENTER_STATE(PARSE_DICT_NEW);
 			}else if(!strcmp(tok,"SHUT") || !strcmp(tok,"USE")){
 				PARSE_ENTER_STATE(PARSE_DICT_EXIST);
 			}
+		}else if(!strcmp(tok,"!")){
+			PARSE_ENTER_STATE(PARSE_ASGN_S0);
 		}else if(!strcmp(tok,":")){
 				compiling = 1;
 				start_new_def();
@@ -500,9 +500,7 @@ int parse_tokens(char * tok){
 			emit_cw(coreSearch("PUSHLIT", vocab));
 			emit_cw((codeword_t *) atol(tok));
 		}else if((var_lookup = varSearch(tok, vocab)) != NULL){
-			// FIXME can we use emit_word_by_name() here instead?
-			emit_cw(coreSearch("PUSHVAR", vocab));
-			emit_cw((codeword_t *) var_lookup);
+			emit_cw(&var_lookup->cw[0]); // PUSHVAR
 		}else if (isValidWordVarName(tok)){
 			// It must be a user word, possibly undefined
 			dict_entry = wordSearch(tok, vocab);
@@ -726,8 +724,7 @@ int parse_tokens(char * tok){
 			abortExecution();
 			return 0;
 		}
-		// The ! command was already emitted. We just emit a variable_t * here
-		emit_cw((codeword_t *) var_lookup);
+		emit_cw(&var_lookup->cw[1]); // ! var
 		PARSE_EXIT_STATE
 		break;
 	case PARSE_DICT_NEW:

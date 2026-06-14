@@ -70,6 +70,7 @@ struct variable_t
 {
 	char * name;
 	variable_t * next;
+	codeword_t cw[2]; // Add more slots later for other var ops
 	int value;
 };
 
