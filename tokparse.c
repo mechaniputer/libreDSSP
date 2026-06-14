@@ -84,7 +84,7 @@ void reset_tokenizer_parser_state(){
 			stubDef[1] = NULL;
 
 			// Populate the dictionary entry
-			newWordDictEntry->userDef = (intptr_t) stubDef;  // Set code array pointer
+			newWordDictEntry->data = (intptr_t) stubDef;  // Set code array pointer
 			newWordDictEntry->size = 1;
 			newWordDictEntry->text = "[aborted definition]";
 			newWordDictEntry = NULL;
@@ -423,7 +423,7 @@ int parse_tokens(char * tok){
 			//printf("Definition of %s complete\n", newWordName);
 
 			// Populate the dictionary entry
-			newWordDictEntry->userDef = (intptr_t) newWordCode;  // Set code array pointer
+			newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer
 			newWordDictEntry->size = newWordCodeLen;
 			newWordDictEntry->text = newWordText;
 

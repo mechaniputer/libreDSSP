@@ -166,9 +166,9 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	tempWord->name = malloc((1+strlen(name))*sizeof(char));
 	strcpy(tempWord->name, name);
 	tempWord->xt = word_enter; // User words always call word_enter
-	tempWord->userDef = 0;     // Will be set to code array pointer later
-	tempWord->size = 0;        // Should correspond to number of elements in userDef[]
-	tempWord->text = NULL;     // Will be set by parser
+	tempWord->data = 0;     // Will be set to code array pointer later
+	tempWord->size = 0;     // Should correspond to number of elements in data[]
+	tempWord->text = NULL;  // Will be set by parser
 	// Regardless of initial state, now the word is named and present in the dictionary.
 	// It's up to the caller to populate the word
 	return tempWord;
@@ -181,7 +181,7 @@ void defCore(char * name, void (*func)(), dict * vocab){
 	}
 	codeword_t * temp = malloc(sizeof(codeword_t));
 	temp->xt = func;
-	temp->userDef = 0;      // Core words don't use userDef field
+	temp->data = 0;      // Core words don't use data field
 	temp->size = 0;
 	temp->name = name;
 	temp->text = NULL;   // Core words don't have source text
@@ -248,7 +248,7 @@ undefined_word_t* create_undefined_word(char *name, dict *vocab){
 	newUndef->placeholder = malloc(sizeof(codeword_t));
 	newUndef->placeholder->xt = _undefined;
 	newUndef->placeholder->name = newUndef->name; // Recycle same name buffer allocated above
-	newUndef->placeholder->userDef = 0;
+	newUndef->placeholder->data = 0;
 	newUndef->placeholder->text = NULL;
 	newUndef->placeholder->next = NULL;
 
@@ -304,7 +304,7 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 		// i denotes just one of our references
 		int num_words = curr->references[i]->size;
 		//printf("num_words is %d\n", num_words);
-		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->userDef;
+		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
 		//print_codewords(dependent_array);
 
 		int loop_end_index=-1;

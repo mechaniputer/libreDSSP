@@ -51,7 +51,7 @@ struct codeword
 	codeword_t * next;
 	char * name;    // Word name
 	char * text;    // For user words, the original definition.
-	intptr_t userDef; // For definitions of user words
+	intptr_t data; // For definitions of user words and operands of some core words
 	int size;      // Number of words in this word
 };
 
@@ -66,9 +66,5 @@ struct cmdbuffer_struct
 cmdbuffer * newCmdBuffer();
 void add_cw_to_cmdbuf(cmdbuffer * cmdbuf, codeword_t * cw);
 void cmdGrow(cmdbuffer * cmdbuf);
-//codeword_t * newLiteral(intptr_t value);
-codeword_t * newVarDecl(char * name);
-codeword_t * newVarAsgn(variable_t * dest);
-codeword_t * newVarPush(variable_t * var);
 
 #endif
