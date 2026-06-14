@@ -873,8 +873,22 @@ void noop(){
 	return;
 }
 
-void _undefined(){
-	printf("ERR: Undefined word %s called during execution\n", current_codeword->name);
+void _undefined_ref(){
+	printf("ERR: Undefined name %s referenced during execution\n", current_codeword->name);
+	abortExecution();
+	cmdbuf->ip = -1; // word_next increments this!
+	return;
+}
+
+void _undefined_assign(){
+	printf("ERR: Undefined name %s assigned a value during execution\n", current_codeword->name);
+	abortExecution();
+	cmdbuf->ip = -1; // word_next increments this!
+	return;
+}
+
+void _word_assign(){
+	printf("ERR: Cannot assign a value to word %s\n", current_codeword->name);
 	abortExecution();
 	cmdbuf->ip = -1; // word_next increments this!
 	return;

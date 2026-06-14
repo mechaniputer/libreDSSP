@@ -234,7 +234,7 @@ undefined_word_t* undefSearch(char *name, dict *vocab){
 }
 
 // Warning: Does not prevent adding duplicates
-undefined_word_t* create_undefined_word(char *name, dict *vocab){
+undefined_word_t* create_undefined_ref(char *name, dict *vocab){
 	//printf("Creating undefined word %s\n",name);
 	// Allocate and initialize
 	undefined_word_t * newUndef = malloc(sizeof(undefined_word_t));
@@ -244,13 +244,21 @@ undefined_word_t* create_undefined_word(char *name, dict *vocab){
 	newUndef->ref_count = 0;
 	newUndef->ref_capacity = 4;
 
-	// Create and attach a codeword_t that runs _undefined() core word
-	newUndef->placeholder = malloc(sizeof(codeword_t));
-	newUndef->placeholder->xt = _undefined;
-	newUndef->placeholder->name = newUndef->name; // Recycle same name buffer allocated above
-	newUndef->placeholder->data = 0;
-	newUndef->placeholder->text = NULL;
-	newUndef->placeholder->next = NULL;
+	// Create and attach a codeword_t that runs _undefined_ref() core word
+	newUndef->ref_placeholder = malloc(sizeof(codeword_t));
+	newUndef->ref_placeholder->xt = _undefined_ref;
+	newUndef->ref_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
+	newUndef->ref_placeholder->data = 0;
+	newUndef->ref_placeholder->text = NULL;
+	newUndef->ref_placeholder->next = NULL;
+
+	// Same thing but for undefAssignVar()
+	newUndef->assign_placeholder = malloc(sizeof(codeword_t));
+	newUndef->assign_placeholder->xt = _undefined_assign;
+	newUndef->ref_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
+	newUndef->ref_placeholder->data = 0;
+	newUndef->ref_placeholder->text = NULL;
+	newUndef->ref_placeholder->next = NULL;
 
 	// Insert and return
 	newUndef->next = vocab->undefined;
@@ -271,7 +279,7 @@ void add_reference(undefined_word_t *undef, codeword_t *ref){
 // WARNING: If the words that referenced this undefined word no longer exist, it can segfault.
 //          Currently, deleting words is not supported, but later it will be.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
-void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
+void resolve_undefined_ref(char *name, codeword_t *def, dict *vocab){
 	//printf("Resolving previously undefined %s\n", name);
 	// First we need to find the word in the linked list.
 	// We need to keep a pointer to the previous word in the list.
@@ -310,7 +318,7 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 		int loop_end_index=-1;
 
 		for(int j=0; j<num_words; j++){
-			//printf("resolve_undefined_word() looking for name %s in array index %d\n",name,j);
+			//printf("resolve_undefined_ref() looking for name %s in array index %d\n",name,j);
 			//printf("See name %s \n", dependent_array[j]->name);
 			if(!strcmp(name, dependent_array[j]->name)){
 				// Found a match
@@ -346,7 +354,7 @@ void resolve_undefined_word(char *name, codeword_t *def, dict *vocab){
 	}
 
 	free(curr->name);
-	free(curr->placeholder);
+	free(curr->ref_placeholder);
 	free(curr->references);
 	free(curr);
 	return;

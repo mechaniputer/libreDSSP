@@ -348,7 +348,7 @@ void emit_word_by_name(char * name){
 		// Previously known undef word
 		// Don't add a ref if not in compiling mode! It will be a NULL ref!
 		add_reference(uword, newWordDictEntry); // Make the undef word record point here
-		emit_cw(uword->placeholder);
+		emit_cw(uword->ref_placeholder);
 	}else if(compiling){
 		// New undef word
 		if(!isValidWordVarName(name)){
@@ -356,9 +356,9 @@ void emit_word_by_name(char * name){
 			abortExecution();
 			return;
 		}
-		uword = create_undefined_word(name, vocab);
+		uword = create_undefined_ref(name, vocab);
 		add_reference(uword, newWordDictEntry); // Make the undef word record point here
-		emit_cw(uword->placeholder);
+		emit_cw(uword->ref_placeholder);
 	}else{
 		// We are not compiling, so whatever we emit will be run immediately.
 		// There's no point in emitting anything undefined.
@@ -430,7 +430,7 @@ int parse_tokens(char * tok){
 			// Check if this was a previously undefined word
 			undefined_word_t * entry = undefSearch(newWordName, vocab);
 			if(NULL != entry){
-				resolve_undefined_word(newWordName, newWordDictEntry, vocab);
+				resolve_undefined_ref(newWordName, newWordDictEntry, vocab);
 			}
 
 			// Detach
@@ -509,12 +509,12 @@ int parse_tokens(char * tok){
 			}else if(compiling && ((uword = undefSearch(tok, vocab)) != NULL)){
 				// Previously known undef word
 				add_reference(uword, newWordDictEntry); // Make the undef word record point here
-				emit_cw(uword->placeholder);
+				emit_cw(uword->ref_placeholder);
 			}else if(compiling){
 				// New undef word
-				uword = create_undefined_word(tok, vocab);
+				uword = create_undefined_ref(tok, vocab);
 				add_reference(uword, newWordDictEntry); // Make the undef word record point here
-				emit_cw(uword->placeholder);
+				emit_cw(uword->ref_placeholder);
 			}else{
 				// We are not compiling, so whatever we emit will be run immediately.
 				// There's no point in emitting anything undefined.
