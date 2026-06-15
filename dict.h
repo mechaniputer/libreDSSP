@@ -50,7 +50,7 @@
 
 */
 
-typedef struct undefined_ref undefined_word_t;
+typedef struct undefined_ref undefined_ref_t;
 
 typedef struct codeword codeword_t;
 typedef struct variable_t variable_t;
@@ -59,10 +59,10 @@ typedef struct dict dict;
 
 struct undefined_ref {
 	char *name;                      // name of undefined word/var
-	codeword_t ** references;        // array of pointers to codewords that reference this
+	codeword_t *** references;        // array of pointers to codewords that reference this
 	codeword_t * ref_placeholder;    // The word that all of the plain refs point to
 	codeword_t * assign_placeholder; // The word that assign refs point to
-	undefined_word_t *next;          // next entry in linked list
+	undefined_ref_t *next;          // next entry in linked list
 	int ref_count;                   // number of references
 	int ref_capacity;                // allocated space for references array
 };
@@ -71,7 +71,7 @@ struct variable_t
 {
 	char * name;
 	variable_t * next;
-	codeword_t cw[2]; // Add more slots later for other var ops
+	codeword_t cw[2]; // 0:pushVar, 1:assignVar
 	int value;
 };
 
@@ -89,7 +89,7 @@ struct dict
 	codeword_t * core;
 	subdict * sub;
 	subdict * grow;
-	undefined_word_t * undefined;
+	undefined_ref_t * undefined;
 };
 
 // Check if a name is already used for a word/var
@@ -110,9 +110,9 @@ subdict * newDict(char * name, dict * vocab);
 subdict * findDict(char * name, dict * vocab);
 
 // Utility functions for undefined word table
-undefined_word_t* undefSearch(char *name, dict *vocab);
-undefined_word_t* create_undefined_ref(char *name, dict *vocab);
-void add_reference(undefined_word_t *undef, codeword_t *ref);
-void resolve_undefined_ref(char *name, codeword_t *def, dict *vocab);
+undefined_ref_t* undefSearch(char *name, dict *vocab);
+undefined_ref_t* create_undefined_ref(char *name, dict *vocab);
+void add_reference(undefined_ref_t *undef, codeword_t **ref);
+void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var, dict *vocab);
 
 #endif

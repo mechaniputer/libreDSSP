@@ -1,6 +1,8 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include "dict.h"
+
 // Statuses for tokenizer
 #define TOK_NORMAL          (0)
 #define TOK_COMMENT         (1)
@@ -29,6 +31,16 @@
 #define PARSE_COMPILE_S0    (17) // Awaiting word name
 #define PARSE_COMPILE_S1    (18) // Awaiting more commands or ;
 
+
+// This is a record to postpone capturing precise addresses of undef refs in a new word
+typedef struct pend_undef_ref pend_undef_ref_t;
+struct pend_undef_ref{
+    undefined_ref_t * uref;
+    int cell_index;
+};
+
+void reset_pending_undefs();
+void add_pending_undef();
 void reset_tokenizer_parser_state();
 int process_line(char * line);
 

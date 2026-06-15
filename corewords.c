@@ -41,6 +41,16 @@ extern stack * loopStack;
 extern dict * vocab;
 extern int abort_requested;
 
+// Global singleton for _word_assign (this is an error word)
+codeword_t global_cw_assign_to_word_err = {
+	.xt = _word_assign,
+	.name = "ERR WORD ASGN",
+	.next = NULL,
+	.size = 0,
+	.data = 0,
+	.text = NULL
+};
+
 void push_zero(){
 	push(dataStack, 0);
 }
@@ -913,8 +923,9 @@ void pushVar(){
 
 // Declare the existence of a named variable
 // The next cell should contain the address of the desired (char *) name of the variable
-// We initialize variables to 0. Not sure whether original DSSP did this.
+// We initialize variables to 0.
 void declareVar(){
+	variable_t * tempVar;
 	cmdbuf->ip++; // Advance to data cell
 	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
 	// The parser has already ensured that the name is valid and null-terminated
@@ -935,15 +946,20 @@ void declareVar(){
 
 	// If there is a name collision in the current subdictionary, abort!
 	int collision = collisionSearch(varname,vocab);
-	if(collision != 0){
+	if(collision == 1){
 		printf("Error: name %s is already used\n",varname);
 		abortExecution();
 		cmdbuf->ip = -1; // word_next increments this!
 		return;
+	}else if(collision == 2){
+		// The var alredy exists, so we zero it
+		tempVar = varSearch(varname, vocab);
+		tempVar->value = 0;
+		return;
 	}
-
+	// 0: no collision / 3: undef exists
 	// No problems. Declare the var.
-	variable_t * tempVar = malloc(sizeof(variable_t));
+	tempVar = malloc(sizeof(variable_t));
 	tempVar->name = varname; // The parser allocated this buffer and we can keep it
 	tempVar->value = 0;
 	tempVar->next = vocab->grow->varlist;
@@ -965,8 +981,10 @@ void declareVar(){
 	tempVar->cw[1].text = NULL;
 	tempVar->cw[1].size = 0;
 
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar, vocab);
 	//printf("Declared variable %s\n",varname);
 	return;
+
 }
 
 // Assign top of stack to a variable
@@ -1139,7 +1157,7 @@ void stackDepth(){
 
 // Lists all undefined words
 void inventoryUndefined(){
-	undefined_word_t * temp = vocab->undefined;
+	undefined_ref_t * temp = vocab->undefined;
 	while(temp != NULL){
 		//printf("Traversal sees %s\n",temp->name);
 		printf("%s\n",temp->name);
@@ -1242,7 +1260,7 @@ void define_all_core(dict * vocab){
 	defCore("SKP1", skip1, vocab); // Not to be used directly
 	defCore("SKP2", skip2, vocab); // Not to be used directly
 	defCore("NOP", noop, vocab);
-	defCore("VAR", declareVar, vocab);
+	//defCore("VAR", declareVar, vocab);
 	//defCore("!", assignVar, vocab); // Not to be used directly
 	//defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
 	defCore("CR", printNewline, vocab);

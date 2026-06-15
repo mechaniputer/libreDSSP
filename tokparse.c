@@ -29,6 +29,7 @@ intptr_t parser_state = PARSE_NORMAL;
 int compiling; // 0-emit to cmdbuf 1-emit to newWordDef
 
 // Globals to define word across potentially several parser invocations
+// TODO Package into struct and create helpers
 char *newWordName;
 char *newWordText;
 int newWordTextLen;
@@ -37,6 +38,10 @@ codeword_t **newWordCode;
 int newWordCodeLen;
 int newWordCodeCap;
 codeword_t * newWordDictEntry;
+pend_undef_ref_t * newWordUndefs;
+int newWordPendUndefsLen;
+int newWordPendUndefsCap;
+
 
 // For ensuring that we do not emit a multicell word when we only have one cell to populate (eg, in a conditional or loop)
 static const char *const multicell_words[] = {"IF-","IF0","IF+","BR-","BR0","BR+","BRS","BR","DO","RP","VAR","!","GROW","SHUT","USE"};
@@ -103,6 +108,7 @@ void reset_tokenizer_parser_state(){
 	parserStack->top = -1;
 	tokenizerStack->top = -1;
 	scan_ptr = NULL;
+	reset_pending_undefs();
 	return;
 }
 
@@ -300,6 +306,32 @@ void ensureSingleCellWord(const char * s){
 	return;
 }
 
+// Resets to empty, frees buffers
+void reset_pending_undefs(){
+	if(newWordUndefs != NULL){
+		free(newWordUndefs);
+	}
+	newWordUndefs = NULL;
+	newWordPendUndefsLen = 0;
+	newWordPendUndefsCap = 0;
+}
+
+// Appends a new undefined ref
+// Grows in increments of 2 elements
+void add_pending_undef(undefined_ref_t * uref, int cell_index){
+	printf("Adding pending undef: %s at cell %d\n", uref->name, cell_index);
+	if(newWordUndefs == NULL){
+		newWordUndefs = malloc(2*sizeof(pend_undef_ref_t));
+		newWordPendUndefsCap = 2;
+	}else if(newWordPendUndefsLen == newWordPendUndefsCap){
+		newWordPendUndefsCap += 2;
+		newWordUndefs = realloc(newWordUndefs, newWordPendUndefsCap * sizeof(pend_undef_ref_t));
+	}
+	newWordUndefs[newWordPendUndefsLen].uref = uref;
+	newWordUndefs[newWordPendUndefsLen].cell_index = cell_index;
+	newWordPendUndefsLen += 1;
+}
+
 void start_new_def(){
 	// Prepare vars to build definition
 	if(newWordName != NULL) free(newWordName);
@@ -314,6 +346,7 @@ void start_new_def(){
 	newWordTextLen = 0;
 	newWordCodeLen = 0;
 	newWordDictEntry = NULL; // Lookup occurs once we get a name
+	reset_pending_undefs();
 }
 
 void add_cw_to_def(codeword_t * cw){
@@ -337,18 +370,19 @@ void emit_cw(codeword_t * cw){
 // Tries core, then user, then undef, and then lastly makes a new undef
 void emit_word_by_name(char * name){
 	codeword_t * dict_entry = NULL;
-	undefined_word_t * uword = NULL;
+	undefined_ref_t * uref = NULL;
 	if((dict_entry = coreSearch(name, vocab)) != NULL){
 		// Core word
 		emit_cw(dict_entry);
 	}else if((dict_entry = wordSearch(name, vocab)) != NULL){
 		/// User word
 		emit_cw(dict_entry);
-	}else if(compiling && (uword = undefSearch(name, vocab)) != NULL){
+	}else if(compiling && (uref = undefSearch(name, vocab)) != NULL){
 		// Previously known undef word
 		// Don't add a ref if not in compiling mode! It will be a NULL ref!
-		add_reference(uword, newWordDictEntry); // Make the undef word record point here
-		emit_cw(uword->ref_placeholder);
+		add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
+		//add_reference(uref, newWordDictEntry); // Make the undef word record point here
+		emit_cw(uref->ref_placeholder);
 	}else if(compiling){
 		// New undef word
 		if(!isValidWordVarName(name)){
@@ -356,9 +390,10 @@ void emit_word_by_name(char * name){
 			abortExecution();
 			return;
 		}
-		uword = create_undefined_ref(name, vocab);
-		add_reference(uword, newWordDictEntry); // Make the undef word record point here
-		emit_cw(uword->ref_placeholder);
+		uref = create_undefined_ref(name, vocab);
+		add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
+		//add_reference(uref, newWordDictEntry); // Make the undef word record point here
+		emit_cw(uref->ref_placeholder);
 	}else{
 		// We are not compiling, so whatever we emit will be run immediately.
 		// There's no point in emitting anything undefined.
@@ -376,7 +411,7 @@ void emit_word_by_name(char * name){
 int parse_tokens(char * tok){
 	codeword_t * dict_entry = NULL;
 	variable_t * var_lookup = NULL;
-	undefined_word_t * uword = NULL;
+	undefined_ref_t * uref = NULL;
 	subdict * sub = NULL;
 	char * st; // For string buffers
 	char * namebuf; // For buffers that we detach into the dictionary
@@ -427,12 +462,20 @@ int parse_tokens(char * tok){
 			newWordDictEntry->size = newWordCodeLen;
 			newWordDictEntry->text = newWordText;
 
-			// Check if this was a previously undefined word
-			undefined_word_t * entry = undefSearch(newWordName, vocab);
-			if(NULL != entry){
-				resolve_undefined_ref(newWordName, newWordDictEntry, vocab);
+			// Finalize undef refs made within the new word
+			for(int i=0; i < newWordPendUndefsLen; i++){
+				uref = newWordUndefs[i].uref;
+				int cell_index = newWordUndefs[i].cell_index;
+				add_reference(uref, &(newWordCode[cell_index]));
 			}
+			reset_pending_undefs();
 
+			// Check if this was a previously undefined word
+			undefined_ref_t * entry = undefSearch(newWordName, vocab);
+			if(NULL != entry){
+				resolve_undefined_ref(newWordName, newWordDictEntry, /*isVar*/ 0, /*var*/ NULL, vocab);
+			}
+			print_codewords(newWordCode);
 			// Detach
 			newWordCode = NULL;
 			newWordText = NULL;
@@ -506,15 +549,17 @@ int parse_tokens(char * tok){
 			dict_entry = wordSearch(tok, vocab);
 			if((dict_entry = wordSearch(tok, vocab)) != NULL){
 				emit_cw(dict_entry);
-			}else if(compiling && ((uword = undefSearch(tok, vocab)) != NULL)){
+			}else if(compiling && ((uref = undefSearch(tok, vocab)) != NULL)){
 				// Previously known undef word
-				add_reference(uword, newWordDictEntry); // Make the undef word record point here
-				emit_cw(uword->ref_placeholder);
+				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
+				//add_reference(uref, newWordDictEntry); // Make the undef word record point here
+				emit_cw(uref->ref_placeholder);
 			}else if(compiling){
 				// New undef word
-				uword = create_undefined_ref(tok, vocab);
-				add_reference(uword, newWordDictEntry); // Make the undef word record point here
-				emit_cw(uword->ref_placeholder);
+				uref = create_undefined_ref(tok, vocab);
+				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
+				//add_reference(uref, newWordDictEntry); // Make the undef word record point here
+				emit_cw(uref->ref_placeholder);
 			}else{
 				// We are not compiling, so whatever we emit will be run immediately.
 				// There's no point in emitting anything undefined.
@@ -717,14 +762,34 @@ int parse_tokens(char * tok){
 		PARSE_EXIT_STATE
 		break;
 	case PARSE_ASGN_S0:
-		// Expecting the name of a previously declared variable
-		// Easily checked with varSearch
-		if((var_lookup = varSearch(tok, vocab)) == NULL){
-			printf("ERR: Unknown variable %s\n",tok);
-			abortExecution();
-			return 0;
+		// Can be an undefined or existing variable.
+		var_lookup = varSearch(tok, vocab);
+		if((var_lookup) == NULL){
+			if(!compiling){
+				// In immediate mode, we error out.
+				printf("ERR: Unknown variable %s\n",tok);
+				abortExecution();
+				return 0;
+			}else{
+				// In compiling mode, we start tracking the undef ref.
+				if(!isValidWordVarName(tok)){
+					printf("ERR: Symbol %s is not a valid var name\n", tok);
+					abortExecution();
+					return 0;
+				}
+				// Check if this is a known uref
+				uref = undefSearch(tok, vocab);
+				if(uref == NULL) uref = create_undefined_ref(tok, vocab);
+
+				// Add to pending undef refs
+				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
+
+				// Emit the cw placeholder for assignment
+				emit_cw(uref->assign_placeholder);
+			}
+		}else{
+			emit_cw(&var_lookup->cw[1]); // Single-cell assignment
 		}
-		emit_cw(&var_lookup->cw[1]); // ! var
 		PARSE_EXIT_STATE
 		break;
 	case PARSE_DICT_NEW:

@@ -26,13 +26,16 @@
 #include "util.h"
 #include "corewords.h"
 
+
+extern codeword_t global_cw_assign_to_word_err ;
+
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
 // Should be used whenever defining a new word to ensure that it doesn't mask a variable.
 // Return 0: Nothing found
 // Return 1: Word found
 // Return 2: Variable found
-// Return 3: Undefined word found
+// Return 3: Undefined object found
 int collisionSearch(char * name, dict * vocab){
 	variable_t * tempVar;
 	codeword_t * tempWord;
@@ -222,9 +225,9 @@ subdict * findDict(char * name, dict * vocab){
 	return NULL;
 }
 
-undefined_word_t* undefSearch(char *name, dict *vocab){
+undefined_ref_t * undefSearch(char *name, dict *vocab){
 	//printf("Looking for undefined word %s\n", name);
-	undefined_word_t * temp = vocab->undefined;
+	undefined_ref_t * temp = vocab->undefined;
 	while(temp != NULL){
 		//printf("Traversal sees %s\n",temp->name);
 		if(!strcmp(temp->name, name)) return temp;
@@ -234,10 +237,10 @@ undefined_word_t* undefSearch(char *name, dict *vocab){
 }
 
 // Warning: Does not prevent adding duplicates
-undefined_word_t* create_undefined_ref(char *name, dict *vocab){
+undefined_ref_t * create_undefined_ref(char *name, dict *vocab){
 	//printf("Creating undefined word %s\n",name);
 	// Allocate and initialize
-	undefined_word_t * newUndef = malloc(sizeof(undefined_word_t));
+	undefined_ref_t * newUndef = malloc(sizeof(undefined_ref_t));
 	newUndef->name = malloc(1+strlen(name));
 	strcpy(newUndef->name, name);
 	newUndef->references = malloc(4*sizeof(codeword_t *));
@@ -255,10 +258,10 @@ undefined_word_t* create_undefined_ref(char *name, dict *vocab){
 	// Same thing but for undefAssignVar()
 	newUndef->assign_placeholder = malloc(sizeof(codeword_t));
 	newUndef->assign_placeholder->xt = _undefined_assign;
-	newUndef->ref_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
-	newUndef->ref_placeholder->data = 0;
-	newUndef->ref_placeholder->text = NULL;
-	newUndef->ref_placeholder->next = NULL;
+	newUndef->assign_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
+	newUndef->assign_placeholder->data = 0;
+	newUndef->assign_placeholder->text = NULL;
+	newUndef->assign_placeholder->next = NULL;
 
 	// Insert and return
 	newUndef->next = vocab->undefined;
@@ -266,7 +269,9 @@ undefined_word_t* create_undefined_ref(char *name, dict *vocab){
 	return newUndef;
 }
 
-void add_reference(undefined_word_t *undef, codeword_t *ref){
+// Previously each ref was to the codeword_t "header" for the word containing the ref.
+// Now it's a direct pointer to the ref.
+void add_reference(undefined_ref_t *undef, codeword_t **ref){
 	//printf("In add_reference()\n");
 	if(undef->ref_count == undef->ref_capacity){
 		undef->ref_capacity += 4;
@@ -279,12 +284,17 @@ void add_reference(undefined_word_t *undef, codeword_t *ref){
 // WARNING: If the words that referenced this undefined word no longer exist, it can segfault.
 //          Currently, deleting words is not supported, but later it will be.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
-void resolve_undefined_ref(char *name, codeword_t *def, dict *vocab){
+void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var, dict *vocab){
 	//printf("Resolving previously undefined %s\n", name);
+
+	// Check the more error-prone params
+	if(isVar) assert(var != NULL);
+	if(!isVar) assert(def != NULL);
+
 	// First we need to find the word in the linked list.
 	// We need to keep a pointer to the previous word in the list.
-	undefined_word_t * curr = vocab->undefined;
-	undefined_word_t * prev = NULL;
+	undefined_ref_t * curr = vocab->undefined;
+	undefined_ref_t * prev = NULL;
 	while(curr != NULL){
 		if(!strcmp(curr->name, name)) break;
 		prev = curr;
@@ -305,51 +315,29 @@ void resolve_undefined_ref(char *name, codeword_t *def, dict *vocab){
 		prev->next = curr->next;
 	}
 
-	// Now we have the undef record curr, and the new word, def.
-	// We need to find all occurrences of the undefined word (iterate curr->references)
-	// Each one points to the codeword_t of a word that needed this new word.
+	// Patch each ref location
 	for(int i=0; i<curr->ref_count ; i++){
-		// i denotes just one of our references
-		int num_words = curr->references[i]->size;
-		//printf("num_words is %d\n", num_words);
-		codeword_t ** dependent_array = (codeword_t **) curr->references[i]->data;
-		//print_codewords(dependent_array);
-
-		int loop_end_index=-1;
-
-		for(int j=0; j<num_words; j++){
-			//printf("resolve_undefined_ref() looking for name %s in array index %d\n",name,j);
-			//printf("See name %s \n", dependent_array[j]->name);
-			if(!strcmp(name, dependent_array[j]->name)){
-				// Found a match
-				dependent_array[j] = def;
+		codeword_t ** patch_target = curr->references[i];
+		if(*patch_target == curr->ref_placeholder){
+			if(0 == isVar){
+				// It's a word
+				*patch_target = def;
+			}else{
+				// It's a var
+				*patch_target = &var->cw[0]; // pushVar
 			}
-			if(!strcmp(dependent_array[j]->name, "PUSHLIT") || !strcmp(dependent_array[j]->name, "PUSHVAR") || !strcmp(dependent_array[j]->name, "!")){
-				//printf("Skipping literal\n");
-				// Skip the literal
-				j+=1;
-				continue;
+		}else if(*patch_target == curr->assign_placeholder){
+			if(0 == isVar){
+				// Can't assign values to words
+				*patch_target = &global_cw_assign_to_word_err;
+			}else{
+				// It's a var
+				*patch_target = &var->cw[1]; // assignVar
 			}
-
-			//printf("array index is now %d\n",j);
-			// Example definition: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
-			if(!strcmp(dependent_array[j]->name, "BR")){
-				//printf("It's a BR\n");
-				// Find where the SKP1 is
-				for(loop_end_index = j+3; ; loop_end_index+=3){
-					//printf("loop_end_index=%d\n",loop_end_index);
-					//printf("See function %s\n",dependent_array[loop_end_index]->name);
-					if(dependent_array[loop_end_index]->xt == skip1) break;
-				}
-				// Should be the index of the branch targer before SKP1
-				loop_end_index -= 1;
-				//printf("Loop end index is %d\n",loop_end_index);
-				// Remember that the loop adds 1 also. By adding one here we land on BR+2
-				j += 1;
-			}else if(j < loop_end_index){
-				// Remember that the loop adds 1 also. By adding 2 here we take triple steps.
-				j+=2;
-			}
+		}else{
+			printf("ERR: Unexpected value at patch target\n");
+			printf("Name: %s\n", (*patch_target)->name);
+			exit(-1);
 		}
 	}
 
