@@ -90,7 +90,7 @@ void print_codewords(codeword_t ** array){
 
 		// The condition here determines whether we are looking at a literal value within a BR statement
 		if((i <= loop_end_index) && ((loop_end_index-i) % 3 == 0)){
-			printf("%d) %p: LIT %ld\n", i, (void*)&array[i], (intptr_t) cmdbuf->array[i]);
+			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
 			i++;
 		}
 		if(array[i]->xt == pushVar){

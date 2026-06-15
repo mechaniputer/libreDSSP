@@ -1260,7 +1260,7 @@ void define_all_core(dict * vocab){
 	defCore("SKP1", skip1, vocab); // Not to be used directly
 	defCore("SKP2", skip2, vocab); // Not to be used directly
 	defCore("NOP", noop, vocab);
-	//defCore("VAR", declareVar, vocab);
+	defCore("VAR", declareVar, vocab);
 	//defCore("!", assignVar, vocab); // Not to be used directly
 	//defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
 	defCore("CR", printNewline, vocab);

@@ -664,6 +664,7 @@ int parse_tokens(char * tok){
 		// This has to be an integer
 		if(isNum(tok)){
 			// It's a number
+			printf("Branch cond %s becomes value %ld\n",tok, atol(tok));
 			emit_cw((codeword_t *) atol(tok));
 			PARSE_CHANGE_STATE(PARSE_BR_S2)
 		}else{
@@ -678,6 +679,7 @@ int parse_tokens(char * tok){
 		if(isNum(tok)){
 			// It's a number
 			emit_cw(coreSearch("SKP2", vocab));
+			printf("Branch cond %s becomes value %ld\n",tok, atol(tok));
 			emit_cw((codeword_t *) atol(tok));
 			PARSE_CHANGE_STATE(PARSE_BR_S2)
 		}else if(!strcmp("ELSE", tok)){
@@ -838,6 +840,12 @@ int process_line(char * line){
 			//printf("Parsing token %s\n",st);
 			parse_tokens(st);
 			free(st);
+			// Greedy execution
+			if(parser_state == 0){
+				word_next();
+				cmdbuf->size = 0;
+				cmdbuf->array[0] = NULL;
+			}
 		}
 		if(abort_requested){
 			return 0; // Keep returning up the chain
