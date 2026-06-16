@@ -181,6 +181,7 @@ char *get_next_token() {
 					return endToken();
 				}
 			}else if (*scan_ptr == '[') {
+				tokenAppendChar(*scan_ptr);
 				push(tokenizerStack, tokenizer_state);
 				tokenizer_state = TOK_COMMENT;
 			}else if (*scan_ptr == '\"') {
@@ -194,20 +195,23 @@ char *get_next_token() {
 
 
 		case TOK_COMMENT:
-			// In a comment, we only have to wait for the end of the comment.
+			// We don't filter comments so that, at least, inline comments like stack annotations make it into definition text.
 			if(*scan_ptr == '\0'){
+				// The line ended and we are still in a (multi-line) comment.
 				return NULL;
 			}else if(*scan_ptr == ']'){
 				tokenizer_state = pop(tokenizerStack);
 			}else if(*scan_ptr == '\\'){
 				tokenizer_state = TOK_COMMENT_ESC;
 			}
+			tokenAppendChar(*scan_ptr);
 			break;
 
 		case TOK_COMMENT_ESC: // Read one character and don't pop the status, even if it's ]
 			if(*scan_ptr == '\0'){ // Cannot escape \0
 				return NULL;
 			}
+			tokenAppendChar(*scan_ptr);
 			tokenizer_state = TOK_COMMENT;
 			break;
 
@@ -436,6 +440,9 @@ int parse_tokens(char * tok){
 		strcat(newWordText, tok);
 		newWordTextLen += strlen(tok);
 	}
+
+	// If it's a comment, then our work is already done here.
+	if(tok[0] == '[') return 0;
 
 	switch(parser_state){
 	case PARSE_COMPILE_S0:

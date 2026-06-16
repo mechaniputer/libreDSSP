@@ -1174,7 +1174,6 @@ void inventoryWords(){
 			printf("Subdict: %s\n",tempSub->name);
 			tempWord = tempSub->wordlist;
 			while(tempWord != NULL){
-				printf("  %s",tempWord->name);
 				printf("  %s\n",tempWord->text);
 				tempWord = tempWord->next;
 			}
