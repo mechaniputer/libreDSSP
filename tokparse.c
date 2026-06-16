@@ -88,6 +88,16 @@ void reset_tokenizer_parser_state(){
 			stubDef[0] = coreSearch(";S", vocab);
 			stubDef[1] = NULL;
 
+			// Prevent leaks
+			if(newWordDictEntry->data != 0){
+				free((void *) newWordDictEntry->data);
+				newWordDictEntry->data = 0;
+			}
+			if(newWordDictEntry->text != 0){
+				free((void *) newWordDictEntry->text);
+				newWordDictEntry->data = 0;
+			}
+
 			// Populate the dictionary entry
 			newWordDictEntry->data = (intptr_t) stubDef;  // Set code array pointer
 			newWordDictEntry->size = 1;
@@ -456,6 +466,17 @@ int parse_tokens(char * tok){
 		if(!strcmp(tok,";")){
 			emit_cw(coreSearch(";S", vocab));
 			//printf("Definition of %s complete\n", newWordName);
+
+
+			// We might be redefining a prior word. This prevents a leak.
+			if(newWordDictEntry->data != 0){
+				free((void *) newWordDictEntry->data);
+				newWordDictEntry->data = 0;
+			}
+			if(newWordDictEntry->text != 0){
+				free((void *) newWordDictEntry->text);
+				newWordDictEntry->data = 0;
+			}
 
 			// Populate the dictionary entry
 			newWordDictEntry->data = (intptr_t) newWordCode;  // Set code array pointer

@@ -343,6 +343,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 
 	free(curr->name);
 	free(curr->ref_placeholder);
+	free(curr->assign_placeholder);
 	free(curr->references);
 	free(curr);
 	return;

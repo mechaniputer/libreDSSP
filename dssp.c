@@ -29,7 +29,7 @@
 #include "corewords.h"
 #include "util.h"
 
-#define VERSION "0.6.0"
+#define VERSION "0.6.1"
 
 extern char *optarg;
 extern int optind;
@@ -154,13 +154,13 @@ int main(int argc, char *argv[]){
 		}else{
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
 				bufptr[characters-1] = '\0';
-				status = process_line(bufptr);
-				if(status == 0) word_next();
+				status = process_line(bufptr); // word_next is called within
+				//if(status == 0) word_next();
 				free(bufptr);
 				bufptr = NULL;
 				bufsize = 0;
-				cmdbuf->size = 0;
-				cmdbuf->array[0] = NULL;
+				//cmdbuf->size = 0;
+				//cmdbuf->array[0] = NULL;
 			}
 			fclose(file);
 			free(bufptr);
@@ -170,11 +170,11 @@ int main(int argc, char *argv[]){
 
 	// Evaluate a string if provided
 	if(opt_eval_String) {
-		status = process_line(eval_string);
+		status = process_line(eval_string); // word_next is called within
 		free(eval_string);
-		if(status == 0) word_next();
-		cmdbuf->size = 0;
-		cmdbuf->array[0] = NULL;
+		//if(status == 0) word_next();
+		//cmdbuf->size = 0;
+		//cmdbuf->array[0] = NULL;
 	}
 
 	// We have evaluated a file and/or string if provided.
@@ -189,12 +189,12 @@ int main(int argc, char *argv[]){
 		abort_requested = 0;
 		// Show prompt, get line of input
 		char * line = prompt(status);
-		status = process_line(line);
+		status = process_line(line); // word_next is called within
 		free(line);
 		//print_codewords(cmdbuf->array);
-		if(status == 0) word_next();
-		cmdbuf->size = 0;
-		cmdbuf->array[0] = NULL;
+		//if(status == 0) word_next();
+		//cmdbuf->size = 0;
+		//cmdbuf->array[0] = NULL;
 	}
 	return 0;
 }
