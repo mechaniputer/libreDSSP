@@ -210,15 +210,20 @@ char * prompt(int status){
 	char *line;
 	if(0 == status){
 		line = readline ("* ");
+		//Check for EOF.
+		if (!line){
+			printf("\n");
+			bye();
+		}
 	}else{
 		line = readline ("? ");
+		if (!line){
+			abortExecution();
+			line = (char*) malloc(sizeof(char));
+			line[0] = '\0';
+		}
 	}
-	//Check for EOF.
-	if (!line){
-		printf("\n");
-		line = (char*) malloc(4*sizeof(char));
-		strcpy(line, "BYE");
-	}
+
 	if(strcmp(line, "")) add_history(line);
 	return line;
 }

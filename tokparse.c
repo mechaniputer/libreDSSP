@@ -101,15 +101,20 @@ void reset_tokenizer_parser_state(){
 			// Populate the dictionary entry
 			newWordDictEntry->data = (intptr_t) stubDef;  // Set code array pointer
 			newWordDictEntry->size = 1;
-			newWordDictEntry->text = "[aborted definition]";
+			char * temp_st = " [aborted definition]";
+			int len1 = strlen(temp_st);
+			int len2 = strlen(newWordDictEntry->name);
+			newWordDictEntry->text = malloc(len1 + len2 + 1);
+			strcpy(newWordDictEntry->text, newWordDictEntry->name);
+			strcpy(newWordDictEntry->text + len2, temp_st);
 			newWordDictEntry = NULL;
 			// Do not free newDictEntry! It's in the dictionary now.
 		}
 		compiling = 0;
 	}
-	if(newWordName!= NULL) free(newWordName);
-	if(newWordText!= NULL) free(newWordText);
-	if(newWordCode!= NULL) free(newWordCode);
+	if(newWordName != NULL) free(newWordName);
+	if(newWordText != NULL) free(newWordText);
+	if(newWordCode != NULL) free(newWordCode);
 	newWordName = NULL;
 	newWordText = NULL;
 	newWordCode= NULL;
@@ -117,6 +122,10 @@ void reset_tokenizer_parser_state(){
 	tokenizer_state = TOK_NORMAL;
 	parserStack->top = -1;
 	tokenizerStack->top = -1;
+	if(tokenBuffer != NULL) free(tokenBuffer);
+	tokenBuffer = NULL;
+	token_len = 0;
+	token_cap = 0;
 	scan_ptr = NULL;
 	reset_pending_undefs();
 	return;
@@ -421,8 +430,8 @@ void emit_word_by_name(char * name){
 // Updates the parse state while emitting code to the appropriate buffer
 // Return 0: good
 // Return -1: Error, must reset the parser
-// TODO: Currently only undef words are supported, but it would be good to allow undef vars as well
 int parse_tokens(char * tok){
+	//printf("Parse state %ld\n",parser_state);
 	codeword_t * dict_entry = NULL;
 	variable_t * var_lookup = NULL;
 	undefined_ref_t * uref = NULL;
@@ -857,7 +866,7 @@ int parse_tokens(char * tok){
 }
 
 int process_line(char * line){
-	//printf("*** Tokenizing line: ***\n>> %s", line);
+	//printf("*** Tokenizing line: ***\n>> %s\n", line);
 	tokenizer_start_line(line);
 
 	while(1){
@@ -880,5 +889,5 @@ int process_line(char * line){
 		}
 	}
 	//printf("\n\n");
-	return parser_state;
+	return parser_state | tokenizer_state;
 }
