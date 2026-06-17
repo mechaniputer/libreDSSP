@@ -153,7 +153,9 @@ int main(int argc, char *argv[]){
 			return -1;
 		}else{
 			while(EOF != (characters = getline(&bufptr, &bufsize, file))){
-				bufptr[characters-1] = '\0';
+				if (characters > 0 && bufptr[characters - 1] == '\n') {
+					bufptr[characters - 1] = '\0';
+				}
 				status = process_line(bufptr); // word_next is called within
 				//if(status == 0) word_next();
 				free(bufptr);
