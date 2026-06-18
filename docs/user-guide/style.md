@@ -144,3 +144,14 @@ Do this:
     0 temperature_good
     ELSE temperature_high ;
 ```
+
+## Avoiding performance nondeterminism
+libreDSSP includes many "convenience" features for developers. While these are intended to be used for interactive development, libreDSSP strives for orthogonality and many of these features can technically be invoked at runtime as well.
+
+The words `GROW`, `VAR`, and `DEL` all perform dynamic allocation behind the scenes, and `DEL` even performs a linear-time search of all user-defined words! Although this should take at most a few milliseconds any production microcontroller, the exact running time of all of these words is dependent on many factors. If memory is low, these words can also fail due to insufficient heap space.
+
+Once implemented, the words `VCTR` and `ARR` will join those above.
+
+Although libreDSSP comes with no warranty, our claim and aspiration is that, if you avoid calling any of the above words after initialization, performance will be consistent and there will be no memory allocations during execution.
+
+**Note** Actually, `TON` also uses malloc, but that's a temporary hack. Probably `TIS` wi

@@ -51,14 +51,15 @@ Also let us know if you are interested in setting up other resources such as an 
 
 - When you redefine a word in a subdictionary, past references to the same word (in the same subdictionary) automatically use the new definition. Earlier DSSPs seem to have kept the definition originally referenced, which results in a needlessly more confusing environment and makes it hard to fix earlier mistakes.
 
-- Related to the previous point, there will be no support for redefining existing VARS as words, or vice-versa. There is no good reason to do this.
+- Instead of the traditional "rollback" mechanism for word deletion, we support the `DEL` word to delete any individual object within the subdictionary currently selected for expansion/modification.
 
-- So-called "compiling words" like `VAR`, `VCTR`, `ARR`, etc, can be used inside of a defined word without needing to use `TEXEC`. libreDSSP needs no "compiling words". In libreDSSP these words are instead "state smart", and will not waste space if invoked repeatedly at runtime. Earlier DSSPs seem not to have allowed this, limiting reference patching to compile/parse time. libreDSSP can patch variable references at runtime whenever a declaration happens. **(Or, at least this is how it will work, eventually)**
+- So-called "compiling words" like `VAR`, `VCTR`, `ARR`, etc, can be used inside of a defined word without needing to use `TEXEC`. In fact, this goes for nearly any core word. In libreDSSP these words are "state smart", and will not waste space if invoked repeatedly at runtime. Earlier DSSPs seem not to have allowed this, limiting reference patching to compile/parse time. libreDSSP can patch variable references at runtime whenever a declaration or deletion occurs. Note that these words can still introduce performance nondeterminisms, and it is recommended to only call them during initialization if this is a concern.
 
 
 ## What works
 - Top-down programming! (reference undefined words when defining words)
 - UNDEF (list undefined words)
+- DEL (delete word or variable)
 - Basic math operations (+,*,-,/)
 - VAR, !, push value of variable by name
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
