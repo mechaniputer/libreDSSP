@@ -350,9 +350,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 }
 
 
-/// FIXME If the word we are deleting contains a previously undef ref to another (undef) word, this breaks badly.
-// When we define that other word, the undef table will still point into this (freed) word body.
-// To fix this, every time we encounter an undef word, we need to remove the reference to this word body.
+// Scans the entire grow dictionary for refs to the specified undef, and changes them to point to the undef's placeholder.
 void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw, dict * vocab){
 	codeword_t * curr_word = vocab->grow->wordlist;
 	while(curr_word != NULL){

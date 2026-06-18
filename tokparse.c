@@ -818,6 +818,14 @@ int parse_tokens(char * tok){
 					abortExecution();
 					return 0;
 				}
+
+				// Check if the name is already a variable
+				if(wordSearch(tok, vocab)){
+					printf("ERR: Symbol %s is already defined as a word\n", tok);
+					abortExecution();
+					return 0;
+				}
+
 				// Check if this is a known uref
 				uref = undefSearch(tok, vocab);
 				if(uref == NULL) uref = create_undefined_ref(tok, vocab);
