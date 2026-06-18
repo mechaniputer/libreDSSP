@@ -41,16 +41,6 @@ extern stack * loopStack;
 extern dict * vocab;
 extern int abort_requested;
 
-// Global singleton for _word_assign (this is an error word)
-codeword_t global_cw_assign_to_word_err = {
-	.xt = _word_assign,
-	.name = "ERR WORD ASGN",
-	.next = NULL,
-	.size = 0,
-	.data = 0,
-	.text = NULL
-};
-
 void push_zero(){
 	push(dataStack, 0);
 }

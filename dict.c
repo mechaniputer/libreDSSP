@@ -27,8 +27,6 @@
 #include "corewords.h"
 
 
-extern codeword_t global_cw_assign_to_word_err ;
-
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
 // Should be used whenever defining a new word to ensure that it doesn't mask a variable.
@@ -329,7 +327,17 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 		}else if(*patch_target == curr->assign_placeholder){
 			if(0 == isVar){
 				// Can't assign values to words
-				*patch_target = &global_cw_assign_to_word_err;
+				// We allocate a one-off codeword for the error. If it gets patched, the patcher should free it.
+				// The only place this might happen is: patch_to_undef()
+				codeword_t * temp_cw = malloc(sizeof(codeword_t));
+				temp_cw->name = malloc(strlen(name)+1);
+				strcpy(temp_cw->name, name);
+				temp_cw->xt = _word_assign;
+				temp_cw->next = NULL;
+				temp_cw->size = 0;
+				temp_cw->data = 0;
+				temp_cw->text = NULL;
+				*patch_target = temp_cw;
 			}else{
 				// It's a var
 				*patch_target = &var->cw[1]; // assignVar
@@ -372,6 +380,13 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw, dict * vocab){
 				}else if(array[patch_index]->xt == assignVar){
 					// If it's an assign ref:
 					array[patch_index] = uref->assign_placeholder;
+				}else if(array[patch_index]->xt == _word_assign){
+					// It was previously an attempt to assign a value to a word.
+					// There are some things to free before we patch.
+					free(array[patch_index]->name);
+					free(array[patch_index]);
+					array[patch_index] = uref->assign_placeholder;
+
 				}
 			}
 
