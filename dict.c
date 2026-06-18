@@ -447,7 +447,13 @@ void deleteName(char * name, dict * vocab){
 		// First, scan the body of this word to see if it contains any undef refs
 		codeword_t ** array = (codeword_t**) curr_word->data;
 		int ind = 0;
-		while(array[ind] != NULL){ // Relies on NULL sentinel
+		int loop_end_index = -1; // This trick is also used in print_codewords().
+		while(array[ind] != NULL || (ind < loop_end_index)){ // Relies on NULL sentinel
+
+			// Skip branch literals
+			if((ind <= loop_end_index) && ((loop_end_index-ind) % 3 == 0)) ind++;
+
+			printf("Scanning deletion target: Checking whether %s is an undef ref\n", array[ind]->name);
 			// If we encounter an undef ref, we need to un-track it to prevent a later segfault
 			if(array[ind]->xt == _undefined_ref || array[ind]->xt == _undefined_assign){
 				printf("This word references undefined name %s!\n",array[ind]->name);
@@ -477,10 +483,19 @@ void deleteName(char * name, dict * vocab){
 				ind += 1;
 			}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declareVar || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
 				// For some words we need to skip two cells for safety
-				ind += 2;
-			}else{
-				ind += 1; // Next codeword_t *
+				ind += 1;
+			}else if(!strcmp(array[ind]->name, "BR")){
+				// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
+				// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
+				for(loop_end_index = ind+3; ; loop_end_index+=3){
+					if(array[loop_end_index]->xt != skip2) break;
+				}
+				// loop_end_index now points to ERG in the example above (position 9)
+				// We want it to point to the last literal (position 7):
+				loop_end_index -= 2;
+				printf("Loop end index is %d\n",loop_end_index);
 			}
+			ind += 1; // Next codeword_t *
 		}
 
 		// Create a new undef ref for this entity.
