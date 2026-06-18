@@ -82,6 +82,7 @@ variable_t * varSearch(char * name, dict * vocab){
 	// Search subdicts
 	tempSub = vocab->sub;
 	while(tempSub != NULL){
+		printf("Searching subdict %s for vars\n",tempSub->name);
 		if((tempSub->open) && (tempSub->varlist != NULL)){
 			tempVar = tempSub->varlist;
 			while(tempVar != NULL){
@@ -210,6 +211,7 @@ subdict * newDict(char * name, dict * vocab){
 	strcpy(tempSub->name, name);
 	tempSub->open = 1;
 	tempSub->wordlist = NULL;
+	tempSub->varlist = NULL;
 	vocab->grow = tempSub;
 	return tempSub;
 }
@@ -358,47 +360,57 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 }
 
 
-// Scans the entire grow dictionary for refs to the specified undef, and changes them to point to the undef's placeholder.
+// Scans the entire dictionary (of words, not vars) for refs to the specified undef, and changes them to point to the undef's placeholder.
+// Any word in any subdict might refernce the word we are deleting.
 void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw, dict * vocab){
-	codeword_t * curr_word = vocab->grow->wordlist;
-	while(curr_word != NULL){
-		printf("Patching body of word %s\n",curr_word->name);
-		codeword_t ** array = (codeword_t **) (curr_word->data);
-		print_codewords(array);
-		int patch_index = 0;
-		while(array[patch_index] != NULL){ // Depends on NULL sentinel
-			printf("See command %s\n", array[patch_index]->name);
-			if(!strcmp(array[patch_index]->name, uref->name)){
-				add_reference(uref, &array[patch_index]);
-				// We need to distinguish whether this is a word call, a push ref, or an assign ref
-				if((codeword_t *) array[patch_index] == old_cw){
-					// Word calls become a plain ref
-					array[patch_index] = uref->ref_placeholder;
-				}else if(array[patch_index]->xt == pushVar){
-					// If it's a plain ref:
-					array[patch_index] = uref->ref_placeholder;
-				}else if(array[patch_index]->xt == assignVar){
-					// If it's an assign ref:
-					array[patch_index] = uref->assign_placeholder;
-				}else if(array[patch_index]->xt == _word_assign){
-					// It was previously an attempt to assign a value to a word.
-					// There are some things to free before we patch.
-					free(array[patch_index]->name);
-					free(array[patch_index]);
-					array[patch_index] = uref->assign_placeholder;
 
+	subdict * tempSub;
+
+	// Search all subdicts
+	tempSub = vocab->sub;
+	while(tempSub != NULL){
+		// Search every word in the current subdict
+		codeword_t * curr_word = tempSub->wordlist;
+		while(curr_word != NULL){
+			printf("Patching body of word %s\n",curr_word->name);
+			codeword_t ** array = (codeword_t **) (curr_word->data);
+			print_codewords(array);
+			int patch_index = 0;
+			while(array[patch_index] != NULL){ // Depends on NULL sentinel
+				printf("See command %s\n", array[patch_index]->name);
+				if(!strcmp(array[patch_index]->name, uref->name)){
+					add_reference(uref, &array[patch_index]);
+					// We need to distinguish whether this is a word call, a push ref, or an assign ref
+					if((codeword_t *) array[patch_index] == old_cw){
+						// Word calls become a plain ref
+						array[patch_index] = uref->ref_placeholder;
+					}else if(array[patch_index]->xt == pushVar){
+						// If it's a plain ref:
+						array[patch_index] = uref->ref_placeholder;
+					}else if(array[patch_index]->xt == assignVar){
+						// If it's an assign ref:
+						array[patch_index] = uref->assign_placeholder;
+					}else if(array[patch_index]->xt == _word_assign){
+						// It was previously an attempt to assign a value to a word.
+						// There are some things to free before we patch.
+						free(array[patch_index]->name);
+						free(array[patch_index]);
+						array[patch_index] = uref->assign_placeholder;
+
+					}
+				}
+
+				// For some words we need to skip two cells for safety
+				if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declareVar || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
+					patch_index += 2;
+				}else{
+					patch_index += 1; // Next codeword_t *
 				}
 			}
 
-			// For some words we need to skip two cells for safety
-			if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declareVar || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
-				patch_index += 2;
-			}else{
-				patch_index += 1; // Next codeword_t *
-			}
+			curr_word = curr_word->next;
 		}
-
-		curr_word = curr_word->next;
+		tempSub = tempSub->next;
 	}
 }
 
