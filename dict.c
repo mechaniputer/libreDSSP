@@ -285,7 +285,7 @@ void add_reference(undefined_ref_t *undef, codeword_t **ref){
 //          Currently, deleting words is not supported, but later it will be.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
 void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var, dict *vocab){
-	//printf("Resolving previously undefined %s\n", name);
+	printf("Resolving previously undefined %s\n", name);
 
 	// Check the more error-prone params
 	if(isVar) assert(var != NULL);
@@ -347,4 +347,161 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 	free(curr->references);
 	free(curr);
 	return;
+}
+
+
+/// FIXME If the word we are deleting contains a previously undef ref to another (undef) word, this breaks badly.
+// When we define that other word, the undef table will still point into this (freed) word body.
+// To fix this, every time we encounter an undef word, we need to remove the reference to this word body.
+void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw, dict * vocab){
+	codeword_t * curr_word = vocab->grow->wordlist;
+	while(curr_word != NULL){
+		printf("Patching body of word %s\n",curr_word->name);
+		codeword_t ** array = (codeword_t **) (curr_word->data);
+		print_codewords(array);
+		int patch_index = 0;
+		while(array[patch_index] != NULL){ // Depends on NULL sentinel
+			printf("See command %s\n", array[patch_index]->name);
+			if(!strcmp(array[patch_index]->name, uref->name)){
+				add_reference(uref, &array[patch_index]);
+				// We need to distinguish whether this is a word call, a push ref, or an assign ref
+				if((codeword_t *) array[patch_index] == old_cw){
+					// Word calls become a plain ref
+					array[patch_index] = uref->ref_placeholder;
+				}else if(array[patch_index]->xt == pushVar){
+					// If it's a plain ref:
+					array[patch_index] = uref->ref_placeholder;
+				}else if(array[patch_index]->xt == assignVar){
+					// If it's an assign ref:
+					array[patch_index] = uref->assign_placeholder;
+				}
+			}
+
+			// For some words we need to skip two cells for safety
+			if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declareVar || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
+				patch_index += 2;
+			}else{
+				patch_index += 1; // Next codeword_t *
+			}
+		}
+
+		curr_word = curr_word->next;
+	}
+}
+
+// Finds an undef entry in the list and removes/frees it
+void delete_undef_ref(undefined_ref_t * uref, dict * vocab){
+	undefined_ref_t * curr = vocab->undefined;
+	undefined_ref_t * prev = NULL;
+	while(curr != NULL){
+		if(curr == uref) break;
+		prev = curr;
+		curr = curr->next;
+	}
+
+	if(curr == NULL){
+		printf("ERR: Undef ref not found in delete_undef_ref\n");
+		exit(-1);
+	}
+
+	if(prev == NULL){
+		vocab->undefined = curr->next;
+	}else{
+		prev->next = curr->next;
+	}
+
+	free(curr->name);
+	free(curr->ref_placeholder);
+	free(curr->assign_placeholder);
+	free(curr->references);
+	free(curr);
+	return;
+}
+
+void deleteName(char * name, dict * vocab){
+	// Note: deletion is constrained to the current subdict
+	// Because no name collisions are allowed within a subdict, this will only delete one object.
+	// It might be a word or a variable.
+
+	// Check for a word to delete.
+	codeword_t * curr_word = vocab->grow->wordlist;
+	codeword_t * prev_word = NULL;
+	while(curr_word != NULL){
+		if(!strcmp(curr_word->name, name)){
+			// If found, splice it out.
+			printf("Found word \"%s\" to delete\n",name);
+			if(prev_word == NULL){
+				// It was literally the first word in the list
+				vocab->grow->wordlist = curr_word->next;
+			}else{
+				prev_word->next = curr_word->next;
+			}
+			break;
+		}
+		prev_word = curr_word;
+		curr_word = curr_word->next;
+	}
+
+	// Delete the word and return
+	if(curr_word != NULL){
+		// First, scan the body of this word to see if it contains any undef refs
+		codeword_t ** array = (codeword_t**) curr_word->data;
+		int ind = 0;
+		while(array[ind] != NULL){ // Relies on NULL sentinel
+			// If we encounter an undef ref, we need to un-track it to prevent a later segfault
+			if(array[ind]->xt == _undefined_ref || array[ind]->xt == _undefined_assign){
+				printf("This word references undefined name %s!\n",array[ind]->name);
+				// We need to retrieve the undef record, remove the ref, and if the undef word hits 0 refs, get rid of it.
+				undefined_ref_t * uref = undefSearch(array[ind]->name, vocab);
+				if(uref == NULL){
+					printf("ERR: Reference to nonexistent undefined word %s\n",array[ind]->name);
+					exit(-1);
+				}
+
+				// We have the undef record. Now we search for a pointer match.
+				for(int j=0; j<uref->ref_count; j++){
+					if(uref->references[j] == &array[ind]){
+						// We found the ref to remove. We swap it with the last ref and decrement the count.
+						uref->references[j] = uref->references[uref->ref_count - 1];
+						uref->ref_count -= 1;
+						break;
+					}
+				}
+
+				// If this undef word has no more refs, we can remove it from the undef table and free it.
+				if(uref->ref_count == 0){
+					printf("Undef word %s has no more refs, removing from undef table\n",uref->name);
+					// Call deletion helper to splice out the undef record and free it
+					delete_undef_ref(uref, vocab);
+				}
+				ind += 1;
+			}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declareVar || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
+				// For some words we need to skip two cells for safety
+				ind += 2;
+			}else{
+				ind += 1; // Next codeword_t *
+			}
+		}
+
+		// Create a new undef ref for this entity.
+		undefined_ref_t * uref = create_undefined_ref(name, vocab);
+
+		// Scan all user words in vocab->grow for references. Add refs and patch them to the appropriate undef placeholder.
+		patch_to_undef(uref, curr_word, vocab);
+		// Free the old word
+		free(curr_word->name);
+		free(curr_word->text);
+		free((void *) curr_word->data);
+		free(curr_word);
+
+		// If uref shows no refs, we can remove it immediately.
+		if(uref->ref_count == 0){
+			printf("Undef word %s has no refs, removing from undef table\n",uref->name);
+			delete_undef_ref(uref, vocab);
+		}
+		return;
+	}
+
+	// TODO same thing but for vars
+
 }

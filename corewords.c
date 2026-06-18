@@ -904,6 +904,13 @@ void _word_assign(){
 	return;
 }
 
+void _delete_name(){
+	cmdbuf->ip++; // Advance to data cell
+	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
+	deleteName(name, vocab);
+	return;
+}
+
 // Next cell should contain a constant literal
 void pushLiteral(){
 	intptr_t operand = (intptr_t) cmdbuf->array[cmdbuf->ip+1];
@@ -914,7 +921,6 @@ void pushLiteral(){
 }
 
 // Push the current value of a variable
-// The next cell should contain the address of the correct variable struct
 void pushVar(){
 	variable_t *v = (variable_t*) current_codeword->data;
 	push(dataStack, v->value);
@@ -988,7 +994,6 @@ void declareVar(){
 }
 
 // Assign top of stack to a variable
-// The next cell should contain the address of the correct variable struct
 void assignVar(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
@@ -1268,6 +1273,7 @@ void define_all_core(dict * vocab){
 	defCore("GROW", growSub, vocab);
 	defCore("SHUT", shutSub, vocab);
 	defCore("USE", openSub, vocab);
+	defCore("DEL", _delete_name, vocab);
 	defCore("TIN", termInNum, vocab);
 	defCore("TON", termOutNum, vocab);
 	defCore("TOS", termOutString, vocab);

@@ -115,4 +115,6 @@ undefined_ref_t* create_undefined_ref(char *name, dict *vocab);
 void add_reference(undefined_ref_t *undef, codeword_t **ref);
 void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var, dict *vocab);
 
+void deleteName(char * name, dict * vocab);
+
 #endif

@@ -551,6 +551,8 @@ int parse_tokens(char * tok){
 				PARSE_ENTER_STATE(PARSE_VAR_S0);
 			}else if(!strcmp(tok,"GROW")){
 				PARSE_ENTER_STATE(PARSE_DICT_NEW);
+			}else if(!strcmp(tok,"DEL")){
+				PARSE_ENTER_STATE(PARSE_DEL_S0);
 			}else if(!strcmp(tok,"SHUT") || !strcmp(tok,"USE")){
 				PARSE_ENTER_STATE(PARSE_DICT_EXIST);
 			}
@@ -854,6 +856,14 @@ int parse_tokens(char * tok){
 			return 0;
 		}
 		emit_cw((codeword_t *) sub);
+		PARSE_EXIT_STATE
+		break;
+	case PARSE_DEL_S0:
+		// Expecting a word/var name to delete (code is similar to PARSE_DICT_NEW)
+		// the DEL command was already emitted. We just emit a char * here.
+		namebuf = malloc((strlen(tok)+1) * sizeof(char));
+		strcpy(namebuf, tok);
+		emit_cw((codeword_t *) namebuf);
 		PARSE_EXIT_STATE
 		break;
 	default:

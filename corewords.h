@@ -103,6 +103,7 @@ void noop();
 void _undefined_ref();
 void _undefined_assign();
 void _word_assign();
+void _delete_name();
 void pushLiteral();
 void pushVar();
 void declareVar();
