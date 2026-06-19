@@ -542,6 +542,42 @@ void deleteName(char * name, dict * vocab){
 		return;
 	}
 
-	// TODO same thing but for vars
+	// Check for a var to delete.
+	variable_t * curr_var = vocab->grow->varlist;
+	variable_t * prev_var = NULL;
+	while(curr_var != NULL){
+		if(!strcmp(curr_var->name, name)){
+			// If found, splice it out.
+			printf("Found word \"%s\" to delete\n",name);
+			if(prev_var == NULL){
+				// It was literally the first word in the list
+				vocab->grow->varlist = curr_var->next;
+			}else{
+				prev_var->next = curr_var->next;
+			}
+			break;
+		}
+		prev_var = curr_var;
+		curr_var = curr_var->next;
+	}
+
+	// Delete the var and return
+	if(curr_var != NULL){
+		// Create a new undef ref for this entity.
+		undefined_ref_t * uref = create_undefined_ref(name, vocab);
+
+		// Scan all user words in vocab->grow for references. Add refs and patch them to the appropriate undef placeholder.
+		patch_to_undef(uref, /*old_cw*/ NULL, vocab);
+		// Free the old word
+		free(curr_var->name);
+		free(curr_var);
+
+		// If uref shows no refs, we can remove it immediately.
+		if(uref->ref_count == 0){
+			printf("Undef var %s has no refs, removing from undef table\n",uref->name);
+			delete_undef_ref(uref, vocab);
+		}
+		return;
+	}
 
 }

@@ -148,7 +148,7 @@ Do this:
 ## Avoiding performance nondeterminism
 libreDSSP includes many "convenience" features for developers. While these are intended to be used for interactive development, libreDSSP strives for orthogonality and many of these features can technically be invoked at runtime as well.
 
-The words `GROW`, `VAR`, and `DEL` all perform dynamic allocation behind the scenes, and `DEL` even performs a linear-time search of all user-defined words! Although this should take at most a few milliseconds any production microcontroller, the exact running time of all of these words is dependent on many factors. If memory is low, these words can also fail due to insufficient heap space.
+The words `GROW`, `VAR`, and `DEL` all perform dynamic allocation behind the scenes, and `DEL` even performs a linear-time search of all user-defined words! Although this should take at most a few milliseconds on any realistic target (even assuming memory is entirely full of word definitions), the exact running time of all of these words is dependent on many factors. If memory is low, these words can also sometimes fail due to insufficient heap space.
 
 Once implemented, the words `VCTR` and `ARR` will join those above.
 
