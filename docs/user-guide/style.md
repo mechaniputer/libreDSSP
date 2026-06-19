@@ -153,5 +153,3 @@ The words `GROW`, `VAR`, and `DEL` all perform dynamic allocation behind the sce
 Once implemented, the words `VCTR` and `ARR` will join those above.
 
 Although libreDSSP comes with no warranty, our claim and aspiration is that, if you avoid calling any of the above words after initialization, performance will be consistent and there will be no memory allocations during execution.
-
-**Note** Actually, `TON` also uses malloc, but that's a temporary hack.

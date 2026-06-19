@@ -1062,62 +1062,46 @@ void openSub(){
 	return;
 }
 
-// TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
 void termInNum(){
-	if(dataStack->top > -1){ // Requires one operand
-		intptr_t len = pop(dataStack);
-		if(len < 0){
-			fprintf(stderr,"ERR: TIN requires non-negative operand\n");
-			abortExecution();
-			cmdbuf->ip = -1; // word_next increments this!
-			return;
-		}
-		char * line = readline("");
-		if(line){
-			int maxlen = strlen(line);
-			if(len < maxlen){
-				push(dataStack, atoi(line + ((maxlen-len)*sizeof(char))));
-			}else{
-				push(dataStack, atoi(line));
-			}
-		}else{
-			fprintf(stderr,"ERR: TIN could not read line\n");
-			abortExecution();
-			cmdbuf->ip = -1; // word_next increments this!
-			return;
-		}
+	char buf[70]; // Longest number should be 64-bit binary plus terminator. 65 should be enough.
+	if (fgets(buf, sizeof(buf), stdin) != NULL) {
+		char *endptr;
+		intptr_t num = (intptr_t)strtol(buf, &endptr, 10);
+		push(dataStack, num);
 	}else{
-		fprintf(stderr,"ERR: Insufficient operands for TIN\n");
+		fprintf(stderr, "ERR: TIN could not read from stdin\n");
 		abortExecution();
-		cmdbuf->ip = -1; // word_next increments this!
+		cmdbuf->ip = -1;
 		return;
 	}
 	return;
 }
 
-// TODO Confirm that this is the correct behavior
 // TODO Support multiple number bases
 void termOutNum(){
-	if(dataStack->top > 0){ // Requires two operands
+	if (dataStack->top >= 1) { // Requires two operands
 		intptr_t len = pop(dataStack);
 		intptr_t num = pop(dataStack);
-		int maxlen = snprintf( NULL, 0, "%ld", num );
-		char *toPrint = malloc( maxlen + 1 );
-		snprintf( toPrint, maxlen + 1, "%ld", num );
 
+		if (len <= 0) {
+			return;
+		}
+		char buf[70]; // Longest number should be 64-bit binary plus terminator. 65 should be enough.
+		int maxlen = snprintf(buf, sizeof(buf), "%ld", (long)num);
 
-		if(maxlen > len){
-			for(int i=0; i < len; i++){
-				printf("%c",toPrint[(maxlen-len)+i]);
-			}
+		if (maxlen > len) {
+			// Truncation case
+			printf("%s", buf + (maxlen - len));
 		}else{
-			for(int i=0; i < maxlen; i++){
-				printf("%c",toPrint[i]);
+			// Padding case (including no padding)
+			int spaces = (int)(len - maxlen);
+			for (int i = 0; i < spaces; i++) {
+				putchar(' ');
 			}
+			printf("%s", buf);
 		}
 
-		free(toPrint);
 	}else{
 		fprintf(stderr,"ERR: Insufficient operands for TON\n");
 		abortExecution();

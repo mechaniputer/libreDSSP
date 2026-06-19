@@ -59,26 +59,15 @@ foo bar baz
 ```
 
 ## Getting numeric input from the user
-The `TIN` word reads numeric input from the user. `TIN` requires a size parameter on top of the stack, which will be consumed.
-The size specifies how many digits the user should be allowed to type.
+The `TIN` word reads numeric input from the user and pushes the value to the stack.
+The number is allowed to begin with a minus sign.
 
-Example of correct usage:
+Example:
 ```
-* ."Enter a 2-digit number: " 2 TIN
-Enter a 2-digit number: 42
+* TIN
+1234567890
 * ..
-[42]
-*
-```
-
-If the user enters more than the specified number of digits, the number will be truncated, preserving the lowest signifigance digits.
-
-Example of truncation:
-```
-* ."Enter a 2-digit number: " 2 TIN
-Enter a 2-digit number: 123456
-* ..
-[56]
+[1234567890]
 *
 ```
 
@@ -96,7 +85,7 @@ Example:
 *
 ```
 
-If the number contains more than the specified number of digits, the number will be truncated, preserving the lowest signifigance digits.
+If the number contains more than the specified number of digits, the number will be truncated, preserving the least significant digits.
 
 
 Example with truncation:
@@ -106,7 +95,18 @@ Example with truncation:
 *
 ```
 
-You can of course use the word `.` to print the top of the stack with a newline, without truncation, and without consuming any stack values:
+If the number contains less the specified number of digits, spaces will be prepended:
+
+Example with padding:
+```
+* 123 3 TON CR
+123
+* 123 6 TON CR
+   123
+*
+```
+
+You can of course use the word `.` to print the top of the stack with a newline, without truncation or padding, and without consuming any stack values:
 ```
 * 123456 .
 123456
