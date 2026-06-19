@@ -15,13 +15,11 @@ Unfortunately, the word "word" can also refer to the size of the machine word. I
 
 
 ## Top-down programming
-libreDSSP (unlike most Forth dialects) allows you to define a word that calls into another word that is not yet defined (including the very word that you are currently defining, as in recursion). This allows for "top-down programming", in which you break the problem into subproblems prior to implementing solutions to any of those subproblems.
+libreDSSP (unlike most Forth dialects) allows you to define a word that references a name (of a word or variable) that is not yet defined. This includes, for example, references to the same word that you are defining (as in recursion). This allows for "top-down programming", in which you break the problem into subproblems and implement the core logic prior to implementing solutions to any/all of those subproblems.
 
-This also makes it possible to test an incomplete program. If an undefined word is run during testing, execution will cleanly abort and return to the libreDSSP prompt.
+This also makes it possible to test an incomplete program. If an undefined word is run (or undefined variable is referenced) during testing, execution will cleanly abort and return to the libreDSSP prompt.
 
-You can view a list of all currently undefined words by running the word `UNDEF`.
-
-**Note:** Currently, you may only reference undefined [user words](userwords.md), not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins>
+You can view a list of all currently undefined names by running the word `UNDEF`.
 
 
 ## Compile mode

@@ -45,10 +45,14 @@ Typing the name of a variable will result in the current value being pushed to t
 * 
 ```
 
+## Deleting variables
+You can use `DEL` to delete the a variable from the [subdictionary](dictionaries.md) currently selected for modification.
+This is the only way to redefine a variable as a word.
+
 ## Shortcuts for altering variable contents
 A future version of libreDSSP will add support for the following words: `!0, !1, !1-, !1+, !-, !+, !!!`. They will be documented here at that time.
 
 ## A note about subdictionaries
-When you define a variable, it will go into whatever subdictionary is selected for expansion. By default, this will be a subdictionary called `$DEFAULT`.
+When you define a variable, it will go into whatever subdictionary is selected for modification. By default, this will be a subdictionary called `$DEFAULT`.
 Words from one subdictionary can reference and use variables from any other subdictionary, but this can also be restricted.
 For more about the use of subdictionaries in libreDSSP, refer to the [relevant page](dictionaries.md).

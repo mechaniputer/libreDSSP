@@ -1,6 +1,6 @@
 # User-defined Words
 
-## Defining
+## Defining words
 To define a new word, enter a statement in the following format:
 
 ```
@@ -22,8 +22,11 @@ It is permissible to split a word definition across multiple lines:
     C 2 * ;
 ```
 
-## Redefining
+## Redefining words
 If you need to change the definition of the word, you may simply define it again with a different body. No special steps are needed. The old definition will be seamlessly replaced and any word that invokes the updated word will already use the new version.
+
+If you want to rebind the name of a word to a variable, you must use `DEL` to delete the word first.
+The word `DEL` will only delete words from the [subdictionary](dictionaries.md) currently selected for modification.
 
 ## Undefined words
 As mentioned on the [DSSP Jargon](jargon.md) page, DSSP allows you to reference (but not use) undefined words.

@@ -52,6 +52,7 @@ The order is mostly alphabetical with some minor variances for the purpose of gr
 | CR | Print a newline | |
 | D | Drop the top cell from the stack | |
 | DEEP | Push the stack depth to the stack | |
+| DEL | Delete a named object (globally patches all refs to safe errors) | |
 | DO | Loop a word a given number of times | |
 | DS | Drop the entire stack contents | |
 | E2 | Exchange the top stack cell with the cell below it | |

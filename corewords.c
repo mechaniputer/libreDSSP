@@ -1025,7 +1025,7 @@ void listDicts(){
 	return;
 }
 
-// Select a subdict for growth. If it doesn't exist yet, open it.
+// Select a subdict for modification. If it doesn't exist yet, open it.
 // The next cell should contain a valid dictionary name (the parser has checked the format)
 void growSub(){
 	cmdbuf->ip++; // Advance to data cell

@@ -23,15 +23,15 @@ $PRIME OPEN
 *
 ```
 
-The subdictionary at the top of the list is the one currently selected for growth.
+The subdictionary at the top of the list is the one currently selected for modification.
 The status of a subdictionary is either `OPEN` or `CLOSED`.
 An `OPEN` subdictionary can be used when looking for previously defined entities, but a `CLOSED` one cannot.
-If the dictionary currently selected for growth is `CLOSED`, new entities cannot be added.
+If the dictionary currently selected for modification is `CLOSED`, new entities cannot be added.
 
 
 ## Opening a new subdictionary
 To open a new subdictionary which did not previously exist, use `GROW`.
-The new subdictionary will be automatically selected for growth so that subsequently defined entities will go into it.
+The new subdictionary will be automatically selected for modification so that subsequently defined entities will go into it.
 
 ```
 * GROW $MATH
@@ -42,8 +42,8 @@ $DEFAULT OPEN
 *
 ```
 
-## Choosing subdictionaries for growth
-The `GROW` word used above to create a new subdictionary is also used to re-select a previously defined subdictionary for growth.
+## Choosing subdictionaries for modification
+The `GROW` word used above to create a new subdictionary is also used to re-select a previously defined subdictionary for modification.
 ```
 * GROW $DEFAULT
 * ?$
