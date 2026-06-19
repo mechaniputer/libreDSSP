@@ -93,28 +93,28 @@ struct dict
 };
 
 // Check if a name is already used for a word/var
-int collisionSearch(char * name, dict * vocab);
+int collisionSearch(char * name);
 // Looks for defined variables
-variable_t * varSearch(char * name, dict * vocab);
+variable_t * varSearch(char * name);
 // Looks for words to see if they are already defined
-codeword_t * wordSearch(char * name, dict * vocab);
+codeword_t * wordSearch(char * name);
 // Looks for core words to see if they are defined
-codeword_t * coreSearch(char * name, dict * vocab);
+codeword_t * coreSearch(char * name);
 // Attempts to define a new function
-codeword_t * wordDefine(char * name, dict * vocab);
+codeword_t * wordDefine(char * name);
 // Defines built-in functions
-void defCore(char * name, void (*func)(), dict * vocab);
+void defCore(char * name, void (*func)());
 // Creates a new sub-dictionary
-subdict * newDict(char * name, dict * vocab);
+subdict * newDict(char * name);
 // Finds a sub-dictionary by name, returns NULL if not found
-subdict * findDict(char * name, dict * vocab);
+subdict * findDict(char * name);
 
 // Utility functions for undefined word table
-undefined_ref_t* undefSearch(char *name, dict *vocab);
-undefined_ref_t* create_undefined_ref(char *name, dict *vocab);
+undefined_ref_t* undefSearch(char *name);
+undefined_ref_t* create_undefined_ref(char *name);
 void add_reference(undefined_ref_t *undef, codeword_t **ref);
-void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var, dict *vocab);
+void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var);
 
-void deleteName(char * name, dict * vocab);
+void deleteName(char * name);
 
 #endif

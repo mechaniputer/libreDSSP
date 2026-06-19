@@ -26,6 +26,7 @@
 #include "util.h"
 #include "corewords.h"
 
+extern dict * vocab;
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
@@ -34,7 +35,7 @@
 // Return 1: Word found
 // Return 2: Variable found
 // Return 3: Undefined object found
-int collisionSearch(char * name, dict * vocab){
+int collisionSearch(char * name){
 	variable_t * tempVar;
 	codeword_t * tempWord;
 
@@ -64,7 +65,7 @@ int collisionSearch(char * name, dict * vocab){
 	}
 
 	// Last we check for undefined words with that name
-	if(NULL != undefSearch(name, vocab)){
+	if(NULL != undefSearch(name)){
 		return 3;
 	}
 	return 0;
@@ -72,7 +73,7 @@ int collisionSearch(char * name, dict * vocab){
 
 // Looks for defined variables
 // TODO add a way for the user to configure the subdict search order
-variable_t * varSearch(char * name, dict * vocab){
+variable_t * varSearch(char * name){
 	variable_t * tempVar;
 	subdict * tempSub;
 
@@ -99,7 +100,7 @@ variable_t * varSearch(char * name, dict * vocab){
 
 // Searches non-core dictionaries, returns codeword_t if it exists
 // TODO add a way for the user to configure the subdict search order
-codeword_t * wordSearch(char * name, dict * vocab){
+codeword_t * wordSearch(char * name){
 	codeword_t * tempWord;
 	subdict * tempSub;
 
@@ -124,7 +125,7 @@ codeword_t * wordSearch(char * name, dict * vocab){
 }
 
 // Searches core dictionary, returns codeword_t if it exists
-codeword_t * coreSearch(char * name, dict * vocab){
+codeword_t * coreSearch(char * name){
 	codeword_t * tempCore = vocab->core;
 
 	while(tempCore != NULL){
@@ -135,7 +136,7 @@ codeword_t * coreSearch(char * name, dict * vocab){
 }
 
 // Searches selected dictionary for word to redefine, or adds a new blank one of the specified name
-codeword_t * wordDefine(char * name, dict * vocab){
+codeword_t * wordDefine(char * name){
 	codeword_t * tempWord;
 
 	if(vocab->grow == NULL){
@@ -176,7 +177,7 @@ codeword_t * wordDefine(char * name, dict * vocab){
 	return tempWord;
 }
 
-void defCore(char * name, void (*func)(), dict * vocab){
+void defCore(char * name, void (*func)()){
 	if(strlen(name) > CORE_NAME_LEN-1){
 		printf("Fatal Error: Core word name %s exceeds %d characters\n",name,CORE_NAME_LEN-1);
 		exit(-1); // This is not an error we should recover from as it indicates a problem in libreDSSP itself
@@ -201,7 +202,7 @@ void defCore(char * name, void (*func)(), dict * vocab){
 }
 
 // Inserts a new subdictionary at the start of the linked list (as a stack)
-subdict * newDict(char * name, dict * vocab){
+subdict * newDict(char * name){
 	// Insert
 	subdict * tempSub = malloc(sizeof(subdict));
 	tempSub->next = vocab->sub;
@@ -216,7 +217,7 @@ subdict * newDict(char * name, dict * vocab){
 	return tempSub;
 }
 
-subdict * findDict(char * name, dict * vocab){
+subdict * findDict(char * name){
 	subdict * tempSub = vocab->sub;
 	while(tempSub != NULL){
 		if(!strcmp(tempSub->name, name)) return tempSub;
@@ -225,7 +226,7 @@ subdict * findDict(char * name, dict * vocab){
 	return NULL;
 }
 
-undefined_ref_t * undefSearch(char *name, dict *vocab){
+undefined_ref_t * undefSearch(char *name){
 	//printf("Looking for undefined word %s\n", name);
 	undefined_ref_t * temp = vocab->undefined;
 	while(temp != NULL){
@@ -237,7 +238,7 @@ undefined_ref_t * undefSearch(char *name, dict *vocab){
 }
 
 // Warning: Does not prevent adding duplicates
-undefined_ref_t * create_undefined_ref(char *name, dict *vocab){
+undefined_ref_t * create_undefined_ref(char *name){
 	//printf("Creating undefined word %s\n",name);
 	// Allocate and initialize
 	undefined_ref_t * newUndef = malloc(sizeof(undefined_ref_t));
@@ -284,7 +285,7 @@ void add_reference(undefined_ref_t *undef, codeword_t **ref){
 // WARNING: If the words that referenced this undefined word no longer exist, it can segfault.
 //          Currently, deleting words is not supported, but later it will be.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
-void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var, dict *vocab){
+void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var){
 	printf("Resolving previously undefined %s\n", name);
 
 	// Check the more error-prone params
@@ -362,7 +363,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 
 // Scans the entire dictionary (of words, not vars) for refs to the specified undef, and changes them to point to the undef's placeholder.
 // Any word in any subdict might refernce the word we are deleting.
-void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw, dict * vocab){
+void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 
 	subdict * tempSub;
 
@@ -415,7 +416,7 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw, dict * vocab){
 }
 
 // Finds an undef entry in the list and removes/frees it
-void delete_undef_ref(undefined_ref_t * uref, dict * vocab){
+void delete_undef_ref(undefined_ref_t * uref){
 	undefined_ref_t * curr = vocab->undefined;
 	undefined_ref_t * prev = NULL;
 	while(curr != NULL){
@@ -443,7 +444,7 @@ void delete_undef_ref(undefined_ref_t * uref, dict * vocab){
 	return;
 }
 
-void deleteName(char * name, dict * vocab){
+void deleteName(char * name){
 	// Note: deletion is constrained to the current subdict
 	// Because no name collisions are allowed within a subdict, this will only delete one object.
 	// It might be a word or a variable.
@@ -483,7 +484,7 @@ void deleteName(char * name, dict * vocab){
 			if(array[ind]->xt == _undefined_ref || array[ind]->xt == _undefined_assign){
 				printf("This word references undefined name %s!\n",array[ind]->name);
 				// We need to retrieve the undef record, remove the ref, and if the undef word hits 0 refs, get rid of it.
-				undefined_ref_t * uref = undefSearch(array[ind]->name, vocab);
+				undefined_ref_t * uref = undefSearch(array[ind]->name);
 				if(uref == NULL){
 					printf("ERR: Reference to nonexistent undefined word %s\n",array[ind]->name);
 					exit(-1);
@@ -503,7 +504,7 @@ void deleteName(char * name, dict * vocab){
 				if(uref->ref_count == 0){
 					printf("Undef word %s has no more refs, removing from undef table\n",uref->name);
 					// Call deletion helper to splice out the undef record and free it
-					delete_undef_ref(uref, vocab);
+					delete_undef_ref(uref);
 				}
 				ind += 1;
 			}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declareVar || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
@@ -524,10 +525,10 @@ void deleteName(char * name, dict * vocab){
 		}
 
 		// Create a new undef ref for this entity.
-		undefined_ref_t * uref = create_undefined_ref(name, vocab);
+		undefined_ref_t * uref = create_undefined_ref(name);
 
 		// Scan all user words in vocab->grow for references. Add refs and patch them to the appropriate undef placeholder.
-		patch_to_undef(uref, curr_word, vocab);
+		patch_to_undef(uref, curr_word);
 		// Free the old word
 		free(curr_word->name);
 		free(curr_word->text);
@@ -537,7 +538,7 @@ void deleteName(char * name, dict * vocab){
 		// If uref shows no refs, we can remove it immediately.
 		if(uref->ref_count == 0){
 			printf("Undef word %s has no refs, removing from undef table\n",uref->name);
-			delete_undef_ref(uref, vocab);
+			delete_undef_ref(uref);
 		}
 		return;
 	}
@@ -564,10 +565,10 @@ void deleteName(char * name, dict * vocab){
 	// Delete the var and return
 	if(curr_var != NULL){
 		// Create a new undef ref for this entity.
-		undefined_ref_t * uref = create_undefined_ref(name, vocab);
+		undefined_ref_t * uref = create_undefined_ref(name);
 
 		// Scan all user words in vocab->grow for references. Add refs and patch them to the appropriate undef placeholder.
-		patch_to_undef(uref, /*old_cw*/ NULL, vocab);
+		patch_to_undef(uref, /*old_cw*/ NULL);
 		// Free the old word
 		free(curr_var->name);
 		free(curr_var);
@@ -575,7 +576,7 @@ void deleteName(char * name, dict * vocab){
 		// If uref shows no refs, we can remove it immediately.
 		if(uref->ref_count == 0){
 			printf("Undef var %s has no refs, removing from undef table\n",uref->name);
-			delete_undef_ref(uref, vocab);
+			delete_undef_ref(uref);
 		}
 		return;
 	}

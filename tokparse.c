@@ -85,7 +85,7 @@ void reset_tokenizer_parser_state(){
 			// Replace prior definition with stub ;S definition so execution and undef lookups are safe
 			// We reuse the existing codeword_t since it is already in the dictionary
 			codeword_t ** stubDef = malloc(2*sizeof(codeword_t *));
-			stubDef[0] = coreSearch(";S", vocab);
+			stubDef[0] = coreSearch(";S");
 			stubDef[1] = NULL;
 
 			// Prevent leaks
@@ -394,13 +394,13 @@ void emit_cw(codeword_t * cw){
 void emit_word_by_name(char * name){
 	codeword_t * dict_entry = NULL;
 	undefined_ref_t * uref = NULL;
-	if((dict_entry = coreSearch(name, vocab)) != NULL){
+	if((dict_entry = coreSearch(name)) != NULL){
 		// Core word
 		emit_cw(dict_entry);
-	}else if((dict_entry = wordSearch(name, vocab)) != NULL){
+	}else if((dict_entry = wordSearch(name)) != NULL){
 		/// User word
 		emit_cw(dict_entry);
-	}else if(compiling && (uref = undefSearch(name, vocab)) != NULL){
+	}else if(compiling && (uref = undefSearch(name)) != NULL){
 		// Previously known undef word
 		// Don't add a ref if not in compiling mode! It will be a NULL ref!
 		add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
@@ -413,14 +413,14 @@ void emit_word_by_name(char * name){
 			abortExecution();
 			return;
 		}
-		uref = create_undefined_ref(name, vocab);
+		uref = create_undefined_ref(name);
 		add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
 		//add_reference(uref, newWordDictEntry); // Make the undef word record point here
 		emit_cw(uref->ref_placeholder);
 	}else{
 		// We are not compiling, so whatever we emit will be run immediately.
 		// There's no point in emitting anything undefined.
-		printf("ERR: Symbol %s is not an executable word\n", name);
+		printf("ERR: Symbol %s undefined\n", name);
 		abortExecution();
 		return;
 	}
@@ -456,12 +456,12 @@ int parse_tokens(char * tok){
 	switch(parser_state){
 	case PARSE_COMPILE_S0:
 		// Next token should be a valid user word name (alphanumeric, not in core or vars)
-		if(isValidWordVarName(tok) && (NULL == coreSearch(tok, vocab)) && (NULL == varSearch(tok, vocab))){
+		if(isValidWordVarName(tok) && (NULL == coreSearch(tok)) && (NULL == varSearch(tok))){
 			newWordName = malloc((1+strlen(tok))*sizeof(char));
 			strcpy(newWordName, tok);
 
 			// wordDefine is able to request an abort so we need to watch for that here
-			newWordDictEntry = wordDefine(newWordName, vocab);
+			newWordDictEntry = wordDefine(newWordName);
 			if(abort_requested) return 0; // Parser has already been reset
 
 			// newWordCode already allocated in compile mode setup
@@ -480,7 +480,7 @@ int parse_tokens(char * tok){
 		break;
 	case PARSE_COMPILE_S1:
 		if(!strcmp(tok,";")){
-			emit_cw(coreSearch(";S", vocab));
+			emit_cw(coreSearch(";S"));
 			//printf("Definition of %s complete\n", newWordName);
 
 
@@ -508,9 +508,9 @@ int parse_tokens(char * tok){
 			reset_pending_undefs();
 
 			// Check if this was a previously undefined word
-			undefined_ref_t * entry = undefSearch(newWordName, vocab);
+			undefined_ref_t * entry = undefSearch(newWordName);
 			if(NULL != entry){
-				resolve_undefined_ref(newWordName, newWordDictEntry, /*isVar*/ 0, /*var*/ NULL, vocab);
+				resolve_undefined_ref(newWordName, newWordDictEntry, /*isVar*/ 0, /*var*/ NULL);
 			}
 			print_codewords(newWordCode);
 			// Detach
@@ -530,7 +530,7 @@ int parse_tokens(char * tok){
 	case PARSE_NORMAL:
 		// In this mode, we expect:
 		// core words, user words, undef words, literal numbers, prints, strings.
-		if((dict_entry = coreSearch(tok, vocab)) != NULL){
+		if((dict_entry = coreSearch(tok)) != NULL){
 			// It's a core word
 			emit_cw(dict_entry);
 
@@ -564,45 +564,45 @@ int parse_tokens(char * tok){
 				PARSE_ENTER_STATE(PARSE_COMPILE_S0);
 		}else if((st = isPrint(tok)) != NULL){
 			// Push the string info, and print it
-			codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
+			codeword_t * cw_push_literal = coreSearch("PUSHLIT");
 			emit_cw(cw_push_literal);
 			emit_cw((codeword_t *) st);
 			emit_cw(cw_push_literal);
 			emit_cw((codeword_t *) strlen(st));
-			emit_cw(coreSearch("TOS", vocab));
+			emit_cw(coreSearch("TOS"));
 		}else if((st = isString(tok)) != NULL){
 			// Push the string info, but don't print it
-			codeword_t * cw_push_literal = coreSearch("PUSHLIT", vocab);
+			codeword_t * cw_push_literal = coreSearch("PUSHLIT");
 			emit_cw(cw_push_literal);
 			emit_cw((codeword_t *) st);
 			emit_cw(cw_push_literal);
 			emit_cw((codeword_t *) strlen(st));
 		}else if(isNum(tok)){
 			// It's a number
-			emit_cw(coreSearch("PUSHLIT", vocab));
+			emit_cw(coreSearch("PUSHLIT"));
 			emit_cw((codeword_t *) atol(tok));
-		}else if((var_lookup = varSearch(tok, vocab)) != NULL){
+		}else if((var_lookup = varSearch(tok)) != NULL){
 			emit_cw(&var_lookup->cw[0]); // PUSHVAR
 		}else if (isValidWordVarName(tok)){
 			// It must be a user word, possibly undefined
-			dict_entry = wordSearch(tok, vocab);
-			if((dict_entry = wordSearch(tok, vocab)) != NULL){
+			dict_entry = wordSearch(tok);
+			if((dict_entry = wordSearch(tok)) != NULL){
 				emit_cw(dict_entry);
-			}else if(compiling && ((uref = undefSearch(tok, vocab)) != NULL)){
+			}else if(compiling && ((uref = undefSearch(tok)) != NULL)){
 				// Previously known undef word
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
 				//add_reference(uref, newWordDictEntry); // Make the undef word record point here
 				emit_cw(uref->ref_placeholder);
 			}else if(compiling){
 				// New undef word
-				uref = create_undefined_ref(tok, vocab);
+				uref = create_undefined_ref(tok);
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
 				//add_reference(uref, newWordDictEntry); // Make the undef word record point here
 				emit_cw(uref->ref_placeholder);
 			}else{
 				// We are not compiling, so whatever we emit will be run immediately.
 				// There's no point in emitting anything undefined.
-				printf("ERR: Symbol %s is not an executable word\n", tok);
+				printf("ERR: Symbol %s undefined\n", tok);
 				abortExecution();
 				return 0;
 			}
@@ -639,7 +639,7 @@ int parse_tokens(char * tok){
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
-		emit_cw(coreSearch("SKP1", vocab));
+		emit_cw(coreSearch("SKP1"));
 		PARSE_CHANGE_STATE(PARSE_BR2_S1)
 		break;
 	case PARSE_BR2_S1:
@@ -668,7 +668,7 @@ int parse_tokens(char * tok){
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
-		emit_cw(coreSearch("SKP1", vocab));
+		emit_cw(coreSearch("SKP1"));
 		PARSE_CHANGE_STATE(PARSE_BRS_S1)
 		break;
 	case PARSE_BRS_S1:
@@ -682,7 +682,7 @@ int parse_tokens(char * tok){
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
-		emit_cw(coreSearch("SKP1", vocab));
+		emit_cw(coreSearch("SKP1"));
 		PARSE_CHANGE_STATE(PARSE_BRS_S2)
 		break;
 	case PARSE_BRS_S2:
@@ -703,7 +703,6 @@ int parse_tokens(char * tok){
 		// This has to be an integer
 		if(isNum(tok)){
 			// It's a number
-			printf("Branch cond %s becomes value %ld\n",tok, atol(tok));
 			emit_cw((codeword_t *) atol(tok));
 			PARSE_CHANGE_STATE(PARSE_BR_S2)
 		}else{
@@ -717,8 +716,7 @@ int parse_tokens(char * tok){
 		// This has to be an integer or an ELSE token
 		if(isNum(tok)){
 			// It's a number
-			emit_cw(coreSearch("SKP2", vocab));
-			printf("Branch cond %s becomes value %ld\n",tok, atol(tok));
+			emit_cw(coreSearch("SKP2"));
 			emit_cw((codeword_t *) atol(tok));
 			PARSE_CHANGE_STATE(PARSE_BR_S2)
 		}else if(!strcmp("ELSE", tok)){
@@ -752,7 +750,7 @@ int parse_tokens(char * tok){
 		if(abort_requested){
 			return 0;
 		}
-		emit_cw(coreSearch("SKP1", vocab));
+		emit_cw(coreSearch("SKP1"));
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
@@ -769,7 +767,7 @@ int parse_tokens(char * tok){
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
-		emit_cw(coreSearch("DO_LOOP", vocab));
+		emit_cw(coreSearch("DO_LOOP"));
 		PARSE_EXIT_STATE
 		break;
 	case PARSE_RP_S0:
@@ -783,7 +781,7 @@ int parse_tokens(char * tok){
 		emit_word_by_name(tok);
 		// emit_word_by_name() is able to request an abort so we need to watch for that here
 		if(abort_requested) return 0;
-		emit_cw(coreSearch("RP_LOOP", vocab));
+		emit_cw(coreSearch("RP_LOOP"));
 		PARSE_EXIT_STATE
 		break;
 	case PARSE_VAR_S0:
@@ -791,8 +789,8 @@ int parse_tokens(char * tok){
 		// This must not be a core word and must be alphanumeric
 		// If we get it, PARSE_EXIT_STATE
 		// Otherwise we need to error out of the parser
-		if(!isValidWordVarName(tok) || coreSearch(tok, vocab)){
-			printf("ERR: Variable name %s not allowed\n",tok);
+		if(!isValidWordVarName(tok) || coreSearch(tok)){
+			printf("ERR: %s invalid var name\n", tok);
 			abortExecution();
 			return 0;
 		}
@@ -804,31 +802,31 @@ int parse_tokens(char * tok){
 		break;
 	case PARSE_ASGN_S0:
 		// Can be an undefined or existing variable.
-		var_lookup = varSearch(tok, vocab);
+		var_lookup = varSearch(tok);
 		if((var_lookup) == NULL){
 			if(!compiling){
 				// In immediate mode, we error out.
-				printf("ERR: Unknown variable %s\n",tok);
+				printf("ERR: Unknown var %s\n",tok);
 				abortExecution();
 				return 0;
 			}else{
 				// In compiling mode, we start tracking the undef ref.
 				if(!isValidWordVarName(tok)){
-					printf("ERR: Symbol %s is not a valid var name\n", tok);
+					printf("ERR: %s invalid var name\n", tok);
 					abortExecution();
 					return 0;
 				}
 
 				// Check if the name is already a variable
-				if(wordSearch(tok, vocab)){
-					printf("ERR: Symbol %s is already defined as a word\n", tok);
+				if(wordSearch(tok)){
+					printf("ERR: Symbol %s already defined as a word\n", tok);
 					abortExecution();
 					return 0;
 				}
 
 				// Check if this is a known uref
-				uref = undefSearch(tok, vocab);
-				if(uref == NULL) uref = create_undefined_ref(tok, vocab);
+				uref = undefSearch(tok);
+				if(uref == NULL) uref = create_undefined_ref(tok);
 
 				// Add to pending undef refs
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
@@ -858,7 +856,7 @@ int parse_tokens(char * tok){
 	case PARSE_DICT_EXIST:
 		// Expecting a valid prior dictionary name
 		// Easily checked with findDict().
-		if((sub = findDict(tok, vocab)) == NULL){
+		if((sub = findDict(tok)) == NULL){
 			printf("ERR: Unknown dictionary %s\n",tok);
 			abortExecution();
 			return 0;

@@ -897,7 +897,7 @@ void _word_assign(){
 void _delete_name(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
-	deleteName(name, vocab);
+	deleteName(name);
 	return;
 }
 
@@ -941,7 +941,7 @@ void declareVar(){
 	}
 
 	// If there is a name collision in the current subdictionary, abort!
-	int collision = collisionSearch(varname,vocab);
+	int collision = collisionSearch(varname);
 	if(collision == 1){
 		printf("Error: name %s is already used\n",varname);
 		abortExecution();
@@ -949,7 +949,7 @@ void declareVar(){
 		return;
 	}else if(collision == 2){
 		// The var alredy exists, so we zero it
-		tempVar = varSearch(varname, vocab);
+		tempVar = varSearch(varname);
 		tempVar->value = 0;
 		return;
 	}
@@ -977,7 +977,7 @@ void declareVar(){
 	tempVar->cw[1].text = NULL;
 	tempVar->cw[1].size = 0;
 
-	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar, vocab);
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
 	//printf("Declared variable %s\n",varname);
 	return;
 
@@ -1008,7 +1008,7 @@ void printSpace(){
 void listDicts(){
 	subdict * tempSub = vocab->sub;
 	if(vocab->grow == NULL || vocab->grow->open == 0){
-		printf("Warning: no dictionary selected for expansion\n");
+		printf("Warning: no subdictionary selected for expansion\n");
 		printf("%s CLOSED\n",vocab->grow->name);
 	}else{
 		printf("%s OPEN\n",vocab->grow->name);
@@ -1033,10 +1033,10 @@ void growSub(){
 
 	// We need to check if the subdict exists using findDict(), and if it does we need to check if it is open.
 	// If it doesn't exist, we need to create it and open it.
-	subdict * tempSub = findDict(name, vocab);
+	subdict * tempSub = findDict(name);
 
 	if(tempSub == NULL){ // We are making a new subdict
-		tempSub = newDict(name, vocab);
+		tempSub = newDict(name);
 	}
 
 	vocab->grow = tempSub;
@@ -1163,96 +1163,96 @@ void inventoryWords(){
 }
 
 
-void define_all_core(dict * vocab){
+void define_all_core(){
 	// Most common literals
-	defCore("0", push_zero, vocab);
-	defCore("1", push_one, vocab);
-	defCore("2", push_two, vocab);
-	defCore("4", push_four, vocab);
-	defCore("8", push_eight, vocab);
+	defCore("0", push_zero);
+	defCore("1", push_one);
+	defCore("2", push_two);
+	defCore("4", push_four);
+	defCore("8", push_eight);
 
 	// Arithmetic
-	defCore("+", plus, vocab);
-	defCore("*", multiply, vocab);
-	defCore("-", minus, vocab);
-	defCore("/", divide, vocab);
-	defCore("NEG", negate, vocab);
-	defCore("ABS", absval, vocab);
-	defCore("1+", plus1, vocab);
-	defCore("2+", plus2, vocab);
-	defCore("3+", plus3, vocab);
-	defCore("4+", plus4, vocab);
-	defCore("1-", minus1, vocab);
-	defCore("2-", minus2, vocab);
-	defCore("3-", minus3, vocab);
-	defCore("4-", minus4, vocab);
+	defCore("+", plus);
+	defCore("*", multiply);
+	defCore("-", minus);
+	defCore("/", divide);
+	defCore("NEG", negate);
+	defCore("ABS", absval);
+	defCore("1+", plus1);
+	defCore("2+", plus2);
+	defCore("3+", plus3);
+	defCore("4+", plus4);
+	defCore("1-", minus1);
+	defCore("2-", minus2);
+	defCore("3-", minus3);
+	defCore("4-", minus4);
 
 	// Display and interpreter
-	defCore("BYE", bye, vocab);
-	defCore(".", showTop, vocab);
-	defCore("..", showStack, vocab);
-	defCore("B10", base10, vocab);
+	defCore("BYE", bye);
+	defCore(".", showTop);
+	defCore("..", showStack);
+	defCore("B10", base10);
 
 	// Conditionals
-	defCore("IF+", ifplus, vocab);
-	defCore("IF0", ifzero, vocab);
-	defCore("IF-", ifminus, vocab);
-	defCore("BR-", branchminus, vocab);
-	defCore("BR0", branchzero, vocab);
-	defCore("BR+", branchplus, vocab);
-	defCore("BRS", branchsign, vocab);
-	defCore("BR", branch, vocab);
-	defCore("=", equality, vocab);
-	defCore(">", greaterthan, vocab);
-	defCore("<", lessthan, vocab);
+	defCore("IF+", ifplus);
+	defCore("IF0", ifzero);
+	defCore("IF-", ifminus);
+	defCore("BR-", branchminus);
+	defCore("BR0", branchzero);
+	defCore("BR+", branchplus);
+	defCore("BRS", branchsign);
+	defCore("BR", branch);
+	defCore("=", equality);
+	defCore(">", greaterthan);
+	defCore("<", lessthan);
 
 	// Looping and flow control
-	defCore("DO", do_begin, vocab);
-	defCore("DO_LOOP", do_loop, vocab); // Not to be used directly
-	defCore("RP", rp_begin, vocab);
-	defCore("RP_LOOP", rp_loop, vocab); // Not to be used directly
-	defCore("EX", loop_exit, vocab);
-	defCore("EX-", loop_exit_minus, vocab);
-	defCore("EX0", loop_exit_zero, vocab);
-	defCore("EX+", loop_exit_plus, vocab);
-	defCore("EXT", loop_exit_nested, vocab);
+	defCore("DO", do_begin);
+	defCore("DO_LOOP", do_loop); // Not to be used directly
+	defCore("RP", rp_begin);
+	defCore("RP_LOOP", rp_loop); // Not to be used directly
+	defCore("EX", loop_exit);
+	defCore("EX-", loop_exit_minus);
+	defCore("EX0", loop_exit_zero);
+	defCore("EX+", loop_exit_plus);
+	defCore("EXT", loop_exit_nested);
 
 	// Stack manipulation
-	defCore("E2", exch2, vocab);
-	defCore("E3", exch3, vocab);
-	defCore("E4", exch4, vocab);
-	defCore("ET", exchdepth, vocab);
-	defCore("C", copy, vocab);
-	defCore("C2", copy2, vocab);
-	defCore("C3", copy3, vocab);
-	defCore("C4", copy4, vocab);
-	defCore("CT", copydepth, vocab);
-	defCore("D", drop, vocab);
-	defCore("DS", dropStack, vocab);
+	defCore("E2", exch2);
+	defCore("E3", exch3);
+	defCore("E4", exch4);
+	defCore("ET", exchdepth);
+	defCore("C", copy);
+	defCore("C2", copy2);
+	defCore("C3", copy3);
+	defCore("C4", copy4);
+	defCore("CT", copydepth);
+	defCore("D", drop);
+	defCore("DS", dropStack);
 
 	// Misc
 	// TODO for special functions we should just use references instead of the dictionary.
-	defCore("PUSHLIT", pushLiteral, vocab);
-	//defCore("DOCOLON", word_enter, vocab); // Not to be used directly
-	defCore(";S", word_exit, vocab); // Not to be used directly
-	defCore("SKP1", skip1, vocab); // Not to be used directly
-	defCore("SKP2", skip2, vocab); // Not to be used directly
-	defCore("NOP", noop, vocab);
-	defCore("VAR", declareVar, vocab);
-	//defCore("!", assignVar, vocab); // Not to be used directly
-	//defCore("PUSHVAR", pushVar, vocab); // Not to be used directly
-	defCore("CR", printNewline, vocab);
-	defCore("SP", printSpace, vocab);
-	defCore("?$", listDicts, vocab);
-	defCore("GROW", growSub, vocab);
-	defCore("SHUT", shutSub, vocab);
-	defCore("USE", openSub, vocab);
-	defCore("DEL", _delete_name, vocab);
-	defCore("TIN", termInNum, vocab);
-	defCore("TON", termOutNum, vocab);
-	defCore("TOS", termOutString, vocab);
-	defCore("DEEP", stackDepth, vocab);
-	defCore("UNDEF",inventoryUndefined, vocab);
-	defCore("WORDS", inventoryWords, vocab); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
+	defCore("PUSHLIT", pushLiteral);
+	//defCore("DOCOLON", word_enter); // Not to be used directly
+	defCore(";S", word_exit); // Not to be used directly
+	defCore("SKP1", skip1); // Not to be used directly
+	defCore("SKP2", skip2); // Not to be used directly
+	defCore("NOP", noop);
+	defCore("VAR", declareVar);
+	//defCore("!", assignVar); // Not to be used directly
+	//defCore("PUSHVAR", pushVar); // Not to be used directly
+	defCore("CR", printNewline);
+	defCore("SP", printSpace);
+	defCore("?$", listDicts);
+	defCore("GROW", growSub);
+	defCore("SHUT", shutSub);
+	defCore("USE", openSub);
+	defCore("DEL", _delete_name);
+	defCore("TIN", termInNum);
+	defCore("TON", termOutNum);
+	defCore("TOS", termOutString);
+	defCore("DEEP", stackDepth);
+	defCore("UNDEF",inventoryUndefined);
+	defCore("WORDS", inventoryWords); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
 	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
 }

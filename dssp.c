@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
 	vocab->undefined = NULL;
 
 	// Add dictionary entries for every core word (corewords.c)
-	define_all_core(vocab);
+	define_all_core();
 
 	// Sub-Dictionaries
 	vocab->sub = malloc(sizeof(subdict)); // For user defined words, can add more dicts later
