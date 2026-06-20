@@ -100,7 +100,7 @@ Also let us know if you are interested in setting up other resources such as an 
 - T0, T1 (assign 0 or 1 to prior top of stack)
 - Variable/Array store shortcuts: !0, !1, !1-, !1+, !-, !+, !!!
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
-- Word ops: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
+- Data permutation: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
 - ONLY, CANCEL, FORGET, CLEAR
 - :: (to define words not subject to CLEAR)
 - "local values" S( ) feature mentioned in daf.txt and apparently working in DSSP-32? Not documented elsewhere.

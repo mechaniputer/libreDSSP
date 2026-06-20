@@ -342,7 +342,7 @@ void reset_pending_undefs(){
 // Appends a new undefined ref
 // Grows in increments of 2 elements
 void add_pending_undef(undefined_ref_t * uref, int cell_index){
-	printf("Adding pending undef: %s at cell %d\n", uref->name, cell_index);
+	//printf("Adding pending undef: %s at cell %d\n", uref->name, cell_index);
 	if(newWordUndefs == NULL){
 		newWordUndefs = malloc(2*sizeof(pend_undef_ref_t));
 		newWordPendUndefsCap = 2;
@@ -512,7 +512,7 @@ int parse_tokens(char * tok){
 			if(NULL != entry){
 				resolve_undefined_ref(newWordName, newWordDictEntry, /*isVar*/ 0, /*var*/ NULL);
 			}
-			print_codewords(newWordCode);
+			//print_codewords(newWordCode);
 			// Detach
 			newWordCode = NULL;
 			newWordText = NULL;
