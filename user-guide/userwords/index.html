@@ -128,11 +128,15 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#user-defined-words" class="nav-link">User-defined Words</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-bs-level="2"><a href="#defining" class="nav-link">Defining</a>
+            <li class="nav-item" data-bs-level="2"><a href="#defining-words" class="nav-link">Defining words</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#redefining" class="nav-link">Redefining</a>
+            <li class="nav-item" data-bs-level="2"><a href="#redefining-words" class="nav-link">Redefining words</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#viewing-defined-words" class="nav-link">Viewing defined words</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -140,7 +144,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#displaying-currently-defined-words" class="nav-link">Displaying currently defined words</a>
+            <li class="nav-item" data-bs-level="2"><a href="#displaying-currently-undefined-words" class="nav-link">Displaying currently undefined words</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -156,7 +160,7 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="user-defined-words">User-defined Words</h1>
-<h2 id="defining">Defining</h2>
+<h2 id="defining-words">Defining words</h2>
 <p>To define a new word, enter a statement in the following format:</p>
 <pre><code>: word_name body1 body2 [body 3 ...] ;
 </code></pre>
@@ -168,8 +172,23 @@
 <pre><code>: square
     C 2 * ;
 </code></pre>
-<h2 id="redefining">Redefining</h2>
+<h2 id="redefining-words">Redefining words</h2>
 <p>If you need to change the definition of the word, you may simply define it again with a different body. No special steps are needed. The old definition will be seamlessly replaced and any word that invokes the updated word will already use the new version.</p>
+<p>If you want to rebind the name of a word to a variable, you must use <code>DEL</code> to delete the word first.
+The word <code>DEL</code> will only delete words from the <a href="../dictionaries/">subdictionary</a> currently selected for modification.</p>
+<h2 id="viewing-defined-words">Viewing defined words</h2>
+<p>You can view a list of the names of all currently-defined words by running <code>WORD</code>.
+To see the actual definition of a word, use <code>SEE</code>.</p>
+<p>Example:</p>
+<pre><code>* WORDS
+Subdict: $DEFAULT
+  bar  foo
+* SEE bar
+Subdict: $DEFAULT (OPEN)
+  : bar  .&quot;Hello from bar&quot; CR ;
+*
+</code></pre>
+<p>Because one name might correspond to several words in distinct subdictionaries, these commands print all definitions and indicate the subdictionary that contains each definition.</p>
 <h2 id="undefined-words">Undefined words</h2>
 <p>As mentioned on the <a href="../jargon/">DSSP Jargon</a> page, DSSP allows you to reference (but not use) undefined words.
 For example, consider the following code:</p>
@@ -192,7 +211,7 @@ ERR: Undefined word add_3 called during execution
 *
 </code></pre>
 <p>As a consequence of these features, note that if you write part of a program and test it, as long as you do not hit any of the undefined words during the test, <em>(or until you do)</em> you will be able to examine how the finished program will behave for the inputs you provide.</p>
-<h2 id="displaying-currently-defined-words">Displaying currently defined words</h2>
+<h2 id="displaying-currently-undefined-words">Displaying currently undefined words</h2>
 <p>The above might make you think, <em>"What if I forget to define a word and deploy code that will fail when that word is called?"</em> Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word <code>UNDEF</code>:</p>
 <pre><code>* : foo bar baz ;
 * UNDEF

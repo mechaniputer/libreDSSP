@@ -165,10 +165,9 @@ libreDSSP consists of <a href="../corewords/">core words</a> and allows programm
 <h2 id="cell-size">Cell size</h2>
 <p>Unfortunately, the word "word" can also refer to the size of the machine word. In libreDSSP the machine word size determines the size of cells, so these docs will try to refer to the "cell size" rather than "word size". libreDSSP targets machines with a word size of either 32 or 64 bits, and the cell size will match the word size of the machine that libreDSSP was compiled for.</p>
 <h2 id="top-down-programming">Top-down programming</h2>
-<p>libreDSSP (unlike most Forth dialects) allows you to define a word that calls into another word that is not yet defined (including the very word that you are currently defining, as in recursion). This allows for "top-down programming", in which you break the problem into subproblems prior to implementing solutions to any of those subproblems.</p>
-<p>This also makes it possible to test an incomplete program. If an undefined word is run during testing, execution will cleanly abort and return to the libreDSSP prompt.</p>
-<p>You can view a list of all currently undefined words by running the word <code>UNDEF</code>.</p>
-<p><strong>Note:</strong> Currently, you may only reference undefined <a href="../userwords/">user words</a>, not undefined variables. A future version will support references to undefined variables as well. In the meantime, <ins>you cannot reference a variable on the same line that you declare it.</ins></p>
+<p>libreDSSP (unlike most Forth dialects) allows you to define a word that references a name (of a word or variable) that is not yet defined. This includes, for example, references to the same word that you are defining (as in recursion). This allows for "top-down programming", in which you break the problem into subproblems and implement the core logic prior to implementing solutions to any/all of those subproblems.</p>
+<p>This also makes it possible to test an incomplete program. If an undefined word is run (or undefined variable is referenced) during testing, execution will cleanly abort and return to the libreDSSP prompt.</p>
+<p>You can view a list of all currently undefined names by running the word <code>UNDEF</code>.</p>
 <h2 id="compile-mode">Compile mode</h2>
 <p>Those of you familiar with Forth will probably know of a distinction between "compile mode" and "immediate mode".
 For new Forth users, the nuances of these modes can be a source of confusion.

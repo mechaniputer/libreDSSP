@@ -160,6 +160,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#avoiding-performance-nondeterminism" class="nav-link">Avoiding performance nondeterminism</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -271,7 +275,12 @@ Each tuple should be additionally indented (if already inside of a word definiti
     -1 temperature_low
     0 temperature_good
     ELSE temperature_high ;
-</code></pre></div>
+</code></pre>
+<h2 id="avoiding-performance-nondeterminism">Avoiding performance nondeterminism</h2>
+<p>libreDSSP includes many "convenience" features for developers. While these are intended to be used for interactive development, libreDSSP strives for orthogonality and many of these features can technically be invoked at runtime as well.</p>
+<p>The words <code>GROW</code>, <code>VAR</code>, and <code>DEL</code> all perform dynamic allocation behind the scenes, and <code>DEL</code> even performs a linear-time search of all user-defined words. <code>WORDS</code>, <code>VARS</code> and <code>SEE</code> also perform lengthy dictionary searches. Although all of these operations should take at most a few milliseconds on any realistic target (even if we assume memory is entirely full of word definitions), the exact running time of all of these words is dependent on many factors. If memory is low, these words can also sometimes fail due to insufficient heap space.</p>
+<p>Once implemented, the words <code>VCTR</code> and <code>ARR</code> will join those above.</p>
+<p>Although libreDSSP comes with no warranty, our claim and aspiration is that, if you avoid calling any of the above words after initialization, performance will be consistent and there will be no memory allocations during execution.</p></div>
             </div>
         </div>
 

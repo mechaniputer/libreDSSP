@@ -152,6 +152,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sign-test" class="nav-link">Sign test</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#maxmin" class="nav-link">Max/Min</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-bs-level="2"><a href="#shorthand-additionsubtraction" class="nav-link">Shorthand addition/subtraction</a>
               <ul class="nav flex-column">
               </ul>
@@ -220,6 +228,15 @@ This is equivalent to <code>-1 *</code>.</p>
 <p>To take the absolute value of the top cell, use the word <code>ABS</code>.
 The top cell will be replaced.
 This is equivalent to <code>C IF- NEG</code>.</p>
+<h2 id="sign-test">Sign test</h2>
+<p>The word <code>SGN</code> will compare the top stack cell with 0.
+If the stack top is negative, it is replaced with <code>-1</code>.
+If the stack top is positive, it is replaced with <code>1</code>.
+If the stack top is zero, it remains <code>0</code>.</p>
+<h2 id="maxmin">Max/Min</h2>
+<p>The words <code>MAX</code> and <code>MIN</code> compare the top two stack cells.
+<code>MAX</code> drops the lower valued cell (keeping the max).
+<code>MIN</code> drops the higher valued cell (keeping the min).</p>
 <h2 id="shorthand-additionsubtraction">Shorthand addition/subtraction</h2>
 <p>libreDSSP includes several words to perform common increment/decrement operations.</p>
 <p>The reason for the existence of these words is threefold:</p>

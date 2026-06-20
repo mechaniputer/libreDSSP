@@ -198,21 +198,13 @@ foo bar baz
 *
 </code></pre>
 <h2 id="getting-numeric-input-from-the-user">Getting numeric input from the user</h2>
-<p>The <code>TIN</code> word reads numeric input from the user. <code>TIN</code> requires a size parameter on top of the stack, which will be consumed.
-The size specifies how many digits the user should be allowed to type.</p>
-<p>Example of correct usage:</p>
-<pre><code>* .&quot;Enter a 2-digit number: &quot; 2 TIN
-Enter a 2-digit number: 42
+<p>The <code>TIN</code> word reads numeric input from the user and pushes the value to the stack.
+The number is allowed to begin with a minus sign.</p>
+<p>Example:</p>
+<pre><code>* TIN
+1234567890
 * ..
-[42]
-*
-</code></pre>
-<p>If the user enters more than the specified number of digits, the number will be truncated, preserving the lowest signifigance digits.</p>
-<p>Example of truncation:</p>
-<pre><code>* .&quot;Enter a 2-digit number: &quot; 2 TIN
-Enter a 2-digit number: 123456
-* ..
-[56]
+[1234567890]
 *
 </code></pre>
 <h2 id="printing-numeric-data-from-the-stack">Printing numeric data from the stack</h2>
@@ -225,13 +217,21 @@ Both stack operands will be consumed.</p>
 123456
 *
 </code></pre>
-<p>If the number contains more than the specified number of digits, the number will be truncated, preserving the lowest signifigance digits.</p>
+<p>If the number contains more than the specified number of digits, the number will be truncated, preserving the least significant digits.</p>
 <p>Example with truncation:</p>
 <pre><code>* 123456 3 TON CR
 456
 *
 </code></pre>
-<p>You can of course use the word <code>.</code> to print the top of the stack with a newline, without truncation, and without consuming any stack values:</p>
+<p>If the number contains less the specified number of digits, spaces will be prepended:</p>
+<p>Example with padding:</p>
+<pre><code>* 123 3 TON CR
+123
+* 123 6 TON CR
+   123
+*
+</code></pre>
+<p>You can of course use the word <code>.</code> to print the top of the stack with a newline, without truncation or padding, and without consuming any stack values:</p>
 <pre><code>* 123456 .
 123456
 * ..

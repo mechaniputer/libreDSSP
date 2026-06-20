@@ -140,7 +140,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#choosing-subdictionaries-for-growth" class="nav-link">Choosing subdictionaries for growth</a>
+            <li class="nav-item" data-bs-level="2"><a href="#choosing-subdictionaries-for-modification" class="nav-link">Choosing subdictionaries for modification</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -180,13 +180,13 @@ $DEFAULT OPEN
 $PRIME OPEN
 *
 </code></pre>
-<p>The subdictionary at the top of the list is the one currently selected for growth.
+<p>The subdictionary at the top of the list is the one currently selected for modification.
 The status of a subdictionary is either <code>OPEN</code> or <code>CLOSED</code>.
 An <code>OPEN</code> subdictionary can be used when looking for previously defined entities, but a <code>CLOSED</code> one cannot.
-If the dictionary currently selected for growth is <code>CLOSED</code>, new entities cannot be added.</p>
+If the dictionary currently selected for modification is <code>CLOSED</code>, new entities cannot be added.</p>
 <h2 id="opening-a-new-subdictionary">Opening a new subdictionary</h2>
 <p>To open a new subdictionary which did not previously exist, use <code>GROW</code>.
-The new subdictionary will be automatically selected for growth so that subsequently defined entities will go into it.</p>
+The new subdictionary will be automatically selected for modification so that subsequently defined entities will go into it.</p>
 <pre><code>* GROW $MATH
 * ?$
 $MATH OPEN
@@ -194,8 +194,8 @@ $PRIME OPEN
 $DEFAULT OPEN
 *
 </code></pre>
-<h2 id="choosing-subdictionaries-for-growth">Choosing subdictionaries for growth</h2>
-<p>The <code>GROW</code> word used above to create a new subdictionary is also used to re-select a previously defined subdictionary for growth.</p>
+<h2 id="choosing-subdictionaries-for-modification">Choosing subdictionaries for modification</h2>
+<p>The <code>GROW</code> word used above to create a new subdictionary is also used to re-select a previously defined subdictionary for modification.</p>
 <pre><code>* GROW $DEFAULT
 * ?$
 $DEFAULT OPEN

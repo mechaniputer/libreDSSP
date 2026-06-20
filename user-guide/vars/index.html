@@ -144,6 +144,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#viewing-defined-variables" class="nav-link">Viewing defined variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#deleting-variables" class="nav-link">Deleting variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-bs-level="2"><a href="#shortcuts-for-altering-variable-contents" class="nav-link">Shortcuts for altering variable contents</a>
               <ul class="nav flex-column">
               </ul>
@@ -193,10 +201,25 @@ The best style approach, however, is to declare your variables at the top of the
 [5]
 * 
 </code></pre>
+<h2 id="viewing-defined-variables">Viewing defined variables</h2>
+<p>You can get a list of all defined variables across all <a href="../dictionaries/">subdictionaries</a> with the <code>VARS</code> command.
+To print the current value of a variable, use <code>SEE</code>.</p>
+<p>Example:</p>
+<pre><code>* VARS
+Subdict: $DEFAULT
+  z  y  x
+* SEE x
+Subdict: $DEFAULT (OPEN)
+  x: 7
+*
+</code></pre>
+<h2 id="deleting-variables">Deleting variables</h2>
+<p>You can use <code>DEL</code> to delete the a variable from the <a href="../dictionaries/">subdictionary</a> currently selected for modification.
+This is the only way to redefine a variable as a word.</p>
 <h2 id="shortcuts-for-altering-variable-contents">Shortcuts for altering variable contents</h2>
 <p>A future version of libreDSSP will add support for the following words: <code>!0, !1, !1-, !1+, !-, !+, !!!</code>. They will be documented here at that time.</p>
 <h2 id="a-note-about-subdictionaries">A note about subdictionaries</h2>
-<p>When you define a variable, it will go into whatever subdictionary is selected for expansion. By default, this will be a subdictionary called <code>$DEFAULT</code>.
+<p>When you define a variable, it will go into whatever subdictionary is selected for modification. By default, this will be a subdictionary called <code>$DEFAULT</code>.
 Words from one subdictionary can reference and use variables from any other subdictionary, but this can also be restricted.
 For more about the use of subdictionaries in libreDSSP, refer to the <a href="../dictionaries/">relevant page</a>.</p></div>
             </div>
