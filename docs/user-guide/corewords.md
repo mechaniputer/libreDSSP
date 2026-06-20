@@ -71,6 +71,7 @@ The order is mostly alphabetical with some minor variances for the purpose of gr
 | NEG | Negate the cell at top of stack | |
 | NOP | Do nothing (no-op)| |
 | RP | Repeat the following word until a loop exit is triggered | |
+| SEE | Print the current definitions bound to a name (in all subdictionaries) | |
 | SHUT | Disable lookup access to a given subictionary | |
 | SP | Print a space | |
 | TIN | Terminal Input Number | |
@@ -79,4 +80,5 @@ The order is mostly alphabetical with some minor variances for the purpose of gr
 | UNDEF | List undefined words | |
 | USE | Enable lookup access to a given subdictionary | |
 | VAR | Declare a new variable (init to 0) | |
+| VARS | List all user-defined variables | |
 | WORDS | List all user-defined words | |
