@@ -28,6 +28,23 @@ If you need to change the definition of the word, you may simply define it again
 If you want to rebind the name of a word to a variable, you must use `DEL` to delete the word first.
 The word `DEL` will only delete words from the [subdictionary](dictionaries.md) currently selected for modification.
 
+## Viewing defined words
+You can view a list of the names of all currently-defined words by running `WORD`.
+To see the actual definition of a word, use `SEE`.
+
+Example:
+```
+* WORDS
+Subdict: $DEFAULT
+  bar  foo
+* SEE bar
+Subdict: $DEFAULT (OPEN)
+  : bar  ."Hello from bar" CR ;
+*
+```
+
+Because one name might correspond to several words in distinct subdictionaries, these commands print all definitions and indicate the subdictionary that contains each definition.
+
 ## Undefined words
 As mentioned on the [DSSP Jargon](jargon.md) page, DSSP allows you to reference (but not use) undefined words.
 For example, consider the following code:
@@ -56,7 +73,7 @@ If you subsequently define `add_3`, the old definition of `foo` will automatical
 
 As a consequence of these features, note that if you write part of a program and test it, as long as you do not hit any of the undefined words during the test, *(or until you do)* you will be able to examine how the finished program will behave for the inputs you provide.
 
-## Displaying currently defined words
+## Displaying currently undefined words
 The above might make you think, *"What if I forget to define a word and deploy code that will fail when that word is called?"* Well first of all, don't do that. But also, you can print a list of all referenced but undefined words by executing the core word `UNDEF`:
 ```
 * : foo bar baz ;

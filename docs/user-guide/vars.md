@@ -45,6 +45,21 @@ Typing the name of a variable will result in the current value being pushed to t
 * 
 ```
 
+## Viewing defined variables
+You can get a list of all defined variables across all [subdictionaries](dictionaries.md) with the `VARS` command.
+To print the current value of a variable, use `SEE`.
+
+Example:
+```
+* VARS
+Subdict: $DEFAULT
+  z  y  x
+* SEE x
+Subdict: $DEFAULT (OPEN)
+  x: 7
+*
+```
+
 ## Deleting variables
 You can use `DEL` to delete the a variable from the [subdictionary](dictionaries.md) currently selected for modification.
 This is the only way to redefine a variable as a word.
