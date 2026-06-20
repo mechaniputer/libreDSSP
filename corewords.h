@@ -42,6 +42,9 @@ void minus();
 void divide();
 void negate();
 void absval();
+void sign();
+void max();
+void min();
 
 void plus1();
 void plus2();

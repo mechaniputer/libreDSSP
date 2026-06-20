@@ -67,6 +67,17 @@ To take the absolute value of the top cell, use the word `ABS`.
 The top cell will be replaced.
 This is equivalent to `C IF- NEG`.
 
+## Sign test
+The word `SGN` will compare the top stack cell with 0.
+If the stack top is negative, it is replaced with `-1`.
+If the stack top is positive, it is replaced with `1`.
+If the stack top is zero, it remains `0`.
+
+## Max/Min
+The words `MAX` and `MIN` compare the top two stack cells.
+`MAX` drops the lower valued cell (keeping the max).
+`MIN` drops the higher valued cell (keeping the min).
+
 ## Shorthand addition/subtraction
 libreDSSP includes several words to perform common increment/decrement operations.
 

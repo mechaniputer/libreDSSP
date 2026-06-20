@@ -51,21 +51,21 @@ Also let us know if you are interested in setting up other resources such as an 
 
 - When you redefine a word in a subdictionary, past references to the same word (in the same subdictionary) automatically use the new definition. Earlier DSSPs seem to have kept the definition originally referenced, which results in a needlessly more confusing environment and makes it hard to fix earlier mistakes.
 
-- Instead of the traditional "rollback" mechanism for word deletion, we support the `DEL` word to delete any individual object within the subdictionary currently selected for expansion/modification.
+- Instead of the traditional "rollback" mechanism for word deletion, we support the `DEL` word to delete any individual object within the subdictionary currently selected for expansion/modification. Old refs are patched to be "undefined".
 
 - So-called "compiling words" like `VAR`, `VCTR`, `ARR`, etc, can be used inside of a defined word without needing to use `TEXEC`. In fact, this goes for nearly any core word. In libreDSSP these words are "state smart", and will not waste space if invoked repeatedly at runtime. Earlier DSSPs seem not to have allowed this, limiting reference patching to compile/parse time. libreDSSP can patch variable references at runtime whenever a declaration or deletion occurs. Note that these words can still introduce performance nondeterminisms, and it is recommended to only call them during initialization if this is a concern.
 
 
 ## What works
-- Top-down programming! (reference undefined words when defining words)
+- Top-down programming! (reference undefined names when defining words)
 - UNDEF (list undefined words)
-- DEL (delete word or variable)
+- DEL (delete named object, unbind name)
 - Basic math operations (+,*,-,/)
 - VAR, !, push value of variable by name
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
 - =, <, >
-- NEG, ABS
-- ..(show stack), .(show top of stack)
+- NEG, ABS, SGN, MAX, MIN
+- .. (show stack), . (show top of stack)
 - IF+, IF0, IF-
 - BR+, BR0, BR-, BRS, BR
 - DO, RP (loops)
@@ -91,7 +91,6 @@ Also let us know if you are interested in setting up other resources such as an 
 
 ## What doesn't work yet
 - File IO (this doesn't seem to be very standardized so we are allowed to make good choices here)
-- References to undefined vars
 - VCTR, ARR, CNST, BYTE, WORD, LONG, QUAD (new), VALUE, TEXT, FIX, EMPTY, EQU
 - ' (push address of var)
 - '' (push address of function)
@@ -99,8 +98,6 @@ Also let us know if you are interested in setting up other resources such as an 
 - ACT (mark a VAR as an executable word pointer, callable by name)
 - !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
 - T0, T1 (assign 0 or 1 to prior top of stack)
-- SGN (push -1, 0, or 1 based on sign of stack top)
-- MAX, MIN
 - Variable/Array store shortcuts: !0, !1, !1-, !1+, !-, !+, !!!
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
 - Word ops: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)

@@ -159,6 +159,56 @@ void absval(){
 	return;
 }
 
+void sign(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for SGN\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	} else if(TOP_FROM_IND < 0) {
+		TOP_FROM_IND = -1;
+	}else if(TOP_FROM_IND > 0) {
+		TOP_FROM_IND = 1;
+	}
+	// 0 is already 0
+	return;
+}
+
+void max(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for MAX\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_data = pop(dataStack);
+	top_ind -=1;
+	if(temp_data > TOP_FROM_IND){
+		TOP_FROM_IND = temp_data;
+	}
+	return;
+}
+
+void min(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for MIN\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_data = pop(dataStack);
+	top_ind -=1;
+	if(temp_data < TOP_FROM_IND){
+		TOP_FROM_IND = temp_data;
+	}
+	return;
+}
+
 void plus1(){
 	FETCH_TOP_IND
 	if(STACKEMPTY){
@@ -1235,6 +1285,9 @@ void define_all_core(){
 	defCore("/", divide);
 	defCore("NEG", negate);
 	defCore("ABS", absval);
+	defCore("SGN", sign);
+	defCore("MAX", max);
+	defCore("MIN", min);
 	defCore("1+", plus1);
 	defCore("2+", plus2);
 	defCore("3+", plus3);
