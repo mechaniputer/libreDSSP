@@ -24,7 +24,7 @@
 #define PARSE_BR_S3         (10)
 #define PARSE_DO_S0         (11)
 #define PARSE_RP_S0         (12)
-#define PARSE_VAR_S0        (13)
+#define PARSE_VAR_NAME_S0   (13)
 #define PARSE_ASGN_S0       (14)
 #define PARSE_DICT_NEW      (15)
 #define PARSE_DICT_EXIST    (16)

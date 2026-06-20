@@ -19,7 +19,7 @@
 
 VAR step_v
 
-VAR PREVDEPTH
+VAR prev_depth
 
 : next CR step_v
   BR
@@ -84,10 +84,10 @@ VAR PREVDEPTH
   ." any of these four operators will apply that operator" ." to the top two elements of" CR
   ." the stack, leaving the result in their place. Give it a try and use '..' to view" CR
   ." the effect that it has on the stack." CR
-  DEEP ! PREVDEPTH incStep ;
+  DEEP ! prev_depth incStep ;
 
 [Clearing the stack]
-: step4 PREVDEPTH DEEP - BR- step4bad step4ok nextRemind ;
+: step4 prev_depth DEEP - BR- step4bad step4ok nextRemind ;
 
 : step4bad ." It doesn't look like you did any math operations yet." CR
   ." Please try one of: + - * /" CR ;

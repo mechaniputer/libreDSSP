@@ -1153,9 +1153,66 @@ void inventoryWords(){
 			printf("Subdict: %s\n",tempSub->name);
 			tempWord = tempSub->wordlist;
 			while(tempWord != NULL){
-				printf("  %s\n",tempWord->text);
+				printf("  %s",tempWord->name);
 				tempWord = tempWord->next;
 			}
+			printf("\n");
+		}
+		tempSub = tempSub->next;
+	}
+	return;
+}
+
+// Prints definition of a name (all occurrences in all open dictionaries)
+// The next cell should contain a valid name (the parser has checked the format)
+void seeName(){
+	cmdbuf->ip++; // Advance to data cell
+	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
+
+	subdict * tempSub = vocab->sub;
+	codeword_t * tempWord;
+	variable_t * tempVar;
+	while(tempSub != NULL){
+
+		// First check for a word
+		tempWord = tempSub->wordlist;
+		while(tempWord != NULL){
+			if(!strcmp(name, tempWord->name)){
+				printf("Subdict: %s (%s)\n",tempSub->name, (tempSub->open ? "OPEN" : "CLOSED"));
+				printf("  %s\n",tempWord->text);
+				break; // One occurrence max per subdict
+			}
+			tempWord = tempWord->next;
+		}
+
+		// Next check for a var
+		tempVar = tempSub->varlist;
+		while(tempVar != NULL){
+			// TODO this will need to be modified to print vectors and arrays
+			if(!strcmp(name, tempVar->name)){
+				printf("Subdict: %s (%s)\n",tempSub->name, (tempSub->open ? "OPEN" : "CLOSED"));
+				printf("  %s: %ld\n",tempVar->name, tempVar->value);
+				break; // One occurrence max per subdict
+			}
+			tempVar = tempVar->next;
+		}
+		tempSub = tempSub->next;
+	}
+	return;
+}
+
+void inventoryVars(){
+	subdict * tempSub = vocab->sub;
+	variable_t * tempVar;
+	while(tempSub != NULL){
+		if(tempSub->open){
+			printf("Subdict: %s\n",tempSub->name);
+			tempVar = tempSub->varlist;
+			while(tempVar != NULL){
+				printf("  %s",tempVar->name);
+				tempVar = tempVar->next;
+			}
+			printf("\n");
 		}
 		tempSub = tempSub->next;
 	}
@@ -1253,6 +1310,8 @@ void define_all_core(){
 	defCore("TOS", termOutString);
 	defCore("DEEP", stackDepth);
 	defCore("UNDEF",inventoryUndefined);
-	defCore("WORDS", inventoryWords); // Borrowed from FORTH. Currently unsure if DSSP had an equivalent.
+	defCore("WORDS", inventoryWords); // Borrowed from Forth.
+	defCore("VARS", inventoryVars); // No precedent
+	defCore("SEE", seeName); // Borrowed from Forth. Also examines variables.
 	// TODO should add words that check word size of the machine (64 or 32 bits) to enable portable DSSP code.
 }

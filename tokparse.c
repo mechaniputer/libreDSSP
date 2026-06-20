@@ -547,8 +547,8 @@ int parse_tokens(char * tok){
 				PARSE_ENTER_STATE(PARSE_DO_S0);
 			}else if(!strcmp(tok,"RP")){
 				PARSE_ENTER_STATE(PARSE_RP_S0);
-			}else if(!strcmp(tok,"VAR")){
-				PARSE_ENTER_STATE(PARSE_VAR_S0);
+			}else if(!strcmp(tok,"VAR") || !strcmp(tok,"SEE")){
+				PARSE_ENTER_STATE(PARSE_VAR_NAME_S0);
 			}else if(!strcmp(tok,"GROW")){
 				PARSE_ENTER_STATE(PARSE_DICT_NEW);
 			}else if(!strcmp(tok,"DEL")){
@@ -784,7 +784,7 @@ int parse_tokens(char * tok){
 		emit_cw(coreSearch("RP_LOOP"));
 		PARSE_EXIT_STATE
 		break;
-	case PARSE_VAR_S0:
+	case PARSE_VAR_NAME_S0:
 		// Expecting a new variable name
 		// This must not be a core word and must be alphanumeric
 		// If we get it, PARSE_EXIT_STATE
@@ -794,7 +794,7 @@ int parse_tokens(char * tok){
 			abortExecution();
 			return 0;
 		}
-		// the VAR command was already emitted. We just emit a char * here.
+		// the VAR/SEE command was already emitted. We just emit a char * here.
 		namebuf = malloc((strlen(tok)+1) * sizeof(char));
 		strcpy(namebuf, tok);
 		emit_cw((codeword_t *) namebuf);

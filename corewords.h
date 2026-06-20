@@ -121,6 +121,9 @@ void termOutString();
 void stackDepth();
 void inventoryUndefined();
 void inventoryWords();
+void inventoryVars();
+void inventoryVars();
+void seeName();
 
 // Add all of the core words to a dictionary
 void define_all_core();
