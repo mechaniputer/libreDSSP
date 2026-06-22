@@ -4,11 +4,12 @@ Welcome to the official documentation for the libreDSSP programming system.
 
 libreDSSP (libre Dialog System for Structured Programming) is a free software interpreter for the DSSP language. This language originated in the Soviet Union and was inspired by the architecture of the Setun ternary computer. It is very similar to Forth but has more compact syntax along with arguably more consistent rules regarding the behavior of stack operations and the evaluation of variables and addresses. DSSP also supports top-down programming, meaning that as-yet undefined words can be referenced in other words.
 
-These docs focus solely on the use of libreDSSP. For information about building, installing, or contributing code to libreDSSP, please visit our [GitHub repository](https://github.com/mechaniputer/libreDSSP)
+These docs cover the usage of libreDSSP, as well as some of the internals to make it easier to modify or extend libreDSSP.
+For information about building, installing, or contributing code to libreDSSP, please visit our [GitHub repository](https://github.com/mechaniputer/libreDSSP)
 
 ## Documentation Status
-Most of what currently works is documented, but more editing is needed.
-The list of [core words](user-guide/corewords.md) needs more detail.
+Most of what currently works is documented, but this is a moving target.
+A new section is being added to cover libreDSSP internals.
 
 ## Licensing
 All libreDSSP code, all libreDSSP example programs, all libreDSSP markdown documentation, the vim source highlighting configuration files, and all custom files that configure and format the documentation, are licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).
@@ -17,7 +18,12 @@ All libreDSSP code, all libreDSSP example programs, all libreDSSP markdown docum
 
 
 ## AI Policy
-The libreDSSP project prioritizes authenticity over perfection. None of the documentation was AI-generated, and **no significant code in libreDSSP itself is AI-generated**. At present, the only really AI-generated code in libreDSSP is found in:
+One of the goals of this project is to develop a full understanding of DSSP including implementation pitfalls.
+A second goal is to produce something maintainable and lasting. Lastly, I want to have fun doing it.
+As a consequence of these goals, this is a human-written project.
+
+None of the documentation was AI-generated, and **no significant code in libreDSSP itself is AI-generated**.
+At present, the only really AI-generated code in libreDSSP is found in:
 
 - Parts of [dssp.js](https://github.com/mechaniputer/libreDSSP/blob/master/docs/dssp.js), which handles DSSP source highlighting on the official docs (obviously highlight.js doesn't know about DSSP).
 - Parts of the [configure](https://github.com/mechaniputer/libreDSSP/blob/master/configure) script.

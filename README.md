@@ -28,7 +28,7 @@ make
 
 
 ### How to use libreDSSP
-The [Official libreDSSP Docs](https://mechaniputer.github.io/libreDSSP/) are still incomplete, but the basics are covered.
+The [Official libreDSSP Docs](https://mechaniputer.github.io/libreDSSP/) are the primary reference. If you can't find what you need there, it's probably undocumented at the moment.
 
 In addition some code examples are provided in the examples directory, and Vim source highlighting files are included in vim/.
 

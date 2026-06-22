@@ -49,7 +49,7 @@ int newWordPendUndefsCap;
 
 
 // For ensuring that we do not emit a multicell word when we only have one cell to populate (eg, in a conditional or loop)
-static const char *const multicell_words[] = {"IF-","IF0","IF+","BR-","BR0","BR+","BRS","BR","DO","RP","VAR","!","GROW","SHUT","USE","SEE","DEL"};
+static const char *const multicell_words[] = {"IF-","IF0","IF+","BR-","BR0","BR+","BRS","BR","DO","RP","VAR","!","GROW","SHUT","USE","SEE","DEL", "!"};
 static const size_t NUM_MULTICELL_WORDS = sizeof(multicell_words) / sizeof(multicell_words[0]);
 
 #define PARSE_ENTER_STATE(ST)  { push(parserStack, parser_state); parser_state = ST; }

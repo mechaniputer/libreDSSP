@@ -15,6 +15,9 @@ nav:
     - Input/Output: user-guide/io.md
     - Dictionaries: user-guide/dictionaries.md
     - Comments and Code Style: user-guide/style.md
-
+  - Internals:
+    - Threading Model: internals/threading.md
+    - Multi-cell Core Words: internals/multicell.md
+    - Reference patching: internals/refpatching.md
 extra_javascript:
   - dssp.js
