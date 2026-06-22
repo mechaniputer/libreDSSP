@@ -596,13 +596,11 @@ int parse_tokens(char * tok){
 			}else if(compiling && ((uref = undefSearch(tok)) != NULL)){
 				// Previously known undef word
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
-				//add_reference(uref, newWordDictEntry); // Make the undef word record point here
 				emit_cw(uref->ref_placeholder);
 			}else if(compiling){
 				// New undef word
 				uref = create_undefined_ref(tok);
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
-				//add_reference(uref, newWordDictEntry); // Make the undef word record point here
 				emit_cw(uref->ref_placeholder);
 			}else{
 				// We are not compiling, so whatever we emit will be run immediately.
@@ -815,7 +813,6 @@ int parse_tokens(char * tok){
 				abortExecution();
 				return 0;
 			}else{
-				// TODO 3.2
 				// In compiling mode, we start tracking the undef ref.
 				if(!isValidWordVarName(tok)){
 					printf("ERR: %s invalid var name\n", tok);

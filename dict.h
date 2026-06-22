@@ -58,13 +58,12 @@ typedef struct subdict subdict;
 typedef struct dict dict;
 
 struct undefined_ref {
-	char *name;                      // name of undefined word/var
-	codeword_t *** references;        // array of pointers to codewords that reference this
-	codeword_t * ref_placeholder;    // The word that all of the plain refs point to
-	//codeword_t * assign_placeholder; // The word that assign refs point to
-	undefined_ref_t *next;          // next entry in linked list
-	int ref_count;                   // number of references
-	int ref_capacity;                // allocated space for references array
+	char *name;                    // name of undefined word/var
+	codeword_t *** references;     // array of pointers to codewords that reference this
+	codeword_t * ref_placeholder;  // The word that all of the plain refs point to
+	undefined_ref_t *next;         // next entry in linked list
+	int ref_count;                 // number of references
+	int ref_capacity;              // allocated space for references array
 };
 
 struct variable_t
@@ -94,18 +93,25 @@ struct dict
 
 // Check if a name is already used for a word/var
 int collisionSearch(char * name);
+
 // Looks for defined variables
 variable_t * varSearch(char * name);
+
 // Looks for words to see if they are already defined
 codeword_t * wordSearch(char * name);
+
 // Looks for core words to see if they are defined
 codeword_t * coreSearch(char * name);
+
 // Attempts to define a new function
 codeword_t * wordDefine(char * name);
+
 // Defines built-in functions
 void defCore(char * name, void (*func)());
+
 // Creates a new sub-dictionary
 subdict * newDict(char * name);
+
 // Finds a sub-dictionary by name, returns NULL if not found
 subdict * findDict(char * name);
 

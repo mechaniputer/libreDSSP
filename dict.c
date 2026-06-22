@@ -261,14 +261,6 @@ undefined_ref_t * create_undefined_ref(char *name){
 	newUndef->ref_placeholder->text = NULL;
 	newUndef->ref_placeholder->next = NULL;
 
-	// Same thing but for undefAssignVar()
-	//newUndef->assign_placeholder = malloc(sizeof(codeword_t));
-	//newUndef->assign_placeholder->xt = _undefined_assign;
-	//newUndef->assign_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
-	//newUndef->assign_placeholder->data = 0;
-	//newUndef->assign_placeholder->text = NULL;
-	//newUndef->assign_placeholder->next = NULL;
-
 	// Insert and return
 	newUndef->next = vocab->undefined;
 	vocab->undefined = newUndef;
@@ -352,7 +344,6 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 
 	free(curr->name);
 	free(curr->ref_placeholder);
-	//free(curr->assign_placeholder);
 	free(curr->references);
 	free(curr);
 	return;
@@ -383,10 +374,7 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 				// Skip branch literals
 				if((patch_index <= loop_end_index) && ((loop_end_index-patch_index) % 3 == 0)) patch_index++;
 
-				//printf("See command %s\n", array[patch_index]->name);
-				//if(!strcmp(array[patch_index]->name, uref->name)){
-				//	add_reference(uref, &array[patch_index]);
-					// We need to distinguish whether this is a word call, a push ref, or an assign ref
+				// We need to distinguish whether this is a word call, a push ref, or an assign ref
 				if((codeword_t *) array[patch_index] == old_cw){
 					if(!strcmp(array[patch_index]->name, uref->name)){
 						// Word calls become a plain ref
@@ -464,7 +452,6 @@ void delete_undef_ref(undefined_ref_t * uref){
 
 	free(curr->name);
 	free(curr->ref_placeholder);
-	//free(curr->assign_placeholder);
 	free(curr->references);
 	free(curr);
 	return;
