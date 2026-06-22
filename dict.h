@@ -61,7 +61,7 @@ struct undefined_ref {
 	char *name;                      // name of undefined word/var
 	codeword_t *** references;        // array of pointers to codewords that reference this
 	codeword_t * ref_placeholder;    // The word that all of the plain refs point to
-	codeword_t * assign_placeholder; // The word that assign refs point to
+	//codeword_t * assign_placeholder; // The word that assign refs point to
 	undefined_ref_t *next;          // next entry in linked list
 	int ref_count;                   // number of references
 	int ref_capacity;                // allocated space for references array

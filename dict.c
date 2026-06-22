@@ -28,6 +28,11 @@
 
 extern dict * vocab;
 
+// Global singleton codewords
+extern codeword_t global_cw_assignVar;
+extern codeword_t global_cw_assignUndef;
+extern codeword_t global_cw_assignWord;
+
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
 // Should be used whenever defining a new word to ensure that it doesn't mask a variable.
@@ -257,12 +262,12 @@ undefined_ref_t * create_undefined_ref(char *name){
 	newUndef->ref_placeholder->next = NULL;
 
 	// Same thing but for undefAssignVar()
-	newUndef->assign_placeholder = malloc(sizeof(codeword_t));
-	newUndef->assign_placeholder->xt = _undefined_assign;
-	newUndef->assign_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
-	newUndef->assign_placeholder->data = 0;
-	newUndef->assign_placeholder->text = NULL;
-	newUndef->assign_placeholder->next = NULL;
+	//newUndef->assign_placeholder = malloc(sizeof(codeword_t));
+	//newUndef->assign_placeholder->xt = _undefined_assign;
+	//newUndef->assign_placeholder->name = newUndef->name; // Recycle same name buffer allocated above
+	//newUndef->assign_placeholder->data = 0;
+	//newUndef->assign_placeholder->text = NULL;
+	//newUndef->assign_placeholder->next = NULL;
 
 	// Insert and return
 	newUndef->next = vocab->undefined;
@@ -327,24 +332,16 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				// It's a var
 				*patch_target = &var->cw_pushVar; // pushVar
 			}
-		}else if(*patch_target == curr->assign_placeholder){
+		}else if(*patch_target == &global_cw_assignUndef){
 			if(0 == isVar){
-				// Can't assign values to words
-				// We allocate a one-off codeword for the error. If it gets patched, the patcher should free it.
-				// The only place this might happen is: patch_to_undef()
-				codeword_t * temp_cw = malloc(sizeof(codeword_t));
-				temp_cw->name = malloc(strlen(name)+1);
-				strcpy(temp_cw->name, name);
-				temp_cw->xt = _word_assign;
-				temp_cw->next = NULL;
-				temp_cw->size = 0;
-				temp_cw->data = 0;
-				temp_cw->text = NULL;
-				*patch_target = temp_cw;
+				// [&global_cw_assignWord] [&codeword_t word]
+				*patch_target++ = &global_cw_assignWord;
+				*patch_target = def;
 			}else{
 				// It's a var
-				// TODO 4
-				//*patch_target = &var->cw[1]; // assignVar
+				// [&global_cw_assignVar] [&variable_t var]
+				*patch_target++ = &global_cw_assignVar;
+				*patch_target = (codeword_t *) var;
 			}
 		}else{
 			printf("ERR: Unexpected value at patch target\n");
@@ -355,7 +352,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 
 	free(curr->name);
 	free(curr->ref_placeholder);
-	free(curr->assign_placeholder);
+	//free(curr->assign_placeholder);
 	free(curr->references);
 	free(curr);
 	return;
@@ -374,10 +371,10 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 		// Search every word in the current subdict
 		codeword_t * curr_word = tempSub->wordlist;
 		while(curr_word != NULL){
-			//printf("Patching body of word %s\n",curr_word->name);
+			printf("Patching body of word %s\n",curr_word->name);
 			int loop_end_index = -1; // This trick is also used in print_codewords() and deleteName()
 			codeword_t ** array = (codeword_t **) (curr_word->data);
-			//print_codewords(array);
+			print_codewords(array);
 			int patch_index = 0;
 
 			while(array[patch_index] != NULL || (patch_index < loop_end_index)){ // Depends on NULL sentinel
@@ -386,25 +383,35 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 				if((patch_index <= loop_end_index) && ((loop_end_index-patch_index) % 3 == 0)) patch_index++;
 
 				//printf("See command %s\n", array[patch_index]->name);
-				if(!strcmp(array[patch_index]->name, uref->name)){
-					add_reference(uref, &array[patch_index]);
+				//if(!strcmp(array[patch_index]->name, uref->name)){
+				//	add_reference(uref, &array[patch_index]);
 					// We need to distinguish whether this is a word call, a push ref, or an assign ref
-					if((codeword_t *) array[patch_index] == old_cw){
+				if((codeword_t *) array[patch_index] == old_cw){
+					if(!strcmp(array[patch_index]->name, uref->name)){
 						// Word calls become a plain ref
 						array[patch_index] = uref->ref_placeholder;
-					}else if(array[patch_index]->xt == pushVar){
+					}
+				}else if(array[patch_index]->xt == pushVar){
+					if(!strcmp(array[patch_index]->name, uref->name)){
 						// If it's a plain ref:
+						printf("Patching plain ref\n");
+						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
-					}else if(array[patch_index]->xt == assignVar){
-						// If it's an assign ref:
-						array[patch_index] = uref->assign_placeholder;
-					}else if(array[patch_index]->xt == _word_assign){
-						// It was previously an attempt to assign a value to a word.
-						// There are some things to free before we patch.
-						free(array[patch_index]->name);
-						free(array[patch_index]);
-						array[patch_index] = uref->assign_placeholder;
-
+					}
+				}else if(array[patch_index] == &global_cw_assignWord){
+					if(!strcmp(array[patch_index+1]->name, uref->name)){
+						// If it's an assign ref to a word:
+						printf("Patching word assign ref\n");
+						add_reference(uref, &array[patch_index]);
+						array[patch_index++] = &global_cw_assignUndef;
+						array[patch_index] = (codeword_t *) uref;
+					}
+				}else if(array[patch_index] == &global_cw_assignVar){
+					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
+						printf("Patching var assign ref\n");
+						add_reference(uref, &array[patch_index]);
+						array[patch_index++] = &global_cw_assignUndef;
+						array[patch_index] = (codeword_t *) uref;
 					}
 				}
 
@@ -454,7 +461,7 @@ void delete_undef_ref(undefined_ref_t * uref){
 
 	free(curr->name);
 	free(curr->ref_placeholder);
-	free(curr->assign_placeholder);
+	//free(curr->assign_placeholder);
 	free(curr->references);
 	free(curr);
 	return;
