@@ -359,7 +359,8 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 }
 
 
-// Scans the entire dictionary (of words, not vars) for refs to the specified undef, and changes them to point to the undef's placeholder.
+// Scans the entire dictionary (of words, not vars) for refs to the specified undef (word or var)
+// Changes them to point to the undef's placeholder.
 // Any word in any subdict might refernce the word we are deleting.
 void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 
@@ -389,26 +390,28 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 				if((codeword_t *) array[patch_index] == old_cw){
 					if(!strcmp(array[patch_index]->name, uref->name)){
 						// Word calls become a plain ref
+						//printf("Patching plain word ref\n");
+						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
 					}
 				}else if(array[patch_index]->xt == pushVar){
 					if(!strcmp(array[patch_index]->name, uref->name)){
 						// If it's a plain ref:
-						printf("Patching plain ref\n");
+						//printf("Patching plain var ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
 					}
 				}else if(array[patch_index] == &global_cw_assignWord){
 					if(!strcmp(array[patch_index+1]->name, uref->name)){
 						// If it's an assign ref to a word:
-						printf("Patching word assign ref\n");
+						//printf("Patching word assign ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index++] = &global_cw_assignUndef;
 						array[patch_index] = (codeword_t *) uref;
 					}
 				}else if(array[patch_index] == &global_cw_assignVar){
 					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
-						printf("Patching var assign ref\n");
+						//printf("Patching var assign ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index++] = &global_cw_assignUndef;
 						array[patch_index] = (codeword_t *) uref;
