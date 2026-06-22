@@ -41,6 +41,37 @@ extern stack * loopStack;
 extern dict * vocab;
 extern int abort_requested;
 
+// Area for global singleton codewords not in dictionary
+
+codeword_t global_cw_assignVar = {
+	.name = "assignVar",
+	.xt = assignVar,
+	.text = "!",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
+
+codeword_t global_cw_assignUndef = {
+	.name = "_undefined_assign",
+	.xt = _undefined_assign,
+	.text = "!",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
+
+codeword_t global_cw_assignWord = {
+	.name = "_word_assign",
+	.xt = _word_assign,
+	.text = "!",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
+
+// Area for core word function bodies
+
 void push_zero(){
 	push(dataStack, 0);
 }
@@ -930,15 +961,21 @@ void _undefined_ref(){
 	return;
 }
 
+// Next cell points to the undefined ref struct
 void _undefined_assign(){
-	printf("ERR: Undefined name %s assigned a value during execution\n", current_codeword->name);
+	cmdbuf->ip++; // Advance to data cell
+	char * name =  ((undefined_ref_t *)(cmdbuf->array[cmdbuf->ip]))->name;
+	printf("ERR: Undefined name %s assigned a value during execution\n", name);
 	abortExecution();
 	cmdbuf->ip = -1; // word_next increments this!
 	return;
 }
 
+// Next cell is a codeword for the word matching the expected variable's name
 void _word_assign(){
-	printf("ERR: Cannot assign a value to word %s\n", current_codeword->name);
+	cmdbuf->ip++; // Advance to data cell
+	char * name =  (cmdbuf->array[cmdbuf->ip])->name;
+	printf("ERR: Cannot assign a value to word %s\n", name);
 	abortExecution();
 	cmdbuf->ip = -1; // word_next increments this!
 	return;
@@ -1011,21 +1048,13 @@ void declareVar(){
 	tempVar->next = vocab->grow->varlist;
 	vocab->grow->varlist = tempVar;
 
-	// Pushvar op
-	tempVar->cw[0].xt = pushVar;
-	tempVar->cw[0].name = varname;
-	tempVar->cw[0].data = (intptr_t) tempVar;
-	tempVar->cw[0].next = NULL;
-	tempVar->cw[0].text = NULL;
-	tempVar->cw[0].size = 0;
-
-	// Assign op
-	tempVar->cw[1].xt = assignVar;
-	tempVar->cw[1].name = varname;
-	tempVar->cw[1].data = (intptr_t) tempVar;
-	tempVar->cw[1].next = NULL;
-	tempVar->cw[1].text = NULL;
-	tempVar->cw[1].size = 0;
+	// per-variable unique pushVar op
+	tempVar->cw_pushVar.xt = pushVar;
+	tempVar->cw_pushVar.name = varname;
+	tempVar->cw_pushVar.data = (intptr_t) tempVar;
+	tempVar->cw_pushVar.next = NULL;
+	tempVar->cw_pushVar.text = NULL;
+	tempVar->cw_pushVar.size = 0;
 
 	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
 	//printf("Declared variable %s\n",varname);
@@ -1035,6 +1064,8 @@ void declareVar(){
 
 // Assign top of stack to a variable
 void assignVar(){
+	cmdbuf->ip++; // Advance to data cell
+	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	FETCH_TOP_IND
 	if(STACKEMPTY){
 		fprintf(stderr,"ERR: Insufficient data operands for !\n");
@@ -1042,7 +1073,7 @@ void assignVar(){
 		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}
-	((variable_t*) current_codeword->data)->value = pop(dataStack);
+	var->value = pop(dataStack);
 	return;
 }
 

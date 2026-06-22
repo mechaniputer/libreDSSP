@@ -71,7 +71,7 @@ struct variable_t
 {
 	char * name;
 	variable_t * next;
-	codeword_t cw[2]; // 0:pushVar, 1:assignVar
+	codeword_t cw_pushVar;
 	intptr_t value;
 };
 

@@ -325,7 +325,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				*patch_target = def;
 			}else{
 				// It's a var
-				*patch_target = &var->cw[0]; // pushVar
+				*patch_target = &var->cw_pushVar; // pushVar
 			}
 		}else if(*patch_target == curr->assign_placeholder){
 			if(0 == isVar){
@@ -343,7 +343,8 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				*patch_target = temp_cw;
 			}else{
 				// It's a var
-				*patch_target = &var->cw[1]; // assignVar
+				// TODO 4
+				//*patch_target = &var->cw[1]; // assignVar
 			}
 		}else{
 			printf("ERR: Unexpected value at patch target\n");

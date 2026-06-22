@@ -15,6 +15,11 @@ extern dict * vocab;
 extern cmdbuffer * cmdbuf;
 extern int abort_requested;
 
+// Global singleton codewords
+extern codeword_t global_cw_assignVar;
+extern codeword_t global_cw_assignUndef;
+extern codeword_t global_cw_assignWord;
+
 // Tokenizer globals
 extern stack *tokenizerStack;
 static char *scan_ptr = NULL;
@@ -582,7 +587,7 @@ int parse_tokens(char * tok){
 			emit_cw(coreSearch("PUSHLIT"));
 			emit_cw((codeword_t *) atol(tok));
 		}else if((var_lookup = varSearch(tok)) != NULL){
-			emit_cw(&var_lookup->cw[0]); // PUSHVAR
+			emit_cw(&var_lookup->cw_pushVar);
 		}else if (isValidWordVarName(tok)){
 			// It must be a user word, possibly undefined
 			dict_entry = wordSearch(tok);
@@ -810,6 +815,7 @@ int parse_tokens(char * tok){
 				abortExecution();
 				return 0;
 			}else{
+				// TODO 3.2
 				// In compiling mode, we start tracking the undef ref.
 				if(!isValidWordVarName(tok)){
 					printf("ERR: %s invalid var name\n", tok);
@@ -829,13 +835,15 @@ int parse_tokens(char * tok){
 				if(uref == NULL) uref = create_undefined_ref(tok);
 
 				// Add to pending undef refs
+				// Note: The pending undef points to the operation cell, not the VAR cell.
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
 
-				// Emit the cw placeholder for assignment
-				emit_cw(uref->assign_placeholder);
+				emit_cw(&global_cw_assignUndef);
+				emit_cw((codeword_t *) uref);
 			}
 		}else{
-			emit_cw(&var_lookup->cw[1]); // Single-cell assignment
+			emit_cw(&global_cw_assignVar);
+			emit_cw((codeword_t*) var_lookup);
 		}
 		PARSE_EXIT_STATE
 		break;
