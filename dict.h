@@ -118,9 +118,10 @@ subdict * findDict(char * name);
 // Utility functions for undefined word table
 undefined_ref_t* undefSearch(char *name);
 undefined_ref_t* create_undefined_ref(char *name);
+int referenced_as_var(char *name);
 void add_reference(undefined_ref_t *undef, codeword_t **ref);
 void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var);
-
+void untrack_undef_refs(codeword_t ** array);
 void deleteName(char * name);
 
 #endif

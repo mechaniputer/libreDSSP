@@ -61,14 +61,6 @@ codeword_t global_cw_assignUndef = {
 	.next = NULL
 };
 
-codeword_t global_cw_assignWord = {
-	.name = "_word_assign",
-	.xt = _word_assign,
-	.text = "!",
-	.size = 0,
-	.data = 0,
-	.next = NULL
-};
 
 // Area for core word function bodies
 
@@ -964,18 +956,8 @@ void _undefined_ref(){
 // Next cell points to the undefined ref struct
 void _undefined_assign(){
 	cmdbuf->ip++; // Advance to data cell
-	char * name =  ((undefined_ref_t *)(cmdbuf->array[cmdbuf->ip]))->name;
+	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Undefined name %s assigned a value during execution\n", name);
-	abortExecution();
-	cmdbuf->ip = -1; // word_next increments this!
-	return;
-}
-
-// Next cell is a codeword for the word matching the expected variable's name
-void _word_assign(){
-	cmdbuf->ip++; // Advance to data cell
-	char * name =  (cmdbuf->array[cmdbuf->ip])->name;
-	printf("ERR: Cannot assign a value to word %s\n", name);
 	abortExecution();
 	cmdbuf->ip = -1; // word_next increments this!
 	return;

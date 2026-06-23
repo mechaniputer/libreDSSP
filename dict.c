@@ -31,7 +31,6 @@ extern dict * vocab;
 // Global singleton codewords
 extern codeword_t global_cw_assignVar;
 extern codeword_t global_cw_assignUndef;
-extern codeword_t global_cw_assignWord;
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
@@ -267,6 +266,28 @@ undefined_ref_t * create_undefined_ref(char *name){
 	return newUndef;
 }
 
+// Scans all ref pointers.
+// If any point to something other than uref->ref_placeholder, return 1.
+// Else return 0
+int referenced_as_var(char * name){
+	undefined_ref_t * uref = undefSearch(name);
+	if(!uref) return 0;
+
+	codeword_t * placeholder = uref->ref_placeholder;
+	int ref_count = uref->ref_count;
+	codeword_t *** refs = uref->references;
+
+	for(int i=0; i<ref_count ; i++){
+		if(placeholder != *(refs[i])){
+			// This is a var-only refernce
+			printf("This name can only be a variable\n");
+			return 1;
+		}
+	}
+	printf("This name is not referenced as a variable\n");
+	return 0;
+}
+
 // Previously each ref was to the codeword_t "header" for the word containing the ref.
 // Now it's a direct pointer to the ref.
 void add_reference(undefined_ref_t *undef, codeword_t **ref){
@@ -279,9 +300,10 @@ void add_reference(undefined_ref_t *undef, codeword_t **ref){
 	undef->ref_count += 1;
 }
 
-// WARNING: If the words that referenced this undefined word no longer exist, it can segfault.
-//          Currently, deleting words is not supported, but later it will be.
 // Adds missing refs to formerly undefined word, and then removed the undef record.
+// Warning:
+// This function assumes that if we are patching word refs, none of them are a var op.
+// Code calling this function must be certain that outstanding refs are safe to patch.
 void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * var){
 	//printf("Resolving previously undefined %s\n", name);
 
@@ -313,6 +335,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 		prev->next = curr->next;
 	}
 
+	// TODO ensure that if isVar is False, every ref is to curr_ref_placeholder (otherwise crash)
 	// Patch each ref location
 	for(int i=0; i<curr->ref_count ; i++){
 		codeword_t ** patch_target = curr->references[i];
@@ -324,17 +347,11 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				// It's a var
 				*patch_target = &var->cw_pushVar; // pushVar
 			}
-		}else if(*patch_target == &global_cw_assignUndef){
-			if(0 == isVar){
-				// [&global_cw_assignWord] [&codeword_t word]
-				*patch_target++ = &global_cw_assignWord;
-				*patch_target = def;
-			}else{
-				// It's a var
-				// [&global_cw_assignVar] [&variable_t var]
-				*patch_target++ = &global_cw_assignVar;
-				*patch_target = (codeword_t *) var;
-			}
+		}else if(isVar && (*patch_target == &global_cw_assignUndef)){
+			// It's a var
+			// [&global_cw_assignVar] [&variable_t var]
+			*patch_target++ = &global_cw_assignVar;
+			*patch_target = (codeword_t *) var;
 		}else{
 			printf("ERR: Unexpected value at patch target\n");
 			printf("Name: %s\n", (*patch_target)->name);
@@ -374,7 +391,7 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 				// Skip branch literals
 				if((patch_index <= loop_end_index) && ((loop_end_index-patch_index) % 3 == 0)) patch_index++;
 
-				// We need to distinguish whether this is a word call, a push ref, or an assign ref
+				// We need to distinguish whether this is a plain word ref, a plain var ref, or a 2-cell var ref
 				if((codeword_t *) array[patch_index] == old_cw){
 					if(!strcmp(array[patch_index]->name, uref->name)){
 						// Word calls become a plain ref
@@ -384,30 +401,20 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 					}
 				}else if(array[patch_index]->xt == pushVar){
 					if(!strcmp(array[patch_index]->name, uref->name)){
-						// If it's a plain ref:
+						// If it's a plain var ref:
 						//printf("Patching plain var ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
-					}
-				}else if(array[patch_index] == &global_cw_assignWord){
-					if(!strcmp(array[patch_index+1]->name, uref->name)){
-						// If it's an assign ref to a word:
-						//printf("Patching word assign ref\n");
-						add_reference(uref, &array[patch_index]);
-						array[patch_index++] = &global_cw_assignUndef;
-						array[patch_index] = (codeword_t *) uref;
 					}
 				}else if(array[patch_index] == &global_cw_assignVar){
 					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
 						//printf("Patching var assign ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index++] = &global_cw_assignUndef;
-						array[patch_index] = (codeword_t *) uref;
+						array[patch_index] = (codeword_t *) uref->name;
 					}
-				}
-
-				// For some words we need to skip two cells for safety
-				if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declareVar || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
+				}else if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declareVar || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
+					// For some additional words we need to skip two cells for safety
 					patch_index += 1;
 				}else if(!strcmp(array[patch_index]->name, "BR")){
 					// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
@@ -457,6 +464,98 @@ void delete_undef_ref(undefined_ref_t * uref){
 	return;
 }
 
+// Takes an array of codewords and untracks any undef refs made therein
+// FIXME there's a lot of repeated logic here. Needs improvement.
+void untrack_undef_refs(codeword_t ** array){
+char * temp_name;
+	int ind = 0;
+	int loop_end_index = -1; // This trick is also used in print_codewords() and patch_to_undef()
+	while(array[ind] != NULL || (ind < loop_end_index)){ // Relies on NULL sentinel
+
+		// Skip branch literals
+		if((ind <= loop_end_index) && ((loop_end_index-ind) % 3 == 0)) ind++;
+
+		printf("Scanning deletion target: Checking whether %s is an undef ref\n", array[ind]->name);
+		// If we encounter an undef ref, we need to un-track it to prevent a later segfault
+
+		if(array[ind]->xt == _undefined_ref){
+			temp_name = array[ind]->name;
+			// Reference to undefined word
+			printf("This word references undefined word %s!\n",temp_name);
+			// We need to retrieve the undef record, remove the ref, and if the undef word hits 0 refs, get rid of it.
+			undefined_ref_t * uref = undefSearch(temp_name);
+			if(uref == NULL){
+				printf("ERR: Reference to nonexistent undefined word %s\n",temp_name);
+				exit(-1);
+			}
+
+			// We have the undef record. Now we search for a pointer match.
+			for(int j=0; j<uref->ref_count; j++){
+				if(uref->references[j] == &array[ind]){
+					// We found the ref to remove. We swap it with the last ref and decrement the count.
+					uref->references[j] = uref->references[uref->ref_count - 1];
+					uref->ref_count -= 1;
+					break;
+				}
+			}
+
+			// If this undef word has no more refs, we can remove it from the undef table and free it.
+			if(uref->ref_count == 0){
+				printf("Undef word %s has no more refs, removing from undef table\n",uref->name);
+				// Call deletion helper to splice out the undef record and free it
+				delete_undef_ref(uref);
+			}
+			ind += 1;
+		}else if(array[ind]->xt == _undefined_assign){
+			// Reference to undefined variable
+			// Note: This will later be a list of like 10 functions to check for... Probably need a helper function.
+			temp_name = (char *) array[ind+1];
+			printf("This word references undefined variable %s!\n",temp_name);
+
+			// We need to retrieve the undef record, remove the ref, and if the undef word hits 0 refs, get rid of it.
+			undefined_ref_t * uref = undefSearch(temp_name);
+			if(uref == NULL){
+				printf("ERR: Reference to nonexistent undefined word %s\n",temp_name);
+				exit(-1);
+			}
+
+			// We have the undef record. Now we search for a pointer match.
+			for(int j=0; j<uref->ref_count; j++){
+				if(uref->references[j] == &array[ind]){
+					// We found the ref to remove. We swap it with the last ref and decrement the count.
+					uref->references[j] = uref->references[uref->ref_count - 1];
+					uref->ref_count -= 1;
+					break;
+				}
+			}
+
+			// If this undef word has no more refs, we can remove it from the undef table and free it.
+			if(uref->ref_count == 0){
+				printf("Undef word %s has no more refs, removing from undef table\n",uref->name);
+				// Call deletion helper to splice out the undef record and free it
+				delete_undef_ref(uref);
+			}
+			// Important: skip 2 cells since var-specific ops are 2 cells.
+			ind += 2;
+
+		}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declareVar || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
+			// For some words we need to skip two cells for safety
+			ind += 1;
+		}else if(!strcmp(array[ind]->name, "BR")){
+			// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
+			// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
+			for(loop_end_index = ind+3; ; loop_end_index+=3){
+				if(array[loop_end_index]->xt != skip2) break;
+			}
+			// loop_end_index now points to ERG in the example above (position 9)
+			// We want it to point to the last literal (position 7):
+			loop_end_index -= 2;
+			//printf("Loop end index is %d\n",loop_end_index);
+		}
+		ind += 1; // Next codeword_t *
+	}
+}
+
 void deleteName(char * name){
 	// Note: deletion is constrained to the current subdict
 	// Because no name collisions are allowed within a subdict, this will only delete one object.
@@ -468,7 +567,7 @@ void deleteName(char * name){
 	while(curr_word != NULL){
 		if(!strcmp(curr_word->name, name)){
 			// If found, splice it out.
-			//printf("Found word \"%s\" to delete\n",name);
+			printf("Found word \"%s\" to delete\n",name);
 			if(prev_word == NULL){
 				// It was literally the first word in the list
 				vocab->grow->wordlist = curr_word->next;
@@ -486,63 +585,16 @@ void deleteName(char * name){
 		printf("DEL %s:%s\n",vocab->grow->name, curr_word->name);
 		// First, scan the body of this word to see if it contains any undef refs
 		codeword_t ** array = (codeword_t**) curr_word->data;
-		int ind = 0;
-		int loop_end_index = -1; // This trick is also used in print_codewords() and patch_to_undef()
-		while(array[ind] != NULL || (ind < loop_end_index)){ // Relies on NULL sentinel
 
-			// Skip branch literals
-			if((ind <= loop_end_index) && ((loop_end_index-ind) % 3 == 0)) ind++;
-
-			//printf("Scanning deletion target: Checking whether %s is an undef ref\n", array[ind]->name);
-			// If we encounter an undef ref, we need to un-track it to prevent a later segfault
-			if(array[ind]->xt == _undefined_ref || array[ind]->xt == _undefined_assign){
-				//printf("This word references undefined name %s!\n",array[ind]->name);
-				// We need to retrieve the undef record, remove the ref, and if the undef word hits 0 refs, get rid of it.
-				undefined_ref_t * uref = undefSearch(array[ind]->name);
-				if(uref == NULL){
-					printf("ERR: Reference to nonexistent undefined word %s\n",array[ind]->name);
-					exit(-1);
-				}
-
-				// We have the undef record. Now we search for a pointer match.
-				for(int j=0; j<uref->ref_count; j++){
-					if(uref->references[j] == &array[ind]){
-						// We found the ref to remove. We swap it with the last ref and decrement the count.
-						uref->references[j] = uref->references[uref->ref_count - 1];
-						uref->ref_count -= 1;
-						break;
-					}
-				}
-
-				// If this undef word has no more refs, we can remove it from the undef table and free it.
-				if(uref->ref_count == 0){
-					//printf("Undef word %s has no more refs, removing from undef table\n",uref->name);
-					// Call deletion helper to splice out the undef record and free it
-					delete_undef_ref(uref);
-				}
-				ind += 1;
-			}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declareVar || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
-				// For some words we need to skip two cells for safety
-				ind += 1;
-			}else if(!strcmp(array[ind]->name, "BR")){
-				// Example code:    BR 0 FOO 1 BAR 2 BAZ ELSE ERG
-				// Compiled result: BR 0 FOO SKP2 1 BAR SKP2 2 BAZ SKP1 ERG
-				for(loop_end_index = ind+3; ; loop_end_index+=3){
-					if(array[loop_end_index]->xt != skip2) break;
-				}
-				// loop_end_index now points to ERG in the example above (position 9)
-				// We want it to point to the last literal (position 7):
-				loop_end_index -= 2;
-				//printf("Loop end index is %d\n",loop_end_index);
-			}
-			ind += 1; // Next codeword_t *
-		}
+		// If it does, untrack them (this can result in undef words becoming totally un-unreferenced and deleted)
+		untrack_undef_refs(array);
 
 		// Create a new undef ref for this entity.
 		undefined_ref_t * uref = create_undefined_ref(name);
 
 		// Scan all user words in vocab->grow for references. Add refs and patch them to the appropriate undef placeholder.
 		patch_to_undef(uref, curr_word);
+
 		// Free the old word
 		free(curr_word->name);
 		free(curr_word->text);

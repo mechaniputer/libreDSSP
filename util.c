@@ -93,6 +93,7 @@ void print_codewords(codeword_t ** array){
 			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
 			i++;
 		}
+
 		if(array[i]->xt == pushVar){
 			printf("%d) %p: PUSH %s\n", i, (void*) &array[i], ((variable_t*)array[i]->data)->name);
 			i++;
@@ -115,6 +116,10 @@ void print_codewords(codeword_t ** array){
 			// assignVar is followed by a pointer to a variable_t
 			i++;
 			printf("%d) %p: ASSIGN %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
+		}else if(array[i]->xt == _undefined_assign){
+			// Undefined var ops are followed by a char *
+			i++;
+			printf("%d) %p: ASSIGN %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
 		}else if(!strcmp("SHUT", array[i]->name) || !strcmp("USE", array[i]->name)){
 			// SHUT/USE are followed by a pointer to a subdict struct
 			i++;

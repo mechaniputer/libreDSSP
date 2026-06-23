@@ -18,7 +18,6 @@ extern int abort_requested;
 // Global singleton codewords
 extern codeword_t global_cw_assignVar;
 extern codeword_t global_cw_assignUndef;
-extern codeword_t global_cw_assignWord;
 
 // Tokenizer globals
 extern stack *tokenizerStack;
@@ -461,7 +460,23 @@ int parse_tokens(char * tok){
 	switch(parser_state){
 	case PARSE_COMPILE_S0:
 		// Next token should be a valid user word name (alphanumeric, not in core or vars)
-		if(isValidWordVarName(tok) && (NULL == coreSearch(tok)) && (NULL == varSearch(tok))){
+		if(!isValidWordVarName(tok)){
+			printf("ERR: Word name %s not allowed\n",tok);
+			abortExecution();
+			return 0;
+		}else if (coreSearch(tok)){
+			printf("ERR: %s is a core word\n",tok);
+			abortExecution();
+			return 0;
+		}else if(varSearch(tok)){
+			printf("ERR: %s is a variable\n",tok);
+			abortExecution();
+			return 0;
+		}else if(referenced_as_var(tok)){
+			printf("ERR: %s is referenced as a variable\n",tok);
+			abortExecution();
+			return 0;
+		}else{
 			newWordName = malloc((1+strlen(tok))*sizeof(char));
 			strcpy(newWordName, tok);
 
@@ -476,11 +491,7 @@ int parse_tokens(char * tok){
 			strcat(newWordText, newWordName);
 			strcat(newWordText, " ");
 			newWordTextLen = strlen(newWordText);
-			PARSE_CHANGE_STATE(PARSE_COMPILE_S1)
-		}else{
-			printf("ERR: Word name %s not allowed\n",tok);
-			abortExecution();
-			return 0;
+			PARSE_CHANGE_STATE(PARSE_COMPILE_S1);
 		}
 		break;
 	case PARSE_COMPILE_S1:
@@ -488,9 +499,9 @@ int parse_tokens(char * tok){
 			emit_cw(coreSearch(";S"));
 			//printf("Definition of %s complete\n", newWordName);
 
-
 			// We might be redefining a prior word. This prevents a leak.
 			if(newWordDictEntry->data != 0){
+				untrack_undef_refs((codeword_t **)newWordDictEntry->data);
 				free((void *) newWordDictEntry->data);
 				newWordDictEntry->data = 0;
 			}
@@ -836,7 +847,7 @@ int parse_tokens(char * tok){
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
 
 				emit_cw(&global_cw_assignUndef);
-				emit_cw((codeword_t *) uref);
+				emit_cw((codeword_t *) uref->name);
 			}
 		}else{
 			emit_cw(&global_cw_assignVar);
