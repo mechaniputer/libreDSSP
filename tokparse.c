@@ -20,6 +20,10 @@ extern codeword_t cw_var_undef_assign;
 extern codeword_t cw_var_generic_assign;
 extern codeword_t cw_var_undef_addrof;
 extern codeword_t cw_var_generic_addrof;
+extern codeword_t cw_var_undef_set0;
+extern codeword_t cw_var_generic_set0;
+extern codeword_t cw_var_undef_set1;
+extern codeword_t cw_var_generic_set1;
 
 // Tokenizer globals
 extern stack *tokenizerStack;
@@ -580,7 +584,13 @@ int parse_tokens(char * tok){
 		}else if(!strcmp(tok,"'")){
 			// We defer emitting the coreword because it might need to be the undef variant.
 			PARSE_ENTER_STATE(PARSE_ADDROF_S0);
-			// TODO additional state transitions for VAR ops (', !0, !1, !1+, !1-, !+, !-)
+		}else if(!strcmp(tok,"!0")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_SET0_S0);
+		}else if(!strcmp(tok,"!1")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_SET1_S0);
+			// TODO additional state transitions for VAR ops (!1+, !1-, !+, !-, SIZE)
 		}else if(!strcmp(tok,":")){
 				compiling = 1;
 				start_new_def();
@@ -859,6 +869,8 @@ int parse_tokens(char * tok){
 	// Note that we still need to observe the state to emit the correct code.
 	case PARSE_ASGN_S0:
 	case PARSE_ADDROF_S0:
+	case PARSE_SET0_S0:
+	case PARSE_SET1_S0:
 		// Can be an undefined or existing variable.
 		var_lookup = varSearch(tok);
 		if((var_lookup) == NULL){
@@ -893,6 +905,10 @@ int parse_tokens(char * tok){
 					emit_cw(&cw_var_undef_assign);
 				}else if(parser_state == PARSE_ADDROF_S0){
 					emit_cw(&cw_var_undef_addrof);
+				}else if(parser_state == PARSE_SET0_S0){
+					emit_cw(&cw_var_undef_set0);
+				}else if(parser_state == PARSE_SET1_S0){
+					emit_cw(&cw_var_undef_set1);
 				}
 				emit_cw((codeword_t *) uref->name);
 			}
@@ -901,6 +917,10 @@ int parse_tokens(char * tok){
 				emit_cw(&cw_var_generic_assign);
 			}else if(parser_state == PARSE_ADDROF_S0){
 				emit_cw(&cw_var_generic_addrof);
+			}else if(parser_state == PARSE_SET0_S0){
+				emit_cw(&cw_var_generic_set0);
+			}else if(parser_state == PARSE_SET1_S0){
+				emit_cw(&cw_var_generic_set1);
 			}
 			emit_cw((codeword_t*) var_lookup);
 		}

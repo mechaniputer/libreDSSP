@@ -32,6 +32,8 @@
 #define PARSE_DEL_S0        (18) // Awaiting word name to delete
 #define PARSE_ASGN_S0       (19)
 #define PARSE_ADDROF_S0     (20)
+#define PARSE_SET0_S0       (21)
+#define PARSE_SET1_S0       (22)
 
 
 // This is a record to postpone capturing precise addresses of undef refs in a new word

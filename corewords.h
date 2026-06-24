@@ -135,4 +135,9 @@ void _var_generic_assign();
 void _var_undef_addrof();
 void _var_generic_addrof();
 
+void _var_undef_set0();
+void _var_generic_set0();
+
+void _var_undef_set1();
+void _var_generic_set1();
 #endif
