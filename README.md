@@ -55,13 +55,15 @@ Also let us know if you are interested in setting up other resources such as an 
 
 - So-called "compiling words" like `VAR`, `VCTR`, `ARR`, etc, can be used inside of a defined word without needing to use `TEXEC`. In fact, this goes for nearly any core word. In libreDSSP these words are "state smart", and will not waste space if invoked repeatedly at runtime. Earlier DSSPs seem not to have allowed this, limiting reference patching to compile/parse time. libreDSSP can patch variable references at runtime whenever a declaration or deletion occurs. Note that these words can still introduce performance nondeterminisms, and it is recommended to only call them during initialization if this is a concern.
 
+- Instead of using legacy type qualifiers like `BYTE VAR FOO`, libreDSSP uses `VAR1 FOO`, where the number denotes the number of bytes. This is more consistent with DSSP's goal of a closer correspondence between the text and the compiled code. It also removes the dependence on legacy machine word sizes, as in `WORD ARR FOO`.
+
 
 ## What works
 - Top-down programming! (reference undefined names when defining words)
 - UNDEF (list undefined words)
 - DEL (delete named object, unbind name)
 - Basic math operations (+,*,-,/)
-- VAR, !, push value of variable by name
+- VAR, related ops: !, ', !0, !1, !1-, !1+, !-, !+, SIZE
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
 - =, <, >
 - NEG, ABS, SGN, MAX, MIN
@@ -91,14 +93,14 @@ Also let us know if you are interested in setting up other resources such as an 
 
 ## What doesn't work yet
 - File IO (this doesn't seem to be very standardized so we are allowed to make good choices here)
-- VCTR, ARR, CNST, BYTE, WORD, LONG, QUAD (new), VALUE, TEXT, FIX, EMPTY, EQU
-- ' (push address of var)
+- VAR type qualifiers (the legacy ones will be deprecated though)
+- VCTR, ARR, CNST, VALUE, TEXT, FIX, EMPTY, EQU
+- Vector/Array operations including !!!
 - '' (push address of function)
 - @ (dereference top of stack and push result)
 - ACT (mark a VAR as an executable word pointer, callable by name)
 - !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
 - T0, T1 (assign 0 or 1 to prior top of stack)
-- Variable/Array store shortcuts: !0, !1, !1-, !1+, !-, !+, !!!
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
 - Data permutation: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
 - ONLY, CANCEL, FORGET, CLEAR

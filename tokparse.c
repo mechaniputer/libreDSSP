@@ -28,6 +28,13 @@ extern codeword_t cw_var_undef_inc;
 extern codeword_t cw_var_generic_inc;
 extern codeword_t cw_var_undef_dec;
 extern codeword_t cw_var_generic_dec;
+extern codeword_t cw_var_undef_add;
+extern codeword_t cw_var_generic_add;
+extern codeword_t cw_var_undef_sub;
+extern codeword_t cw_var_generic_sub;
+extern codeword_t cw_var_undef_size;
+extern codeword_t cw_var_generic_size;
+
 
 // Tokenizer globals
 extern stack *tokenizerStack;
@@ -600,7 +607,15 @@ int parse_tokens(char * tok){
 		}else if(!strcmp(tok,"!1-")){
 			// We defer emitting the coreword because it might need to be the undef variant.
 			PARSE_ENTER_STATE(PARSE_DEC_S0);
-			// TODO additional state transitions for VAR ops (!1+, !1-, !+, !-, SIZE)
+		}else if(!strcmp(tok,"!+")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_ADD_S0);
+		}else if(!strcmp(tok,"!-")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_SUB_S0);
+		}else if(!strcmp(tok,"SIZE")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_SIZE_S0);
 		}else if(!strcmp(tok,":")){
 				compiling = 1;
 				start_new_def();
@@ -883,6 +898,9 @@ int parse_tokens(char * tok){
 	case PARSE_SET1_S0:
 	case PARSE_INC_S0:
 	case PARSE_DEC_S0:
+	case PARSE_ADD_S0:
+	case PARSE_SUB_S0:
+	case PARSE_SIZE_S0:
 		// Can be an undefined or existing variable.
 		var_lookup = varSearch(tok);
 		if((var_lookup) == NULL){
@@ -925,6 +943,12 @@ int parse_tokens(char * tok){
 					emit_cw(&cw_var_undef_inc);
 				}else if(parser_state == PARSE_DEC_S0){
 					emit_cw(&cw_var_undef_dec);
+				}else if(parser_state == PARSE_ADD_S0){
+					emit_cw(&cw_var_undef_dec);
+				}else if(parser_state == PARSE_SUB_S0){
+					emit_cw(&cw_var_undef_dec);
+				}else if(parser_state == PARSE_SIZE_S0){
+					emit_cw(&cw_var_undef_dec);
 				}
 				emit_cw((codeword_t *) uref->name);
 			}
@@ -941,6 +965,12 @@ int parse_tokens(char * tok){
 				emit_cw(&cw_var_generic_inc);
 			}else if(parser_state == PARSE_DEC_S0){
 				emit_cw(&cw_var_generic_dec);
+			}else if(parser_state == PARSE_ADD_S0){
+				emit_cw(&cw_var_generic_add);
+			}else if(parser_state == PARSE_SUB_S0){
+				emit_cw(&cw_var_generic_sub);
+			}else if(parser_state == PARSE_SIZE_S0){
+				emit_cw(&cw_var_generic_size);
 			}
 			emit_cw((codeword_t*) var_lookup);
 		}

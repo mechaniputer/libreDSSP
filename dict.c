@@ -41,6 +41,12 @@ extern codeword_t cw_var_undef_inc;
 extern codeword_t cw_var_generic_inc;
 extern codeword_t cw_var_undef_dec;
 extern codeword_t cw_var_generic_dec;
+extern codeword_t cw_var_undef_add;
+extern codeword_t cw_var_generic_add;
+extern codeword_t cw_var_undef_sub;
+extern codeword_t cw_var_generic_sub;
+extern codeword_t cw_var_undef_size;
+extern codeword_t cw_var_generic_size;
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
@@ -381,6 +387,28 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 			// [&cw_var_generic_dec] [&variable_t var]
 			*patch_target++ = &cw_var_generic_dec;
 			*patch_target = (codeword_t *) var;
+
+
+
+		}else if(isVar && (*patch_target == &cw_var_undef_add)){
+			// [&cw_var_generic_add] [&variable_t var]
+			*patch_target++ = &cw_var_generic_add;
+			*patch_target = (codeword_t *) var;
+
+
+
+
+		}else if(isVar && (*patch_target == &cw_var_undef_sub)){
+			// [&cw_var_generic_sub] [&variable_t var]
+			*patch_target++ = &cw_var_generic_sub;
+			*patch_target = (codeword_t *) var;
+
+
+		}else if(isVar && (*patch_target == &cw_var_undef_size)){
+			// [&cw_var_generic_size] [&variable_t var]
+			*patch_target++ = &cw_var_generic_size;
+			*patch_target = (codeword_t *) var;
+
 		}else{
 			printf("ERR: Unexpected value at patch target\n");
 			printf("Name: %s\n", (*patch_target)->name);

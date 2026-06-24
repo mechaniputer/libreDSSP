@@ -1565,6 +1565,14 @@ void _var_generic_dec(){
 }
 
 
+codeword_t cw_var_undef_add = {
+	.name = "_var_undef_add",
+	.xt = _var_undef_add,
+	.text = "!+",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell points to the undefined ref struct
 void _var_undef_add(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1575,6 +1583,14 @@ void _var_undef_add(){
 	return;
 }
 
+codeword_t cw_var_generic_add = {
+	.name = "_var_generic_add",
+	.xt = _var_generic_add,
+	.text = "!+",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell is a variable_t pointer
 void _var_generic_add(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1591,6 +1607,14 @@ void _var_generic_add(){
 }
 
 
+codeword_t cw_var_undef_sub = {
+	.name = "_var_undef_sub",
+	.xt = _var_undef_sub,
+	.text = "!-",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell points to the undefined ref struct
 void _var_undef_sub(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1601,6 +1625,14 @@ void _var_undef_sub(){
 	return;
 }
 
+codeword_t cw_var_generic_sub = {
+	.name = "_var_generic_sub",
+	.xt = _var_generic_sub,
+	.text = "!-",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell is a variable_t pointer
 void _var_generic_sub(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1617,6 +1649,14 @@ void _var_generic_sub(){
 }
 
 
+codeword_t cw_var_undef_size = {
+	.name = "_var_undef_size",
+	.xt = _var_undef_size,
+	.text = "SIZE",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell points to the undefined ref struct
 void _var_undef_size(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1627,11 +1667,19 @@ void _var_undef_size(){
 	return;
 }
 
+codeword_t cw_var_generic_size = {
+	.name = "_var_generic_size",
+	.xt = _var_generic_size,
+	.text = "SIZE",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell is a variable_t pointer
 void _var_generic_size(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
-	push(dataStack, (intptr_t)&(var->size));
+	push(dataStack, (intptr_t) (var->size));
 	return;
 }
 

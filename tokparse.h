@@ -36,6 +36,9 @@
 #define PARSE_SET1_S0       (22)
 #define PARSE_INC_S0        (23)
 #define PARSE_DEC_S0        (24)
+#define PARSE_ADD_S0        (25)
+#define PARSE_SUB_S0        (26)
+#define PARSE_SIZE_S0       (27)
 
 
 // This is a record to postpone capturing precise addresses of undef refs in a new word

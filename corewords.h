@@ -147,4 +147,13 @@ void _var_generic_inc();
 void _var_undef_dec();
 void _var_generic_dec();
 
+void _var_undef_add();
+void _var_generic_add();
+
+void _var_undef_sub();
+void _var_generic_sub();
+
+void _var_undef_size();
+void _var_generic_size();
+
 #endif
