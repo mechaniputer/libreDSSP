@@ -113,13 +113,53 @@ void print_codewords(codeword_t ** array){
 			i++;
 			printf("%d) %p: STR %s\n", i, (void*) &array[i], (char *) array[i]);
 		}else if(array[i]->xt == _var_generic_assign){
-			// _var_generic_assign is followed by a pointer to a variable_t
+			// Non-declaration VAR ops are followed by a pointer to a variable_t
 			i++;
 			printf("%d) %p: ASSIGN %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
 		}else if(array[i]->xt == _var_undef_assign){
 			// Undefined var ops are followed by a char *
 			i++;
 			printf("%d) %p: ASSIGN %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
+		}else if(array[i]->xt == _var_generic_addrof){
+			// Non-declaration VAR ops are followed by a pointer to a variable_t
+			i++;
+			printf("%d) %p: ADDROF %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
+		}else if(array[i]->xt == _var_undef_addrof){
+			// Undefined var ops are followed by a char *
+			i++;
+			printf("%d) %p: ADDROF %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
+		}else if(array[i]->xt == _var_generic_set0){
+			// Non-declaration VAR ops are followed by a pointer to a variable_t
+			i++;
+			printf("%d) %p: !0 %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
+		}else if(array[i]->xt == _var_undef_set0){
+			// Undefined var ops are followed by a char *
+			i++;
+			printf("%d) %p: !0 %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
+		}else if(array[i]->xt == _var_generic_set1){
+			// Non-declaration VAR ops are followed by a pointer to a variable_t
+			i++;
+			printf("%d) %p: !1 %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
+		}else if(array[i]->xt == _var_undef_set1){
+			// Undefined var ops are followed by a char *
+			i++;
+			printf("%d) %p: !1 %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
+		}else if(array[i]->xt == _var_generic_inc){
+			// Non-declaration VAR ops are followed by a pointer to a variable_t
+			i++;
+			printf("%d) %p: !1+ %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
+		}else if(array[i]->xt == _var_undef_inc){
+			// Undefined var ops are followed by a char *
+			i++;
+			printf("%d) %p: !1+ %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
+		}else if(array[i]->xt == _var_generic_dec){
+			// Non-declaration VAR ops are followed by a pointer to a variable_t
+			i++;
+			printf("%d) %p: !1- %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
+		}else if(array[i]->xt == _var_undef_dec){
+			// Undefined var ops are followed by a char *
+			i++;
+			printf("%d) %p: !1- %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);
 		}else if(!strcmp("SHUT", array[i]->name) || !strcmp("USE", array[i]->name)){
 			// SHUT/USE are followed by a pointer to a subdict struct
 			i++;

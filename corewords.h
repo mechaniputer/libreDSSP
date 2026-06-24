@@ -140,4 +140,11 @@ void _var_generic_set0();
 
 void _var_undef_set1();
 void _var_generic_set1();
+
+void _var_undef_inc();
+void _var_generic_inc();
+
+void _var_undef_dec();
+void _var_generic_dec();
+
 #endif

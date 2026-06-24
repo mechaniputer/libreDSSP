@@ -37,6 +37,10 @@ extern codeword_t cw_var_undef_set0;
 extern codeword_t cw_var_generic_set0;
 extern codeword_t cw_var_undef_set1;
 extern codeword_t cw_var_generic_set1;
+extern codeword_t cw_var_undef_inc;
+extern codeword_t cw_var_generic_inc;
+extern codeword_t cw_var_undef_dec;
+extern codeword_t cw_var_generic_dec;
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
@@ -369,6 +373,14 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 			// [&cw_var_generic_set1] [&variable_t var]
 			*patch_target++ = &cw_var_generic_set1;
 			*patch_target = (codeword_t *) var;
+		}else if(isVar && (*patch_target == &cw_var_undef_inc)){
+			// [&cw_var_generic_inc] [&variable_t var]
+			*patch_target++ = &cw_var_generic_inc;
+			*patch_target = (codeword_t *) var;
+		}else if(isVar && (*patch_target == &cw_var_undef_dec)){
+			// [&cw_var_generic_dec] [&variable_t var]
+			*patch_target++ = &cw_var_generic_dec;
+			*patch_target = (codeword_t *) var;
 		}else{
 			printf("ERR: Unexpected value at patch target\n");
 			printf("Name: %s\n", (*patch_target)->name);
@@ -449,6 +461,20 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 						//printf("Patching var !1 ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index++] = &cw_var_undef_set1;
+						array[patch_index] = (codeword_t *) uref->name;
+					}
+				}else if(array[patch_index] == &cw_var_generic_inc){
+					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
+						//printf("Patching var !1+ ref\n");
+						add_reference(uref, &array[patch_index]);
+						array[patch_index++] = &cw_var_undef_inc;
+						array[patch_index] = (codeword_t *) uref->name;
+					}
+				}else if(array[patch_index] == &cw_var_generic_dec){
+					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
+						//printf("Patching var !1- ref\n");
+						add_reference(uref, &array[patch_index]);
+						array[patch_index++] = &cw_var_undef_dec;
 						array[patch_index] = (codeword_t *) uref->name;
 					}
 				}else if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declare_var8 || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){

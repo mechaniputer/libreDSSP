@@ -1389,6 +1389,7 @@ void _var_generic_assign(){
 	return;
 }
 
+
 codeword_t cw_var_undef_addrof = {
 	.name = "_var_undef_addrof",
 	.xt = _var_undef_addrof,
@@ -1423,6 +1424,7 @@ void _var_generic_addrof(){
 	return;
 }
 
+
 codeword_t cw_var_undef_set0 = {
 	.name = "_var_undef_set0",
 	.xt = _var_undef_set0,
@@ -1456,6 +1458,7 @@ void _var_generic_set0(){
 	var->value = 0;
 	return;
 }
+
 
 codeword_t cw_var_undef_set1 = {
 	.name = "_var_undef_set1",
@@ -1492,6 +1495,14 @@ void _var_generic_set1(){
 }
 
 
+codeword_t cw_var_undef_inc = {
+	.name = "_var_undef_inc",
+	.xt = _var_undef_inc,
+	.text = "!1+",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell points to the undefined ref struct
 void _var_undef_inc(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1502,6 +1513,14 @@ void _var_undef_inc(){
 	return;
 }
 
+codeword_t cw_var_generic_inc = {
+	.name = "_var_generic_inc",
+	.xt = _var_generic_inc,
+	.text = "!1+",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell is a variable_t pointer
 void _var_generic_inc(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1511,6 +1530,14 @@ void _var_generic_inc(){
 }
 
 
+codeword_t cw_var_undef_dec = {
+	.name = "_var_undef_dec",
+	.xt = _var_undef_dec,
+	.text = "!1-",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell points to the undefined ref struct
 void _var_undef_dec(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1521,6 +1548,14 @@ void _var_undef_dec(){
 	return;
 }
 
+codeword_t cw_var_generic_dec = {
+	.name = "_var_generic_dec",
+	.xt = _var_generic_dec,
+	.text = "!1-",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell is a variable_t pointer
 void _var_generic_dec(){
 	cmdbuf->ip++; // Advance to data cell

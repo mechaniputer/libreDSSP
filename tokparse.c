@@ -24,6 +24,10 @@ extern codeword_t cw_var_undef_set0;
 extern codeword_t cw_var_generic_set0;
 extern codeword_t cw_var_undef_set1;
 extern codeword_t cw_var_generic_set1;
+extern codeword_t cw_var_undef_inc;
+extern codeword_t cw_var_generic_inc;
+extern codeword_t cw_var_undef_dec;
+extern codeword_t cw_var_generic_dec;
 
 // Tokenizer globals
 extern stack *tokenizerStack;
@@ -54,7 +58,7 @@ int newWordPendUndefsCap;
 
 
 // For ensuring that we do not emit a multicell word when we only have one cell to populate (eg, in a conditional or loop)
-static const char *const multicell_words[] = {"IF-","IF0","IF+","BR-","BR0","BR+","BRS","BR","DO","RP","VAR","!","GROW","SHUT","USE","SEE","DEL", "!"};
+static const char *const multicell_words[] = {"IF-","IF0","IF+","BR-","BR0","BR+","BRS","BR","DO","RP","VAR","!","GROW","SHUT","USE","SEE","DEL", "!", "'", "!0", "!1", "!1+", "!1-", "!+,", "!-", "SIZE"};
 static const size_t NUM_MULTICELL_WORDS = sizeof(multicell_words) / sizeof(multicell_words[0]);
 
 #define PARSE_ENTER_STATE(ST)  { push(parserStack, parser_state); parser_state = ST; }
@@ -590,6 +594,12 @@ int parse_tokens(char * tok){
 		}else if(!strcmp(tok,"!1")){
 			// We defer emitting the coreword because it might need to be the undef variant.
 			PARSE_ENTER_STATE(PARSE_SET1_S0);
+		}else if(!strcmp(tok,"!1+")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_INC_S0);
+		}else if(!strcmp(tok,"!1-")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_DEC_S0);
 			// TODO additional state transitions for VAR ops (!1+, !1-, !+, !-, SIZE)
 		}else if(!strcmp(tok,":")){
 				compiling = 1;
@@ -871,6 +881,8 @@ int parse_tokens(char * tok){
 	case PARSE_ADDROF_S0:
 	case PARSE_SET0_S0:
 	case PARSE_SET1_S0:
+	case PARSE_INC_S0:
+	case PARSE_DEC_S0:
 		// Can be an undefined or existing variable.
 		var_lookup = varSearch(tok);
 		if((var_lookup) == NULL){
@@ -909,6 +921,10 @@ int parse_tokens(char * tok){
 					emit_cw(&cw_var_undef_set0);
 				}else if(parser_state == PARSE_SET1_S0){
 					emit_cw(&cw_var_undef_set1);
+				}else if(parser_state == PARSE_INC_S0){
+					emit_cw(&cw_var_undef_inc);
+				}else if(parser_state == PARSE_DEC_S0){
+					emit_cw(&cw_var_undef_dec);
 				}
 				emit_cw((codeword_t *) uref->name);
 			}
@@ -921,6 +937,10 @@ int parse_tokens(char * tok){
 				emit_cw(&cw_var_generic_set0);
 			}else if(parser_state == PARSE_SET1_S0){
 				emit_cw(&cw_var_generic_set1);
+			}else if(parser_state == PARSE_INC_S0){
+				emit_cw(&cw_var_generic_inc);
+			}else if(parser_state == PARSE_DEC_S0){
+				emit_cw(&cw_var_generic_dec);
 			}
 			emit_cw((codeword_t*) var_lookup);
 		}
