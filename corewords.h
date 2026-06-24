@@ -103,14 +103,9 @@ void dropStack();
 void skip1();
 void skip2();
 void noop();
-void _undefined_ref();
-void _var_undef_assign();
 void delete_name();
 void pushLiteral();
-void _var8_ref();
 void declare_var8();
-void _var_generic_assign();
-void _var8_ref();
 void printNewline();
 void printSpace();
 void listDicts();
@@ -129,5 +124,15 @@ void seeName();
 
 // Add all of the core words to a dictionary
 void define_all_core();
+
+// Unindexed core words
+void _undefined_ref();
+void _var8_ref();
+
+void _var_undef_assign();
+void _var_generic_assign();
+
+void _var_undef_addrof();
+void _var_generic_addrof();
 
 #endif

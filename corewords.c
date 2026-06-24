@@ -1166,6 +1166,65 @@ void inventoryVars(){
 }
 
 
+// Declare the existence of a named variable
+// The next cell should contain the address of the desired (char *) name of the variable
+// We initialize variables to 0.
+void declare_var8(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(vocab->grow == NULL){
+		printf("Error: We are defining a word but no dictionary is selected\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	if(vocab->grow->open == 0){
+		printf("Error: We are defining a word in a closed dictionary\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var alredy exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+	// No problems. Declare the var.
+	tempVar = malloc(sizeof(variable_t));
+	tempVar->name = varname; // The parser allocated this buffer and we can keep it
+	tempVar->value = 0;
+	tempVar->next = vocab->grow->varlist;
+	tempVar->size = 8;
+	vocab->grow->varlist = tempVar;
+
+	// per-variable unique _var8_ref op
+	tempVar->cw_pushVar.xt = _var8_ref;
+	tempVar->cw_pushVar.name = varname;
+	tempVar->cw_pushVar.data = (intptr_t) tempVar;
+	tempVar->cw_pushVar.next = NULL;
+	tempVar->cw_pushVar.text = NULL;
+	tempVar->cw_pushVar.size = 0; // FIXME maybe we should co-opt this as the variable size field?
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared variable %s\n",varname);
+	return;
+
+}
+
 void define_all_core(){
 	// Most common literals
 	defCore("0", push_zero);
@@ -1295,7 +1354,6 @@ codeword_t cw_var_undef_assign = {
 	.data = 0,
 	.next = NULL
 };
-
 // Next cell points to the undefined ref struct
 void _var_undef_assign(){
 	cmdbuf->ip++; // Advance to data cell
@@ -1315,7 +1373,6 @@ codeword_t cw_var_generic_assign = {
 	.data = 0,
 	.next = NULL
 };
-
 // Next cell is a variable_t pointer
 // Assign top of stack to a variable
 void _var_generic_assign(){
@@ -1332,8 +1389,16 @@ void _var_generic_assign(){
 	return;
 }
 
+codeword_t cw_var_undef_addrof = {
+	.name = "_var_undef_addrof",
+	.xt = _var_undef_addrof,
+	.text = "!",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell points to the undefined ref struct
-void var_undef_addrof(){
+void _var_undef_addrof(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to get address of undefined name %s\n", name);
@@ -1342,8 +1407,16 @@ void var_undef_addrof(){
 	return;
 }
 
+codeword_t cw_var_generic_addrof = {
+	.name = "_var_generic_addrof",
+	.xt = _var_generic_addrof,
+	.text = "!",
+	.size = 0,
+	.data = 0,
+	.next = NULL
+};
 // Next cell is a variable_t pointer
-void var_generic_addrof(){
+void _var_generic_addrof(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	push(dataStack, (intptr_t)&(var->value));
@@ -1352,7 +1425,7 @@ void var_generic_addrof(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_set0(){
+void _var_undef_set0(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to set value of undefined name %s to 0\n", name);
@@ -1362,7 +1435,7 @@ void var_undef_set0(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_set0(){
+void _var_generic_set0(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	var->value = 0;
@@ -1371,7 +1444,7 @@ void var_generic_set0(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_set1(){
+void _var_undef_set1(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to set value of undefined name %s to 1\n", name);
@@ -1381,7 +1454,7 @@ void var_undef_set1(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_set1(){
+void _var_generic_set1(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	var->value = 1;
@@ -1390,7 +1463,7 @@ void var_generic_set1(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_inc(){
+void _var_undef_inc(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to increment value of undefined name %s\n", name);
@@ -1400,7 +1473,7 @@ void var_undef_inc(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_inc(){
+void _var_generic_inc(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	var->value += 1;
@@ -1409,7 +1482,7 @@ void var_generic_inc(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_dec(){
+void _var_undef_dec(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to decrement value of undefined name %s\n", name);
@@ -1419,7 +1492,7 @@ void var_undef_dec(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_dec(){
+void _var_generic_dec(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	var->value -= 1;
@@ -1428,7 +1501,7 @@ void var_generic_dec(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_add(){
+void _var_undef_add(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to add to value of undefined name %s\n", name);
@@ -1438,7 +1511,7 @@ void var_undef_add(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_add(){
+void _var_generic_add(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	FETCH_TOP_IND
@@ -1454,7 +1527,7 @@ void var_generic_add(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_sub(){
+void _var_undef_sub(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to subtract from value of undefined name %s\n", name);
@@ -1464,7 +1537,7 @@ void var_undef_sub(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_sub(){
+void _var_generic_sub(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	FETCH_TOP_IND
@@ -1480,7 +1553,7 @@ void var_generic_sub(){
 
 
 // Next cell points to the undefined ref struct
-void var_undef_size(){
+void _var_undef_size(){
 	cmdbuf->ip++; // Advance to data cell
 	char * name =  (char *)(cmdbuf->array[cmdbuf->ip]);
 	printf("ERR: Tried to get size of undefined name %s\n", name);
@@ -1490,69 +1563,10 @@ void var_undef_size(){
 }
 
 // Next cell is a variable_t pointer
-void var_generic_size(){
+void _var_generic_size(){
 	cmdbuf->ip++; // Advance to data cell
 	variable_t * var =  (variable_t *)(cmdbuf->array[cmdbuf->ip]);
 	push(dataStack, (intptr_t)&(var->size));
 	return;
 }
 
-
-// Declare the existence of a named variable
-// The next cell should contain the address of the desired (char *) name of the variable
-// We initialize variables to 0.
-void declare_var8(){
-	variable_t * tempVar;
-	cmdbuf->ip++; // Advance to data cell
-	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
-	// The parser has already ensured that the name is valid and null-terminated
-
-	// If no dictionary is selected to declare the VAR, abort!
-	if(vocab->grow == NULL){
-		printf("Error: We are defining a word but no dictionary is selected\n");
-		abortExecution();
-		cmdbuf->ip = -1; // word_next increments this!
-		return;
-	}
-	if(vocab->grow->open == 0){
-		printf("Error: We are defining a word in a closed dictionary\n");
-		abortExecution();
-		cmdbuf->ip = -1; // word_next increments this!
-		return;
-	}
-
-	// If there is a name collision in the current subdictionary, abort!
-	int collision = collisionSearch(varname);
-	if(collision == 1){
-		printf("Error: name %s is already used\n",varname);
-		abortExecution();
-		cmdbuf->ip = -1; // word_next increments this!
-		return;
-	}else if(collision == 2){
-		// The var alredy exists, so we zero it
-		tempVar = varSearch(varname);
-		tempVar->value = 0;
-		return;
-	}
-	// 0: no collision / 3: undef exists
-	// No problems. Declare the var.
-	tempVar = malloc(sizeof(variable_t));
-	tempVar->name = varname; // The parser allocated this buffer and we can keep it
-	tempVar->value = 0;
-	tempVar->next = vocab->grow->varlist;
-	tempVar->size = 8;
-	vocab->grow->varlist = tempVar;
-
-	// per-variable unique _var8_ref op
-	tempVar->cw_pushVar.xt = _var8_ref;
-	tempVar->cw_pushVar.name = varname;
-	tempVar->cw_pushVar.data = (intptr_t) tempVar;
-	tempVar->cw_pushVar.next = NULL;
-	tempVar->cw_pushVar.text = NULL;
-	tempVar->cw_pushVar.size = 0; // FIXME maybe we should co-opt this as the variable size field?
-
-	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
-	//printf("Declared variable %s\n",varname);
-	return;
-
-}

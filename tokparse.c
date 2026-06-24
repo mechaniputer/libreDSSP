@@ -16,8 +16,10 @@ extern cmdbuffer * cmdbuf;
 extern int abort_requested;
 
 // Global singleton codewords
-extern codeword_t cw_var_generic_assign;
 extern codeword_t cw_var_undef_assign;
+extern codeword_t cw_var_generic_assign;
+extern codeword_t cw_var_undef_addrof;
+extern codeword_t cw_var_generic_addrof;
 
 // Tokenizer globals
 extern stack *tokenizerStack;
@@ -575,6 +577,9 @@ int parse_tokens(char * tok){
 		}else if(!strcmp(tok,"!")){
 			// We defer emitting the coreword because it might need to be the undef variant.
 			PARSE_ENTER_STATE(PARSE_ASGN_S0);
+		}else if(!strcmp(tok,"'")){
+			// We defer emitting the coreword because it might need to be the undef variant.
+			PARSE_ENTER_STATE(PARSE_ADDROF_S0);
 			// TODO additional state transitions for VAR ops (', !0, !1, !1+, !1-, !+, !-)
 		}else if(!strcmp(tok,":")){
 				compiling = 1;
@@ -816,47 +821,6 @@ int parse_tokens(char * tok){
 		emit_cw((codeword_t *) namebuf);
 		PARSE_EXIT_STATE
 		break;
-	case PARSE_ASGN_S0:
-		// Can be an undefined or existing variable.
-		var_lookup = varSearch(tok);
-		if((var_lookup) == NULL){
-			if(!compiling){
-				// In immediate mode, we error out.
-				printf("ERR: Unknown var %s\n",tok);
-				abortExecution();
-				return 0;
-			}else{
-				// In compiling mode, we start tracking the undef ref.
-				if(!isValidWordVarName(tok)){
-					printf("ERR: %s invalid var name\n", tok);
-					abortExecution();
-					return 0;
-				}
-
-				// Check if the name is already a variable
-				if(wordSearch(tok)){
-					printf("ERR: Symbol %s already defined as a word\n", tok);
-					abortExecution();
-					return 0;
-				}
-
-				// Check if this is a known uref
-				uref = undefSearch(tok);
-				if(uref == NULL) uref = create_undefined_ref(tok);
-
-				// Add to pending undef refs
-				// Note: The pending undef points to the operation cell, not the VAR cell.
-				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
-
-				emit_cw(&cw_var_undef_assign);
-				emit_cw((codeword_t *) uref->name);
-			}
-		}else{
-			emit_cw(&cw_var_generic_assign);
-			emit_cw((codeword_t*) var_lookup);
-		}
-		PARSE_EXIT_STATE
-		break;
 	case PARSE_DICT_NEW:
 		// Expecting a valid new dictionary name
 		// Easily checked with isDict().
@@ -888,6 +852,58 @@ int parse_tokens(char * tok){
 		namebuf = malloc((strlen(tok)+1) * sizeof(char));
 		strcpy(namebuf, tok);
 		emit_cw((codeword_t *) namebuf);
+		PARSE_EXIT_STATE
+		break;
+
+	// We stack cases here for compactness.
+	// Note that we still need to observe the state to emit the correct code.
+	case PARSE_ASGN_S0:
+	case PARSE_ADDROF_S0:
+		// Can be an undefined or existing variable.
+		var_lookup = varSearch(tok);
+		if((var_lookup) == NULL){
+			if(!compiling){
+				// In immediate mode, we error out.
+				printf("ERR: Unknown var %s\n",tok);
+				abortExecution();
+				return 0;
+			}else{
+				// In compiling mode, we start tracking the undef ref.
+				if(!isValidWordVarName(tok)){
+					printf("ERR: %s invalid var name\n", tok);
+					abortExecution();
+					return 0;
+				}
+
+				// Check if the name is already a variable
+				if(wordSearch(tok)){
+					printf("ERR: Symbol %s already defined as a word\n", tok);
+					abortExecution();
+					return 0;
+				}
+
+				// Check if this is a known uref
+				uref = undefSearch(tok);
+				if(uref == NULL) uref = create_undefined_ref(tok);
+
+				// Add to pending undef refs
+				// Note: The pending undef points to the operation cell, not the VAR cell.
+				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
+				if(parser_state == PARSE_ASGN_S0){
+					emit_cw(&cw_var_undef_assign);
+				}else if(parser_state == PARSE_ADDROF_S0){
+					emit_cw(&cw_var_undef_addrof);
+				}
+				emit_cw((codeword_t *) uref->name);
+			}
+		}else{
+			if(parser_state == PARSE_ASGN_S0){
+				emit_cw(&cw_var_generic_assign);
+			}else if(parser_state == PARSE_ADDROF_S0){
+				emit_cw(&cw_var_generic_addrof);
+			}
+			emit_cw((codeword_t*) var_lookup);
+		}
 		PARSE_EXIT_STATE
 		break;
 	default:

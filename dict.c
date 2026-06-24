@@ -31,6 +31,8 @@ extern dict * vocab;
 // Global singleton codewords
 extern codeword_t cw_var_generic_assign;
 extern codeword_t cw_var_undef_assign;
+extern codeword_t cw_var_generic_addrof;
+extern codeword_t cw_var_undef_addrof;
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
@@ -348,9 +350,12 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				*patch_target = &var->cw_pushVar; // _var8_ref
 			}
 		}else if(isVar && (*patch_target == &cw_var_undef_assign)){
-			// It's a var
 			// [&cw_var_generic_assign] [&variable_t var]
 			*patch_target++ = &cw_var_generic_assign;
+			*patch_target = (codeword_t *) var;
+		}else if(isVar && (*patch_target == &cw_var_undef_addrof)){
+			// [&cw_var_generic_addrof] [&variable_t var]
+			*patch_target++ = &cw_var_generic_addrof;
 			*patch_target = (codeword_t *) var;
 		}else{
 			printf("ERR: Unexpected value at patch target\n");
@@ -411,6 +416,13 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 						//printf("Patching var assign ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index++] = &cw_var_undef_assign;
+						array[patch_index] = (codeword_t *) uref->name;
+					}
+				}else if(array[patch_index] == &cw_var_generic_addrof){
+					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
+						//printf("Patching var addrof ref\n");
+						add_reference(uref, &array[patch_index]);
+						array[patch_index++] = &cw_var_undef_addrof;
 						array[patch_index] = (codeword_t *) uref->name;
 					}
 				}else if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declare_var8 || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){

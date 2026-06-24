@@ -24,13 +24,14 @@
 #define PARSE_BR_S3         (10)
 #define PARSE_DO_S0         (11)
 #define PARSE_RP_S0         (12)
-#define PARSE_VAR_NAME_S0  (13)
-#define PARSE_ASGN_S0       (14)
-#define PARSE_DICT_NEW      (15)
-#define PARSE_DICT_EXIST    (16)
-#define PARSE_COMPILE_S0    (17) // Awaiting word name
-#define PARSE_COMPILE_S1    (18) // Awaiting more commands or ;
-#define PARSE_DEL_S0        (19) // Awaiting word name to delete
+#define PARSE_VAR_NAME_S0   (13)
+#define PARSE_DICT_NEW      (14)
+#define PARSE_DICT_EXIST    (15)
+#define PARSE_COMPILE_S0    (16) // Awaiting word name
+#define PARSE_COMPILE_S1    (17) // Awaiting more commands or ;
+#define PARSE_DEL_S0        (18) // Awaiting word name to delete
+#define PARSE_ASGN_S0       (19)
+#define PARSE_ADDROF_S0     (20)
 
 
 // This is a record to postpone capturing precise addresses of undef refs in a new word
