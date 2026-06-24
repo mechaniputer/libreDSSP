@@ -19,5 +19,6 @@ nav:
     - Threading Model: internals/threading.md
     - Multi-cell Core Words: internals/multicell.md
     - Reference patching: internals/refpatching.md
+    - Porting: internals/portability.md
 extra_javascript:
   - dssp.js
