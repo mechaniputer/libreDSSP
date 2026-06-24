@@ -72,6 +72,7 @@ struct variable_t
 	variable_t * next;
 	codeword_t cw_pushVar;
 	intptr_t value;
+	int size; // 1, 2, 4, or 8 bytes
 };
 
 struct subdict

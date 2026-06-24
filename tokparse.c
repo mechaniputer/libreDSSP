@@ -16,8 +16,8 @@ extern cmdbuffer * cmdbuf;
 extern int abort_requested;
 
 // Global singleton codewords
-extern codeword_t global_cw_assignVar;
-extern codeword_t global_cw_assignUndef;
+extern codeword_t cw_var_generic_assign;
+extern codeword_t cw_var_undef_assign;
 
 // Tokenizer globals
 extern stack *tokenizerStack;
@@ -563,7 +563,7 @@ int parse_tokens(char * tok){
 				PARSE_ENTER_STATE(PARSE_DO_S0);
 			}else if(!strcmp(tok,"RP")){
 				PARSE_ENTER_STATE(PARSE_RP_S0);
-			}else if(!strcmp(tok,"VAR") || !strcmp(tok,"SEE")){
+			}else if(!strncmp(tok,"VAR",3) || !strcmp(tok,"SEE")){
 				PARSE_ENTER_STATE(PARSE_VAR_NAME_S0);
 			}else if(!strcmp(tok,"GROW")){
 				PARSE_ENTER_STATE(PARSE_DICT_NEW);
@@ -573,7 +573,9 @@ int parse_tokens(char * tok){
 				PARSE_ENTER_STATE(PARSE_DICT_EXIST);
 			}
 		}else if(!strcmp(tok,"!")){
+			// We defer emitting the coreword because it might need to be the undef variant.
 			PARSE_ENTER_STATE(PARSE_ASGN_S0);
+			// TODO additional state transitions for VAR ops (', !0, !1, !1+, !1-, !+, !-)
 		}else if(!strcmp(tok,":")){
 				compiling = 1;
 				start_new_def();
@@ -846,11 +848,11 @@ int parse_tokens(char * tok){
 				// Note: The pending undef points to the operation cell, not the VAR cell.
 				add_pending_undef(uref, newWordCodeLen); // Record the pending undef ref with the current cell index
 
-				emit_cw(&global_cw_assignUndef);
+				emit_cw(&cw_var_undef_assign);
 				emit_cw((codeword_t *) uref->name);
 			}
 		}else{
-			emit_cw(&global_cw_assignVar);
+			emit_cw(&cw_var_generic_assign);
 			emit_cw((codeword_t*) var_lookup);
 		}
 		PARSE_EXIT_STATE

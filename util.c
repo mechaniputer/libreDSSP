@@ -94,7 +94,7 @@ void print_codewords(codeword_t ** array){
 			i++;
 		}
 
-		if(array[i]->xt == pushVar){
+		if(array[i]->xt == _var8_ref){
 			printf("%d) %p: PUSH %s\n", i, (void*) &array[i], ((variable_t*)array[i]->data)->name);
 			i++;
 			continue;
@@ -112,11 +112,11 @@ void print_codewords(codeword_t ** array){
 			// DEL and SEE are followed by a char * containing an object name
 			i++;
 			printf("%d) %p: STR %s\n", i, (void*) &array[i], (char *) array[i]);
-		}else if(array[i]->xt == assignVar){
-			// assignVar is followed by a pointer to a variable_t
+		}else if(array[i]->xt == _var_generic_assign){
+			// _var_generic_assign is followed by a pointer to a variable_t
 			i++;
 			printf("%d) %p: ASSIGN %s\n", i, (void*) &array[i], ((variable_t*)array[i])->name);
-		}else if(array[i]->xt == _undefined_assign){
+		}else if(array[i]->xt == _var_undef_assign){
 			// Undefined var ops are followed by a char *
 			i++;
 			printf("%d) %p: ASSIGN %s (UNDEF)\n", i, (void*) &array[i], (char *)array[i]);

@@ -29,8 +29,8 @@
 extern dict * vocab;
 
 // Global singleton codewords
-extern codeword_t global_cw_assignVar;
-extern codeword_t global_cw_assignUndef;
+extern codeword_t cw_var_generic_assign;
+extern codeword_t cw_var_undef_assign;
 
 // Searches vocab->grow to ensure that a name is free in this namespace.
 // Should be used whenever defining a new variable to ensure that it doesn't mask a function
@@ -345,12 +345,12 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				*patch_target = def;
 			}else{
 				// It's a var
-				*patch_target = &var->cw_pushVar; // pushVar
+				*patch_target = &var->cw_pushVar; // _var8_ref
 			}
-		}else if(isVar && (*patch_target == &global_cw_assignUndef)){
+		}else if(isVar && (*patch_target == &cw_var_undef_assign)){
 			// It's a var
-			// [&global_cw_assignVar] [&variable_t var]
-			*patch_target++ = &global_cw_assignVar;
+			// [&cw_var_generic_assign] [&variable_t var]
+			*patch_target++ = &cw_var_generic_assign;
 			*patch_target = (codeword_t *) var;
 		}else{
 			printf("ERR: Unexpected value at patch target\n");
@@ -399,21 +399,21 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
 					}
-				}else if(array[patch_index]->xt == pushVar){
+				}else if(array[patch_index]->xt == _var8_ref){
 					if(!strcmp(array[patch_index]->name, uref->name)){
 						// If it's a plain var ref:
 						//printf("Patching plain var ref\n");
 						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
 					}
-				}else if(array[patch_index] == &global_cw_assignVar){
+				}else if(array[patch_index] == &cw_var_generic_assign){
 					if(!strcmp( ((variable_t *)(array[patch_index+1]))->name , uref->name)){
 						//printf("Patching var assign ref\n");
 						add_reference(uref, &array[patch_index]);
-						array[patch_index++] = &global_cw_assignUndef;
+						array[patch_index++] = &cw_var_undef_assign;
 						array[patch_index] = (codeword_t *) uref->name;
 					}
-				}else if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declareVar || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
+				}else if(array[patch_index]->xt == pushLiteral || array[patch_index]->xt == declare_var8 || array[patch_index]->xt == growSub || array[patch_index]->xt == growSub || array[patch_index]->xt == shutSub){
 					// For some additional words we need to skip two cells for safety
 					patch_index += 1;
 				}else if(!strcmp(array[patch_index]->name, "BR")){
@@ -506,7 +506,7 @@ char * temp_name;
 				delete_undef_ref(uref);
 			}
 			ind += 1;
-		}else if(array[ind]->xt == _undefined_assign){
+		}else if(array[ind]->xt == _var_undef_assign){
 			// Reference to undefined variable
 			// Note: This will later be a list of like 10 functions to check for... Probably need a helper function.
 			temp_name = (char *) array[ind+1];
@@ -538,7 +538,7 @@ char * temp_name;
 			// Important: skip 2 cells since var-specific ops are 2 cells.
 			ind += 2;
 
-		}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declareVar || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
+		}else if(array[ind]->xt == pushLiteral || array[ind]->xt == declare_var8 || array[ind]->xt == growSub || array[ind]->xt == growSub || array[ind]->xt == shutSub){
 			// For some words we need to skip two cells for safety
 			ind += 1;
 		}else if(!strcmp(array[ind]->name, "BR")){
