@@ -122,6 +122,7 @@ void termReadByte();
 void termInByte();
 void termInNum();
 void termOutNum();
+void termInString();
 void termOutString();
 void stackDepth();
 void inventoryUndefined();

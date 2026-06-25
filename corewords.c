@@ -1131,6 +1131,46 @@ void termOutNum(){
 	return;
 }
 
+void termInString(){
+	// FIXME Need ctrl+c sig handler to fix the terminal
+
+	// Requires two operands. The top of the stack is a count and below that is a pointer to the string.
+	if(dataStack->top < 1){
+		fprintf(stderr,"ERR: Insufficient stack operands for TOS\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	// Pop the count and pointer from the stack
+	intptr_t len = pop(dataStack);
+	char * str = (char *) pop(dataStack);
+
+	// Read up to the specified number of characters from the string
+	for(int i=0; i<len; i++){
+
+		// Clear ICANON
+		struct termios orig, raw;
+		tcgetattr(STDIN_FILENO, &orig);
+		raw = orig;
+		raw.c_lflag &= ~(ICANON);
+		raw.c_cc[VMIN] = 1;
+		raw.c_cc[VTIME] = 0;
+		tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+
+		str[i] = getchar();
+
+		// Set ICANON
+		tcsetattr(STDIN_FILENO, TCSANOW, &orig);
+
+		// If newline or EOF, break
+		if(str[i] == '\n' || str[i] == EOF){
+			str[i] = '\0'; // Null terminate the string
+			break;
+		}
+	}
+	return;
+}
+
 void termOutString(){
 	// Requires two operands. The top of the stack is a count and below that is a pointer to the string.
 	if(dataStack->top < 1){
@@ -1142,10 +1182,16 @@ void termOutString(){
 	// Pop the count and pointer from the stack
 	intptr_t len = pop(dataStack);
 	char * str = (char *) pop(dataStack);
-	// Print exactly the specified number of characters from the string
+	// Print up to the specified number of characters from the string
 	for(int i=0; i<len; i++){
+		if(str[i] == '\0' || str[i] == EOF) break;
 		printf("%c", str[i]);
 	}
+	return;
+}
+
+void bell(){
+	putchar('\a');
 	return;
 }
 
@@ -1610,7 +1656,9 @@ void define_all_core(){
 	defCore("TIN", termInNum);
 	defCore("TOB", termOutByte);
 	defCore("TON", termOutNum);
+	defCore("TIS", termInString);
 	defCore("TOS", termOutString);
+	defCore("BELL", bell);
 	defCore("DEEP", stackDepth);
 	defCore("UNDEF",inventoryUndefined);
 	defCore("WORDS", inventoryWords); // Borrowed from Forth.

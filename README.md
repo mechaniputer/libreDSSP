@@ -57,6 +57,8 @@ Also let us know if you are interested in setting up other resources such as an 
 
 - Instead of using legacy type qualifiers like `BYTE VAR FOO`, libreDSSP uses `VAR1 FOO`, where the number denotes the number of bytes. This is more consistent with DSSP's goal of a closer correspondence between the text and the compiled code. It also removes the dependence on legacy machine word sizes, as in `WORD ARR FOO`.
 
+- TIS and TOS insert and respect null terminators.
+
 
 ## What works
 - Top-down programming! (reference undefined names when defining words)
@@ -79,8 +81,8 @@ Also let us know if you are interested in setting up other resources such as an 
 - CT, C2, C3, C4
 - Function declarations
 - TRB (input byte, no echo), TIB (input byte with echo), TOB (output byte)
-- TIN (input num), TON (output num), TOS (output string)
-- SP, CR
+- TIN (input num), TON (output num), TOS (output string), TIS (input string)
+- SP, CR, BELL
 - ."hello" printing
 - Push address and len of string literal
 - [comments]
@@ -109,11 +111,9 @@ Also let us know if you are interested in setting up other resources such as an 
 - "local values" S( ) feature mentioned in daf.txt and apparently working in DSSP-32? Not documented elsewhere.
 - DEFINE? (Predicate for whether a word is defined. I assume this should not check in CLOSED subdicts.)
 - SAVE, LOAD (for saving state to, or restoring state from, a source file)
-- TIS (input string)
 - B2, B8, B16
 - EXEC (execute function from address on stack)
 - TEXEC (execute text)
-- BELL
 - LPSP, LPCR, LPS, LPT, LPFF
 - INT, TRAP, ON, EON
 - Floating point math (not an original DSSP feature)
