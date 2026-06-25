@@ -1165,6 +1165,242 @@ void inventoryVars(){
 	return;
 }
 
+int declare_var_dict_check(){
+	if(vocab->grow == NULL){
+		printf("Error: We are defining a word but no dictionary is selected\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return 1;
+	}
+	if(vocab->grow->open == 0){
+		printf("Error: We are defining a word in a closed dictionary\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return 1;
+	}
+	return 0;
+}
+
+// Sets up everything except size and cw_pushVar.xt
+variable_t * help_get_new_var(char * varname){
+	variable_t * tempVar = malloc(sizeof(variable_t));
+	tempVar->name = varname; // The parser allocated this buffer and we can keep it
+	tempVar->value = 0;
+	tempVar->next = vocab->grow->varlist;
+	vocab->grow->varlist = tempVar;
+
+	// per-variable unique _var8_ref op
+	tempVar->cw_pushVar.name = varname;
+	tempVar->cw_pushVar.data = (intptr_t) tempVar;
+	tempVar->cw_pushVar.next = NULL;
+	tempVar->cw_pushVar.text = NULL;
+	tempVar->cw_pushVar.size = 0; // FIXME maybe we should co-opt this as the variable size field?
+	return tempVar;
+}
+
+void declare_var1(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(declare_var_dict_check()) return;
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var already exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 1;
+	tempVar->cw_pushVar.xt = _var1_ref;
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared VAR1 %s\n",varname);
+	return;
+}
+
+void declare_var1u(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(declare_var_dict_check()) return;
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var already exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 1;
+	tempVar->cw_pushVar.xt = _var1u_ref;
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared VAR1 %s\n",varname);
+	return;
+}
+
+void declare_var2(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(declare_var_dict_check()) return;
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var already exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 2;
+	tempVar->cw_pushVar.xt = _var2_ref;
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared VAR1 %s\n",varname);
+	return;
+}
+
+void declare_var2u(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(declare_var_dict_check()) return;
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var already exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 2;
+	tempVar->cw_pushVar.xt = _var2u_ref;
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared VAR1 %s\n",varname);
+	return;
+}
+
+void declare_var4(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(declare_var_dict_check()) return;
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var already exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 4;
+	tempVar->cw_pushVar.xt = _var4_ref;
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared VAR1 %s\n",varname);
+	return;
+}
+
+void declare_var4u(){
+	variable_t * tempVar;
+	cmdbuf->ip++; // Advance to data cell
+	char * varname = (char *) cmdbuf->array[cmdbuf->ip];
+	// The parser has already ensured that the name is valid and null-terminated
+
+	// If no dictionary is selected to declare the VAR, abort!
+	if(declare_var_dict_check()) return;
+
+	// If there is a name collision in the current subdictionary, abort!
+	int collision = collisionSearch(varname);
+	if(collision == 1){
+		printf("Error: name %s is already used\n",varname);
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}else if(collision == 2){
+		// The var already exists, so we zero it
+		tempVar = varSearch(varname);
+		tempVar->value = 0;
+		return;
+	}
+	// 0: no collision / 3: undef exists
+
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 4;
+	tempVar->cw_pushVar.xt = _var4u_ref;
+
+	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
+	//printf("Declared VAR1 %s\n",varname);
+	return;
+}
 
 // Declare the existence of a named variable
 // The next cell should contain the address of the desired (char *) name of the variable
@@ -1176,18 +1412,7 @@ void declare_var8(){
 	// The parser has already ensured that the name is valid and null-terminated
 
 	// If no dictionary is selected to declare the VAR, abort!
-	if(vocab->grow == NULL){
-		printf("Error: We are defining a word but no dictionary is selected\n");
-		abortExecution();
-		cmdbuf->ip = -1; // word_next increments this!
-		return;
-	}
-	if(vocab->grow->open == 0){
-		printf("Error: We are defining a word in a closed dictionary\n");
-		abortExecution();
-		cmdbuf->ip = -1; // word_next increments this!
-		return;
-	}
+	if(declare_var_dict_check()) return;
 
 	// If there is a name collision in the current subdictionary, abort!
 	int collision = collisionSearch(varname);
@@ -1197,32 +1422,21 @@ void declare_var8(){
 		cmdbuf->ip = -1; // word_next increments this!
 		return;
 	}else if(collision == 2){
-		// The var alredy exists, so we zero it
+		// The var already exists, so we zero it
 		tempVar = varSearch(varname);
 		tempVar->value = 0;
 		return;
 	}
 	// 0: no collision / 3: undef exists
-	// No problems. Declare the var.
-	tempVar = malloc(sizeof(variable_t));
-	tempVar->name = varname; // The parser allocated this buffer and we can keep it
-	tempVar->value = 0;
-	tempVar->next = vocab->grow->varlist;
-	tempVar->size = 8;
-	vocab->grow->varlist = tempVar;
 
-	// per-variable unique _var8_ref op
+	// No problems. Declare the var.
+	tempVar = help_get_new_var(varname);
+	tempVar->size = 8;
 	tempVar->cw_pushVar.xt = _var8_ref;
-	tempVar->cw_pushVar.name = varname;
-	tempVar->cw_pushVar.data = (intptr_t) tempVar;
-	tempVar->cw_pushVar.next = NULL;
-	tempVar->cw_pushVar.text = NULL;
-	tempVar->cw_pushVar.size = 0; // FIXME maybe we should co-opt this as the variable size field?
 
 	if(collision == 3) resolve_undefined_ref(varname, /*dict entry*/ NULL, /*isVar*/ 1, /*var*/ tempVar);
-	//printf("Declared variable %s\n",varname);
+	//printf("Declared VAR1 %s\n",varname);
 	return;
-
 }
 
 void define_all_core(){
@@ -1298,15 +1512,18 @@ void define_all_core(){
 	// Misc
 	// TODO for special functions we should just use references instead of the dictionary.
 	defCore("PUSHLIT", pushLiteral);
-	//defCore("DOCOLON", word_enter); // Not to be used directly
 	defCore(";S", word_exit); // Not to be used directly
 	defCore("SKP1", skip1); // Not to be used directly
 	defCore("SKP2", skip2); // Not to be used directly
 	defCore("NOP", noop);
+	defCore("VAR1", declare_var1);
+	defCore("VAR1U", declare_var1u);
+	defCore("VAR2", declare_var2);
+	defCore("VAR2U", declare_var2u);
+	defCore("VAR4", declare_var4);
+	defCore("VAR4U", declare_var4u);
 	defCore("VAR8", declare_var8);
 	defCore("VAR", declare_var8); // FIXME On 32-bit this should be declare_var4
-	//defCore("!", _var_generic_assign); // Not to be used directly
-	//defCore("PUSHVAR", _var8_ref); // Not to be used directly
 	defCore("CR", printNewline);
 	defCore("SP", printSpace);
 	defCore("?$", listDicts);
@@ -1336,6 +1553,48 @@ void _undefined_ref(){
 	printf("ERR: Undefined name %s referenced during execution\n", current_codeword->name);
 	abortExecution();
 	cmdbuf->ip = -1; // word_next increments this!
+	return;
+}
+
+// Codeword is allocated as part of specific variable_t
+void _var1_ref(){
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, (int8_t) v->value);
+	return;
+}
+
+// Codeword is allocated as part of specific variable_t
+void _var1u_ref(){
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, (uint8_t) v->value);
+	return;
+}
+
+// Codeword is allocated as part of specific variable_t
+void _var2_ref(){
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, (int16_t) v->value);
+	return;
+}
+
+// Codeword is allocated as part of specific variable_t
+void _var2u_ref(){
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, (uint16_t) v->value);
+	return;
+}
+
+// Codeword is allocated as part of specific variable_t
+void _var4_ref(){
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, (int32_t) v->value);
+	return;
+}
+
+// Codeword is allocated as part of specific variable_t
+void _var4u_ref(){
+	variable_t *v = (variable_t*) current_codeword->data;
+	push(dataStack, (uint32_t) v->value);
 	return;
 }
 

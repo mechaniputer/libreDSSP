@@ -105,6 +105,12 @@ void skip2();
 void noop();
 void delete_name();
 void pushLiteral();
+void declare_var1();
+void declare_var1u();
+void declare_var2();
+void declare_var2u();
+void declare_var4();
+void declare_var4u();
 void declare_var8();
 void printNewline();
 void printSpace();
@@ -127,6 +133,12 @@ void define_all_core();
 
 // Unindexed core words
 void _undefined_ref();
+void _var1_ref();
+void _var1u_ref();
+void _var2_ref();
+void _var2u_ref();
+void _var4_ref();
+void _var4u_ref();
 void _var8_ref();
 
 void _var_undef_assign();
