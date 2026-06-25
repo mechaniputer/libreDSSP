@@ -56,6 +56,9 @@ void minus2();
 void minus3();
 void minus4();
 
+void top0();
+void top1();
+
 // Display and interpreter
 void bye();
 void showTop();

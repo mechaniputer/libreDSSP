@@ -68,6 +68,7 @@ Also let us know if you are interested in setting up other resources such as an 
 - VAR, VAR1, VAR1U, VAR2, VAR2U, VAR4, VAR4U, VAR8 (BYTE/WORD/LONG are deprecated)
 - VAR ops: !, ', !0, !1, !1-, !1+, !-, !+, SIZE
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
+- T0, T1 (assign 0 or 1 to prior top of stack)
 - =, <, >
 - NEG, ABS, SGN, MAX, MIN
 - .. (show stack), . (show top of stack)
@@ -101,7 +102,6 @@ Also let us know if you are interested in setting up other resources such as an 
 - @ (dereference top of stack) @1 @1U, @2, @2U, @4, @4U, @8 (deprecates @B, @W, @L)
 - C@ (dereference top of stack without consuming) C@1 C@1U, C@2, C@2U, C@4, C@4U, C@8 (deprecates C@B, C@W, C@L)
 - !T, !T1, !T1U, !T2, !T2U, etc (dereference top of stack and store the 2nd stack operand there)
-- T0, T1 (assign 0 or 1 to prior top of stack)
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
 - Data permutation: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
 - '' (push address of function)

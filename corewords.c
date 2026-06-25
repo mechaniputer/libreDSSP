@@ -310,6 +310,30 @@ void minus4(){
 	return;
 }
 
+void top0(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for T0\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	TOP_FROM_IND = 0;
+	return;
+}
+
+void top1(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for T1\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	TOP_FROM_IND = 1;
+	return;
+}
+
 void bye(){
 	printf("Exiting libreDSSP\n");
 	exit(0);
@@ -1567,7 +1591,7 @@ void define_all_core(){
 	defCore("4", push_four);
 	defCore("8", push_eight);
 
-	// Arithmetic
+	// Stack arithmetic
 	defCore("+", plus);
 	defCore("*", multiply);
 	defCore("-", minus);
@@ -1585,6 +1609,8 @@ void define_all_core(){
 	defCore("2-", minus2);
 	defCore("3-", minus3);
 	defCore("4-", minus4);
+	defCore("T0", top0);
+	defCore("T1", top1);
 
 	// Display and interpreter
 	defCore("BYE", bye);
