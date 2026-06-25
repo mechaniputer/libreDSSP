@@ -18,6 +18,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h> // For echo disable in termReadByte()
+#include <unistd.h>  // For STDIN_FILENO in termReadByte()
 
 #include "corewords.h"
 #include "dict.h"
@@ -1008,6 +1010,66 @@ void openSub(){
 	return;
 }
 
+// Read byte without echo
+void termReadByte(){
+	// FIXME Need ctrl+c sig handler to fix the terminal
+
+	// Disable echo, clear ICANON
+	struct termios orig, raw;
+	tcgetattr(STDIN_FILENO, &orig);
+	raw = orig;
+	raw.c_lflag &= ~(ICANON | ECHO);
+	raw.c_cc[VMIN] = 1;
+	raw.c_cc[VTIME] = 0;
+	tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+
+	// Read byte
+	int ch = getchar();
+
+	// Enable echo, set ICANON
+	tcsetattr(STDIN_FILENO, TCSANOW, &orig);
+
+	if (ch != EOF) {
+		push(dataStack, (intptr_t) ch);
+	}else{
+		fprintf(stderr, "ERR: TRB could not read from stdin\n");
+		abortExecution();
+		cmdbuf->ip = -1;
+		return;
+	}
+	return;
+}
+
+// Read byte with echo
+void termInByte(){
+	// FIXME Need ctrl+c sig handler to fix the terminal
+
+	// Clear ICANON
+	struct termios orig, raw;
+	tcgetattr(STDIN_FILENO, &orig);
+	raw = orig;
+	raw.c_lflag &= ~(ICANON);
+	raw.c_cc[VMIN] = 1;
+	raw.c_cc[VTIME] = 0;
+	tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+
+	// Read byte
+	int ch = getchar();
+
+	// Set ICANON
+	tcsetattr(STDIN_FILENO, TCSANOW, &orig);
+
+	if (ch != EOF) {
+		push(dataStack, (intptr_t) ch);
+	}else{
+		fprintf(stderr, "ERR: TIB could not read from stdin\n");
+		abortExecution();
+		cmdbuf->ip = -1;
+		return;
+	}
+	return;
+}
+
 // TODO Support multiple number bases
 void termInNum(){
 	char buf[70]; // Longest number should be 64-bit binary plus terminator. 65 should be enough.
@@ -1021,6 +1083,18 @@ void termInNum(){
 		cmdbuf->ip = -1;
 		return;
 	}
+	return;
+}
+
+void termOutByte(){
+	// Requires one operands.
+	if(dataStack->top < 0){
+		fprintf(stderr,"ERR: Insufficient stack operands for TOB\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	putchar((char) pop(dataStack));
 	return;
 }
 
@@ -1531,7 +1605,10 @@ void define_all_core(){
 	defCore("SHUT", shutSub);
 	defCore("USE", openSub);
 	defCore("DEL", delete_name);
+	defCore("TRB", termReadByte);
+	defCore("TIB", termInByte);
 	defCore("TIN", termInNum);
+	defCore("TOB", termOutByte);
 	defCore("TON", termOutNum);
 	defCore("TOS", termOutString);
 	defCore("DEEP", stackDepth);

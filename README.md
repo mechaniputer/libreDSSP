@@ -63,7 +63,8 @@ Also let us know if you are interested in setting up other resources such as an 
 - UNDEF (list undefined words)
 - DEL (delete named object, unbind name)
 - Basic math operations (+,*,-,/)
-- VAR, related ops: !, ', !0, !1, !1-, !1+, !-, !+, SIZE
+- VAR, VAR1, VAR1U, VAR2, VAR2U, VAR4, VAR4U, VAR8 (BYTE/WORD/LONG are deprecated)
+- VAR ops: !, ', !0, !1, !1-, !1+, !-, !+, SIZE
 - 1+, 2+, 3+, 4+, 1-, 2-, 3-, 4-
 - =, <, >
 - NEG, ABS, SGN, MAX, MIN
@@ -77,8 +78,8 @@ Also let us know if you are interested in setting up other resources such as an 
 - ET, E2, E3, E4
 - CT, C2, C3, C4
 - Function declarations
-- TOS
-- TIN, TON (Not sure if correct behavior)
+- TRB (input byte, no echo), TIB (input byte with echo), TOB (output byte)
+- TIN (input num), TON (output num), TOS (output string)
 - SP, CR
 - ."hello" printing
 - Push address and len of string literal
@@ -93,23 +94,22 @@ Also let us know if you are interested in setting up other resources such as an 
 
 ## What doesn't work yet
 - File IO (this doesn't seem to be very standardized so we are allowed to make good choices here)
-- VAR type qualifiers (the legacy ones will be deprecated though)
 - VCTR, ARR, CNST, VALUE, TEXT, FIX, EMPTY, EQU
 - Vector/Array operations including !!!
-- '' (push address of function)
-- @ (dereference top of stack and push result)
-- ACT (mark a VAR as an executable word pointer, callable by name)
-- !T, !TB, etc (dereference top of stack and store the 2nd stack operand)
+- @ (dereference top of stack) @1 @1U, @2, @2U, @4, @4U, @8 (deprecates @B, @W, @L)
+- C@ (dereference top of stack without consuming) C@1 C@1U, C@2, C@2U, C@4, C@4U, C@8 (deprecates C@B, C@W, C@L)
+- !T, !T1, !T1U, !T2, !T2U, etc (dereference top of stack and store the 2nd stack operand there)
 - T0, T1 (assign 0 or 1 to prior top of stack)
 - Bitwise: SHL, SHR, NOT, INV, &, &0, '+', SHT
 - Data permutation: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
+- '' (push address of function)
+- ACT (mark a VAR as an executable word pointer, callable by name)
 - ONLY, CANCEL, FORGET, CLEAR
 - :: (to define words not subject to CLEAR)
 - "local values" S( ) feature mentioned in daf.txt and apparently working in DSSP-32? Not documented elsewhere.
 - DEFINE? (Predicate for whether a word is defined. I assume this should not check in CLOSED subdicts.)
 - SAVE, LOAD (for saving state to, or restoring state from, a source file)
-- TRB, TOB
-- TIB, TIS
+- TIS (input string)
 - B2, B8, B16
 - EXEC (execute function from address on stack)
 - TEXEC (execute text)

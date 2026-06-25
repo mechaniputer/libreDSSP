@@ -118,6 +118,8 @@ void listDicts();
 void growSub();
 void shutSub();
 void openSub();
+void termReadByte();
+void termInByte();
 void termInNum();
 void termOutNum();
 void termOutString();
