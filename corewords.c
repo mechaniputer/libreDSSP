@@ -334,6 +334,117 @@ void top1(){
 	return;
 }
 
+void shift_left(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for SHL\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	TOP_FROM_IND <<=1;
+	return;
+}
+
+void shift_right(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for SHR\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	TOP_FROM_IND >>=1;
+	return;
+}
+
+void shift_val(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for SHT\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_data = pop(dataStack);
+	top_ind -=1;
+
+	if(temp_data > 0){
+		TOP_FROM_IND <<= temp_data;
+	}else if(temp_data < 0){
+		TOP_FROM_IND >>= ((~temp_data)+1);
+	}
+
+	return;
+}
+
+void not(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for NOT\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	TOP_FROM_IND = !TOP_FROM_IND;
+	return;
+}
+
+void bit_inv(){
+	FETCH_TOP_IND
+	if(STACKEMPTY){
+		fprintf(stderr,"ERR: Insufficient operands for INV\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	TOP_FROM_IND = ~TOP_FROM_IND;
+	return;
+}
+
+void bit_and(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for &\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_data = pop(dataStack);
+	dataStack->array[dataStack->top] &= temp_data;
+	return;
+}
+
+void bit_or(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for &0\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_data = pop(dataStack);
+	dataStack->array[dataStack->top] |= temp_data;
+	return;
+}
+
+void bit_xor(){
+	FETCH_TOP_IND
+	intptr_t temp_data;
+	if(TOP_IND <= 0){
+		fprintf(stderr,"ERR: Insufficient operands for '+'\n");
+		abortExecution();
+		cmdbuf->ip = -1; // word_next increments this!
+		return;
+	}
+	temp_data = pop(dataStack);
+	dataStack->array[dataStack->top] ^= temp_data;
+	return;
+}
+
 void bye(){
 	printf("Exiting libreDSSP\n");
 	exit(0);
@@ -1611,6 +1722,14 @@ void define_all_core(){
 	defCore("4-", minus4);
 	defCore("T0", top0);
 	defCore("T1", top1);
+	defCore("SHL", shift_left);
+	defCore("SHR", shift_right);
+	defCore("SHT", shift_val);
+	defCore("NOT", not);
+	defCore("INV", bit_inv);
+	defCore("&", bit_and);
+	defCore("&0", bit_or);
+	defCore("'+'", bit_xor);
 
 	// Display and interpreter
 	defCore("BYE", bye);

@@ -59,6 +59,16 @@ void minus4();
 void top0();
 void top1();
 
+void shift_left();
+void shift_right();
+void shift_val();
+
+void not();
+void bit_inv();
+void bit_and();
+void bit_or();
+void bit_xor();
+
 // Display and interpreter
 void bye();
 void showTop();
