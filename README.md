@@ -100,18 +100,18 @@ Also let us know if you are interested in setting up other resources such as an 
 - File IO (this doesn't seem to be very standardized so we are allowed to make good choices here)
 - VCTR, ARR, CNST, VALUE, TEXT, FIX, EMPTY, EQU
 - Vector/Array operations including !!!
-- @ (dereference top of stack) @1 @1U, @2, @2U, @4, @4U, @8 (deprecates @B, @W, @L)
-- C@ (dereference top of stack without consuming) C@1 C@1U, C@2, C@2U, C@4, C@4U, C@8 (deprecates C@B, C@W, C@L)
-- !T, !T1, !T1U, !T2, !T2U, etc (dereference top of stack and store the 2nd stack operand there)
+- @ (dereference top of stack) @1, @2, @4, @8 (deprecates @B, @W, @L)
+- C@ (dereference top of stack without consuming) C@1 C@2, C@4, C@8 (deprecates C@B, C@W, C@L)
+- !T (dereference top of stack, store 2nd operand) !T1, !T2, !T4, !T8  (deprecates !TB, !TL, !TW)
 - Data permutation: SWB, SWW, LO, HI, SETHI, SETLO, SGX (Note: These will have to be augmented for 64-bit words)
+- B2, B8, B16
+- "local values" S( ) feature mentioned in daf.txt and apparently working in DSSP-32? Not documented elsewhere.
+- SAVE, LOAD (for saving state to, or restoring state from, a source file)
 - '' (push address of function)
 - ACT (mark a VAR as an executable word pointer, callable by name)
 - ONLY, CANCEL, FORGET, CLEAR
 - :: (to define words not subject to CLEAR)
-- "local values" S( ) feature mentioned in daf.txt and apparently working in DSSP-32? Not documented elsewhere.
 - DEFINE? (Predicate for whether a word is defined. I assume this should not check in CLOSED subdicts.)
-- SAVE, LOAD (for saving state to, or restoring state from, a source file)
-- B2, B8, B16
 - EXEC (execute function from address on stack)
 - TEXEC (execute text)
 - LPSP, LPCR, LPS, LPT, LPFF
