@@ -106,7 +106,17 @@ void print_codewords(codeword_t ** array){
 			// PUSHLIT is followed by a literal that we don't want to dereference
 			i++;
 			printf("%d) %p: Literal %ld\n", i, (void*) &array[i], (intptr_t) array[i]);
-		}else if(!strcmp("VAR", array[i]->name) || !strcmp("GROW", array[i]->name) || !strcmp("DEL", array[i]->name)|| !strcmp("SEE", array[i]->name)){
+		}else if(!strcmp("VAR", array[i]->name) ||
+				!strcmp("VAR8", array[i]->name) ||
+				!strcmp("VAR4", array[i]->name) ||
+				!strcmp("VAR4U", array[i]->name) ||
+				!strcmp("VAR2", array[i]->name) ||
+				!strcmp("VAR2U", array[i]->name) ||
+				!strcmp("VAR1", array[i]->name) ||
+				!strcmp("VAR1U", array[i]->name) ||
+				!strcmp("GROW", array[i]->name) ||
+				!strcmp("DEL", array[i]->name)||
+				!strcmp("SEE", array[i]->name)){
 			// VAR is followed by a char * containing a variable name
 			// GROW is followed by a char * containing a dict name
 			// DEL and SEE are followed by a char * containing an object name

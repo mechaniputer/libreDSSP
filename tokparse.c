@@ -524,7 +524,7 @@ int parse_tokens(char * tok){
 			}
 			if(newWordDictEntry->text != 0){
 				free((void *) newWordDictEntry->text);
-				newWordDictEntry->data = 0;
+				newWordDictEntry->text = 0;
 			}
 
 			// Populate the dictionary entry
@@ -944,11 +944,11 @@ int parse_tokens(char * tok){
 				}else if(parser_state == PARSE_DEC_S0){
 					emit_cw(&cw_var_undef_dec);
 				}else if(parser_state == PARSE_ADD_S0){
-					emit_cw(&cw_var_undef_dec);
+					emit_cw(&cw_var_undef_add);
 				}else if(parser_state == PARSE_SUB_S0){
-					emit_cw(&cw_var_undef_dec);
+					emit_cw(&cw_var_undef_sub);
 				}else if(parser_state == PARSE_SIZE_S0){
-					emit_cw(&cw_var_undef_dec);
+					emit_cw(&cw_var_undef_size);
 				}
 				emit_cw((codeword_t *) uref->name);
 			}

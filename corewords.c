@@ -1090,8 +1090,10 @@ void printSpace(){
 
 void listDicts(){
 	subdict * tempSub = vocab->sub;
-	if(vocab->grow == NULL || vocab->grow->open == 0){
+	if(vocab->grow == NULL){
 		printf("Warning: no subdictionary selected for expansion\n");
+	}else if(vocab->grow->open == 0){
+		printf("Warning: closed subdictionary selected for expansion\n");
 		printf("%s CLOSED\n",vocab->grow->name);
 	}else{
 		printf("%s OPEN\n",vocab->grow->name);

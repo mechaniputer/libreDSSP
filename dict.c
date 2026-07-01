@@ -361,7 +361,7 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 				*patch_target = def;
 			}else{
 				// It's a var
-				*patch_target = &var->cw_pushVar; // _var8_ref
+				*patch_target = &var->cw_pushVar;
 			}
 		}else if(isVar && (*patch_target == &cw_var_undef_assign)){
 			// [&cw_var_generic_assign] [&variable_t var]
@@ -423,6 +423,12 @@ void resolve_undefined_ref(char *name, codeword_t *def, int isVar, variable_t * 
 	return;
 }
 
+int is_var_ref(codeword_t * cw){
+	return (cw->xt == _var8_ref) ||
+	(cw->xt == _var4_ref) || (cw->xt == _var4u_ref) ||
+	(cw->xt == _var2_ref) || (cw->xt == _var2u_ref) ||
+	(cw->xt == _var1_ref) || (cw->xt == _var1u_ref);
+}
 
 // Scans the entire dictionary (of words, not vars) for refs to the specified undef (word or var)
 // Changes them to point to the undef's placeholder.
@@ -456,7 +462,7 @@ void patch_to_undef(undefined_ref_t * uref, codeword_t * old_cw){
 						add_reference(uref, &array[patch_index]);
 						array[patch_index] = uref->ref_placeholder;
 					}
-				}else if(array[patch_index]->xt == _var8_ref){
+				}else if(is_var_ref(array[patch_index])){
 					if(!strcmp(array[patch_index]->name, uref->name)){
 						// If it's a plain var ref:
 						//printf("Patching plain var ref\n");
